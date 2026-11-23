@@ -90,6 +90,7 @@ Dates are stored as `YYYY-MM-DD` local calendar dates (no timezone math for due 
 ## Security and privacy
 
 - No telemetry, no analytics, no auto-update pings in v0.1 (updater, if added later, is opt-in).
+- Strict CSP in `tauri.conf.json`: bundled content only, no remote origins, no `unsafe-eval`, devtools off in release builds. External profile links open via `tauri-plugin-opener` scoped strictly to `http://` and `https://`.
 - SMTP password lives only in the OS keychain. Never logged, never exported, never in backups.
 - Backups are the SQLite file (and exports) only.
 - Email digests contain item names and are sent to the user's own mailbox through the user's own SMTP server. Settings screen says so.

@@ -17,6 +17,8 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T1.6 `buildDigest`
 - [x] T1.7 `renderDigest` (TR + EN, text + HTML)
 - [x] T1.8 Additional built-in templates
+- [ ] T1.9 Localized workflow titles (before T3.5)
+- [ ] T1.10 `shouldSendDigest` (before Phase 4)
 
 ## Phase 2 — Data (`packages/data`) — spec: `tasks/phase-2-data.md`
 - [x] T2.0 Package scaffold and decisions
@@ -27,12 +29,17 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T2.5 Settings and reminder log
 - [x] T2.6 Restart-persistence integration test
 
-## Phase 3 — UI
-- [ ] Scaffold Tauri 2 + React in `apps/desktop`
-- [ ] Today screen
-- [ ] All items (table, kanban)
-- [ ] Item detail
-- [ ] Theme (light/dark), TR/EN
+## Phase 3 — UI (`apps/desktop`) — spec: `tasks/phase-3-ui.md`
+- [ ] T3.0 Scaffold and decisions
+- [ ] T3.1 Rust SQLite pipe (`src-tauri`)
+- [ ] T3.2 TypeScript bridge and startup
+- [ ] T3.3 App shell, i18n, theme
+- [ ] T3.4 Clock and refresh
+- [ ] T3.5 Today screen
+- [ ] T3.6 Items list and create/edit form
+- [ ] T3.7 Item detail
+- [ ] T3.8 Kanban view (optional)
+- [ ] T3.9 Settings, test support, CI, smoke tests
 
 ## Phase 4 — Reminders and tools
 - [ ] Scheduler spike: hidden-window reliability on Windows, macOS, Linux

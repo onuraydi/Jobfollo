@@ -41,3 +41,23 @@ Format: context, decision, consequences. Append new entries; do not rewrite old 
 **Context:** Outcome ids (`reply`, `interview`, `offer`, `negative`, plus an "in progress" default) are generic; labels are localized in the UI.
 **Decision:** Outcomes are plain text ids on `item.outcome`; labels live in the UI i18n files. Custom outcomes are post-MVP.
 **Consequences:** Remove `outcome_definition` from the data model in `ARCHITECTURE.md`.
+
+## ADR-009 — Bundle identifier is permanent
+**Context:** The Tauri bundle identifier decides the OS app-data folder, so changing it later orphans every user's database.
+**Decision:** Use `io.github.onuraydi.jobfollo` as the Tauri bundle identifier. It is recorded here and never changed after the first release.
+**Consequences:** Database and app-data paths remain stable across upgrades on Windows, macOS, and Linux.
+
+## ADR-010 — UI stack
+**Context:** Needs a fast, accessible, low-dependency desktop UI that stays strictly presentation-only over `@jobfollo/core` and `@jobfollo/data`.
+**Decision:** React + TypeScript (strict) + Vite (from the Tauri template), Tailwind CSS, shadcn/ui (components live in the repo), `lucide-react` icons, `react-router`, `i18next` + `react-i18next`. No global state library and no form library: React context + small hooks, controlled forms. Pre-approved dependencies are listed in `docs/tasks/phase-3-ui.md`; anything else requires approval.
+**Consequences:** Small dependency tree, predictable rendering, straightforward testing with Vitest and Testing Library.
+
+## ADR-011 — "Today" is the local calendar day, computed in the UI shell
+**Context:** `core` and `data` never read the clock, and ISO date strings (`YYYY-MM-DD`) must never shift by a day due to UTC offsets.
+**Decision:** The UI shell computes `today` with local date getters (`localToday()`), never `toISOString()` and never `new Date("YYYY-MM-DD")` (which parses as UTC). ISO dates are converted to `Date` objects only for display via `new Date(y, m - 1, d)`.
+**Consequences:** Due dates and "Today" grouping match the user's local calendar in every timezone.
+
+## ADR-012 — Localized titles live in the workflow templates
+**Context:** Built-in step titles and workflow names are English strings in the template JSON, so a Turkish UI or Turkish email digest would show English.
+**Decision:** Workflow templates carry optional `titles` / `names` maps (`{ en, tr }`); UI and `renderDigest` read the same source and fall back to the plain string. Implemented as `T1.9` in `@jobfollo/core` before `T3.5`.
+**Consequences:** Built-in workflows stay localized consistently across both the desktop UI and email digests while custom workflows continue working without translation maps.
