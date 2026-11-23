@@ -52,6 +52,23 @@ export interface Item {
   notes?: string;
 }
 
+export type StepStatus =
+  | "done"
+  | "skipped"
+  | "pending"
+  | "overdue"
+  | "due_today"
+  | "blocked";
+
+export interface StepInstance {
+  stepKey: string;
+  title: string;
+  dueDate?: ISODate;
+  completedOn?: ISODate;
+  status: StepStatus;
+  suggestsOutcome?: string;
+}
+
 export interface NextStep {
   stepKey: string;
   title: string;
