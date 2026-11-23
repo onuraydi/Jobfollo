@@ -5,3 +5,4 @@ export { addDays, diffDays, isValidISODate } from "./date.js";
 export { computeSchedule } from "./schedule.js";
 export { computeNextStep } from "./next-step.js";
 export { buildDigest } from "./digest.js";
+export { renderDigest } from "./render-digest.js";

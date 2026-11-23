@@ -103,6 +103,14 @@ export interface Digest {
   isEmpty: boolean;
 }
 
+export type Locale = "tr" | "en";
+
+export interface RenderedDigest {
+  subject: string;
+  text: string;
+  html: string;
+}
+
 export type ValidationErrorCode =
   | "empty_workflow_id"
   | "empty_workflow_name"
