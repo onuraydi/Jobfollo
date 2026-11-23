@@ -1,0 +1,48 @@
+{
+  "batch": {
+    "requestStatementsJson": "[{\"sql\":\"CREATE TABLE notes (id TEXT PRIMARY KEY, body TEXT NOT NULL)\"},{\"sql\":\"INSERT INTO notes (id, body) VALUES (?, ?)\",\"params\":[\"n1\",\"Merhaba\"]}]",
+    "expectedResponseJson": "[{\"rowsAffected\":0},{\"rowsAffected\":1}]"
+  },
+  "select": {
+    "sql": "SELECT id, body FROM notes WHERE id = ?",
+    "params": ["n1"],
+    "expectedResponseJson": "[{\"body\":\"Merhaba\",\"id\":\"n1\"}]"
+  },
+  "dataLocation": {
+    "expectedResponse": "C:\\Users\\demo\\AppData\\Roaming\\io.github.onuraydi.jobfollo"
+  },
+  "errors": {
+    "constraint": {
+      "kind": "constraint",
+      "message": "Statement 0: UNIQUE constraint failed: notes.id"
+    },
+    "busy": {
+      "kind": "busy",
+      "message": "database is locked"
+    },
+    "sql": {
+      "kind": "sql",
+      "message": "near \"BROKEN\": syntax error"
+    },
+    "io": {
+      "kind": "io",
+      "message": "disk I/O error"
+    },
+    "open": {
+      "kind": "open",
+      "message": "Failed to open database"
+    },
+    "invalid_argument": {
+      "kind": "invalid_argument",
+      "message": "Parameter at index 0 cannot be a boolean; use integer 0 or 1"
+    },
+    "forbidden": {
+      "kind": "forbidden",
+      "message": "db_select only permits read-only SQL statements"
+    },
+    "limit": {
+      "kind": "limit",
+      "message": "Batch exceeds maximum of 2000 statements"
+    }
+  }
+}

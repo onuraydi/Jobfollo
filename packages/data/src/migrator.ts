@@ -1,4 +1,10 @@
 import { systemClock } from "./defaults.js";
+import {
+  DatabaseNewerThanAppError,
+  InvalidMigrationSetError,
+  MigrationChecksumMismatchError,
+  MigrationFailedError,
+} from "./errors.js";
 import type {
   Clock,
   Migration,
@@ -68,14 +74,21 @@ export async function runMigrations(
 ): Promise<MigrationRunResult> {
   const sorted = [...migrations].sort((a, b) => a.version - b.version);
   const seenVersions = new Set<number>();
-  for (const migration of sorted) {
+  for (let i = 0; i < sorted.length; i++) {
+    const migration = sorted[i]!;
     if (!Number.isInteger(migration.version) || migration.version < 1) {
-      throw new RangeError(
+      throw new InvalidMigrationSetError(
         `Migration version must be a positive integer, got ${String(migration.version)}`,
       );
     }
     if (seenVersions.has(migration.version)) {
-      throw new Error(`Duplicate migration version: ${migration.version}`);
+      throw new InvalidMigrationSetError(`Duplicate migration version: ${migration.version}`);
+    }
+    const expectedVersion = i + 1;
+    if (migration.version !== expectedVersion) {
+      throw new InvalidMigrationSetError(
+        `Migration version gap detected: expected version ${expectedVersion}, got ${migration.version}`,
+      );
     }
     seenVersions.add(migration.version);
   }
@@ -91,9 +104,7 @@ export async function runMigrations(
     appliedRows.length > 0 ? appliedRows[appliedRows.length - 1]!.version : 0;
 
   if (maxAppliedVersion > maxKnownVersion) {
-    throw new Error(
-      `Database schema version ${maxAppliedVersion} is newer than supported version ${maxKnownVersion}. Refusing to downgrade.`,
-    );
+    throw new DatabaseNewerThanAppError(maxAppliedVersion, maxKnownVersion);
   }
 
   const byVersion = new Map<number, Migration>();
@@ -105,14 +116,17 @@ export async function runMigrations(
   for (const row of appliedRows) {
     const known = byVersion.get(row.version);
     if (!known) {
-      throw new Error(
+      throw new InvalidMigrationSetError(
         `Applied migration version ${row.version} (${row.name}) is missing from known migrations.`,
       );
     }
     const expectedChecksum = await computeChecksum(known.sql);
     if (row.checksum !== expectedChecksum) {
-      throw new Error(
-        `Checksum mismatch for applied migration ${row.version} (${row.name}): expected ${expectedChecksum}, found ${row.checksum}.`,
+      throw new MigrationChecksumMismatchError(
+        row.version,
+        row.name,
+        expectedChecksum,
+        row.checksum,
       );
     }
     appliedByVersion.set(row.version, row);
@@ -131,7 +145,11 @@ export async function runMigrations(
       params: [migration.version, migration.name, checksum, clock.nowIso()],
     });
 
-    await executor.batch(statements);
+    try {
+      await executor.batch(statements);
+    } catch (error) {
+      throw new MigrationFailedError(migration.version, migration.name, error);
+    }
     newlyApplied.push(migration.version);
   }
 

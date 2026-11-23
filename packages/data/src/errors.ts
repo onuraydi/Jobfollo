@@ -130,3 +130,67 @@ export class AlreadySentError extends Error {
     this.date = date;
   }
 }
+
+export class MigrationError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = "MigrationError";
+  }
+}
+
+export class DatabaseNewerThanAppError extends MigrationError {
+  readonly dbVersion: number;
+  readonly appVersion: number;
+
+  constructor(dbVersion: number, appVersion: number) {
+    super(
+      `Database schema version ${dbVersion} is newer than supported version ${appVersion}. Refusing to downgrade.`,
+    );
+    this.name = "DatabaseNewerThanAppError";
+    this.dbVersion = dbVersion;
+    this.appVersion = appVersion;
+  }
+}
+
+export class MigrationChecksumMismatchError extends MigrationError {
+  readonly version: number;
+  readonly migrationName: string;
+  readonly expectedChecksum: string;
+  readonly actualChecksum: string;
+
+  constructor(
+    version: number,
+    migrationName: string,
+    expectedChecksum: string,
+    actualChecksum: string,
+  ) {
+    super(
+      `Checksum mismatch for applied migration ${version} (${migrationName}): expected ${expectedChecksum}, found ${actualChecksum}.`,
+    );
+    this.name = "MigrationChecksumMismatchError";
+    this.version = version;
+    this.migrationName = migrationName;
+    this.expectedChecksum = expectedChecksum;
+    this.actualChecksum = actualChecksum;
+  }
+}
+
+export class InvalidMigrationSetError extends MigrationError {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidMigrationSetError";
+  }
+}
+
+export class MigrationFailedError extends MigrationError {
+  readonly version: number;
+  readonly migrationName: string;
+
+  constructor(version: number, migrationName: string, cause: unknown) {
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    super(`Migration ${version} (${migrationName}) failed: ${detail}`, { cause });
+    this.name = "MigrationFailedError";
+    this.version = version;
+    this.migrationName = migrationName;
+  }
+}

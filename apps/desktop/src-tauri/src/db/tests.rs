@@ -309,25 +309,31 @@ fn reports_open_error_without_panicking_when_path_is_a_directory() {
 
 #[test]
 fn matches_exact_camel_case_json_ipc_contract() {
+    let fixtures: JsonValue =
+        serde_json::from_str(include_str!("../../../contract/ipc-fixtures.json")).unwrap();
     let db = Database::open_in_memory().unwrap();
 
-    // Literal JSON string as TypeScript will send it (with params omitted on first statement)
-    let input_json = r#"[
-        {"sql": "CREATE TABLE notes (id TEXT PRIMARY KEY, body TEXT NOT NULL)"},
-        {"sql": "INSERT INTO notes (id, body) VALUES (?, ?)", "params": ["n1", "Merhaba"]}
-    ]"#;
+    // Shared literal JSON string as TypeScript sends it (with params omitted on first statement)
+    let input_json = fixtures["batch"]["requestStatementsJson"].as_str().unwrap();
+    let expected_batch_json = fixtures["batch"]["expectedResponseJson"].as_str().unwrap();
+
     let statements: Vec<SqlStatement> = serde_json::from_str(input_json).unwrap();
     let batch_results: Vec<BatchResult> = db.batch(&statements).unwrap();
     let batch_json = serde_json::to_string(&batch_results).unwrap();
-    assert_eq!(batch_json, r#"[{"rowsAffected":0},{"rowsAffected":1}]"#);
+    assert_eq!(batch_json, expected_batch_json);
 
-    let rows = db
-        .select("SELECT id, body FROM notes WHERE id = ?", &[json!("n1")])
-        .unwrap();
+    let select_sql = fixtures["select"]["sql"].as_str().unwrap();
+    let select_params: Vec<JsonValue> = fixtures["select"]["params"]
+        .as_array()
+        .unwrap()
+        .clone();
+    let expected_select_json = fixtures["select"]["expectedResponseJson"].as_str().unwrap();
+
+    let rows = db.select(select_sql, &select_params).unwrap();
     let select_json = serde_json::to_string(&rows).unwrap();
-    assert_eq!(select_json, r#"[{"body":"Merhaba","id":"n1"}]"#);
+    assert_eq!(select_json, expected_select_json);
 
-    // Error JSON contract
+    // Error JSON contract matches every error kind defined in fixtures["errors"]
     let err = db
         .batch(&[stmt(
             "INSERT INTO notes (id, body) VALUES (?, ?)",
@@ -335,6 +341,6 @@ fn matches_exact_camel_case_json_ipc_contract() {
         )])
         .unwrap_err();
     let err_value: JsonValue = serde_json::to_value(&err).unwrap();
-    assert_eq!(err_value["kind"], json!("constraint"));
+    assert_eq!(err_value["kind"], fixtures["errors"]["constraint"]["kind"]);
     assert!(err_value["message"].as_str().unwrap().contains("Statement 0"));
 }

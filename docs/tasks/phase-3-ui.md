@@ -47,11 +47,16 @@ Implements ADR-006. Put all DB logic in a plain Rust module (no Tauri types) so 
 - Errors are serializable `{ kind: "constraint" | "busy" | "sql" | "io" | "open" | "invalid_argument" | "forbidden" | "limit", message }`; messages never contain parameter values.
 - `cargo test`: parameter binding for each type, batch rollback on the third statement failing, foreign key enforcement, read-only enforcement in `db_select`, multi-statement rejection, `ATTACH` and `PRAGMA` denied, WAL mode on a file database, integrity check ok, Turkish and emoji text round-trip, SQL injection string stored as plain text.
 
-### T3.2 TypeScript bridge and startup
-- `createTauriSqlExecutor(invoke)` implements `SqlExecutor`; `invoke` is a parameter so it is unit-tested with a fake. Rust error kinds map to a typed `SqlExecutionError`.
+### T3.2a TypeScript bridge, contract fixtures, and testing export
+- `createTauriSqlExecutor(invoke)` implements `SqlExecutor` and `getDataLocation(invoke)` returns the data directory; `invoke` is injected so tests never import `@tauri-apps/api` (isolated to `src/db/default.ts`).
+- Pre-IPC parameter validation rejects `undefined`, `NaN`, `±Infinity`, booleans, `bigint`, objects, arrays, and unsafe integers with `SqlExecutionError` (`kind: "invalid_argument"`). Rust error kinds map verbatim; non-contractual rejections and malformed responses map to `kind: "ipc"`.
+- Shared literal JSON fixtures in `apps/desktop/contract/ipc-fixtures.json` asserted by both Rust (`include_str!`) and TypeScript tests.
+- Pulls `@jobfollo/data/testing` subpath export forward from T3.9 (re-exporting in-memory SQLite executor, fake clock, sequential IDs) and adds typed `MigrationError` subclasses in `@jobfollo/data`.
+
+### T3.2b App services, bootstrap, and boot screens
 - App services (React context): repositories from `@jobfollo/data`, `Clock` (system, UTC), `IdGenerator` (`crypto.randomUUID`), `localToday()`.
 - Startup states: loading → ready, or a full-screen error with a plain explanation and the data path for: database cannot be opened, migration refused because the file is newer than the app, migration checksum mismatch. **The app never deletes or resets data on its own.**
-- Tests: bridge with fake `invoke` (params, batch result mapping, each error kind); startup state machine; the "newer database" refusal screen.
+- Tests: startup state machine; the "newer database" refusal screen.
 
 ### T3.3 App shell, i18n, theme
 - Sidebar: Today, Items, Settings. react-router. Light, dark and system theme (setting `theme`), language `system | tr | en` (setting `language`; `system` resolves from `navigator.language`, default English if neither).

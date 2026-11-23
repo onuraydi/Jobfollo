@@ -91,6 +91,7 @@ Rules and limits:
 - Limits: max `2,000` statements per batch, max `1,000,000` bytes per SQL string, max `50,000` rows per `db_select` (exceeding returns `limit`).
 - Open-time pragmas (`foreign_keys = ON`, `journal_mode = WAL`, `busy_timeout = 5000`, `synchronous = NORMAL`) run before a SQLite authorizer is installed that denies `ATTACH`, `DETACH`, all `PRAGMA`, `CREATE/DROP VIRTUAL TABLE`, and `load_extension`.
 - Errors serialize as `{ kind: "constraint" | "busy" | "sql" | "io" | "open" | "invalid_argument" | "forbidden" | "limit", message: string }`. Error messages never include bound parameter values. If opening the database fails at startup, the app still starts and `db_select`/`db_batch` return `kind: "open"`.
+- The TypeScript bridge (`apps/desktop/src/db/`) validates parameters before IPC, adds the client-only error kind `"ipc"` for malformed or non-contractual IPC responses/rejections, and shares literal camelCase JSON contract fixtures with Rust via `apps/desktop/contract/ipc-fixtures.json`.
 
 ## Email reminder subsystem
 

@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  DatabaseNewerThanAppError,
+  InvalidMigrationSetError,
+  MigrationChecksumMismatchError,
+  MigrationError,
+  MigrationFailedError,
   builtInMigrations,
   computeChecksum,
   runMigrations,
@@ -92,7 +97,15 @@ describe("runMigrations", () => {
       },
     ];
 
-    await expect(runMigrations(db, tampered, fixedClock)).rejects.toThrow(/checksum/i);
+    let caught: unknown;
+    try {
+      await runMigrations(db, tampered, fixedClock);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(MigrationError);
+    expect(caught).toBeInstanceOf(MigrationChecksumMismatchError);
+    expect((caught as Error).name).toBe("MigrationChecksumMismatchError");
   });
 
   it("refuses to start when the DB schema version is newer than the app knows", async () => {
@@ -106,9 +119,15 @@ describe("runMigrations", () => {
 
     await runMigrations(db, [...builtInMigrations, v2], fixedClock);
 
-    await expect(runMigrations(db, builtInMigrations, fixedClock)).rejects.toThrow(
-      /newer/i,
-    );
+    let caught: unknown;
+    try {
+      await runMigrations(db, builtInMigrations, fixedClock);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(MigrationError);
+    expect(caught).toBeInstanceOf(DatabaseNewerThanAppError);
+    expect((caught as Error).name).toBe("DatabaseNewerThanAppError");
   });
 
   it("rolls back a failing migration completely including schema_migrations", async () => {
@@ -124,7 +143,16 @@ describe("runMigrations", () => {
       ].join("\n"),
     };
 
-    await expect(runMigrations(db, [failing], fixedClock)).rejects.toThrow();
+    let caught: unknown;
+    try {
+      await runMigrations(db, [failing], fixedClock);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(MigrationError);
+    expect(caught).toBeInstanceOf(MigrationFailedError);
+    expect((caught as Error).name).toBe("MigrationFailedError");
+    expect((caught as Error).cause).toBeDefined();
 
     const tables = await db.select<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'partial_table'",
@@ -133,6 +161,36 @@ describe("runMigrations", () => {
 
     const applied = await db.select("SELECT version FROM schema_migrations");
     expect(applied).toEqual([]);
+  });
+
+  it("rejects duplicate or gapped migration versions with InvalidMigrationSetError", async () => {
+    db = createSqliteExecutor();
+
+    const dup: Migration[] = [
+      { version: 1, name: "0001_a", sql: "CREATE TABLE a (id TEXT)" },
+      { version: 1, name: "0001_b", sql: "CREATE TABLE b (id TEXT)" },
+    ];
+    let errDup: unknown;
+    try {
+      await runMigrations(db, dup, fixedClock);
+    } catch (error) {
+      errDup = error;
+    }
+    expect(errDup).toBeInstanceOf(MigrationError);
+    expect(errDup).toBeInstanceOf(InvalidMigrationSetError);
+    expect((errDup as Error).name).toBe("InvalidMigrationSetError");
+
+    const gap: Migration[] = [
+      { version: 1, name: "0001_a", sql: "CREATE TABLE a (id TEXT)" },
+      { version: 3, name: "0003_c", sql: "CREATE TABLE c (id TEXT)" },
+    ];
+    let errGap: unknown;
+    try {
+      await runMigrations(db, gap, fixedClock);
+    } catch (error) {
+      errGap = error;
+    }
+    expect(errGap).toBeInstanceOf(InvalidMigrationSetError);
   });
 
   it("applies only pending migrations incrementally", async () => {
