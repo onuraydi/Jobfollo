@@ -10,20 +10,38 @@ import {
   type SmtpSecuritySetting,
   type ThemeSetting,
 } from "@jobfollo/data";
-import { Database, Globe, History, KeyRound, Mail, Palette, Power, Send } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  Database,
+  Download,
+  Globe,
+  History,
+  KeyRound,
+  Mail,
+  Palette,
+  Power,
+  Send,
+  Upload,
+} from "lucide-react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useServices } from "../boot/index.js";
-import { usePreferences } from "../shell/index.js";
+import { useDataRevision, usePreferences } from "../shell/index.js";
 import { formatDisplayDate } from "../time/index.js";
+import {
+  createBackupPayload,
+  parseBackupJson,
+  restoreBackup,
+} from "../transfer/index.js";
 
 const LANGUAGE_OPTIONS: readonly LanguageSetting[] = ["system", "en", "tr"];
 const THEME_OPTIONS: readonly ThemeSetting[] = ["system", "light", "dark"];
 
 export function SettingsPage() {
   const { t } = useTranslation();
-  const { settings, reminderLog, dataLocation, mail } = useServices();
+  const services = useServices();
+  const { settings, reminderLog, dataLocation, mail } = services;
   const { language, resolvedLocale, theme, setLanguage, setTheme } = usePreferences();
+  const { bumpRevision } = useDataRevision();
 
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [sendTime, setSendTime] = useState("09:00");
@@ -39,6 +57,9 @@ export function SettingsPage() {
   const [recentLogs, setRecentLogs] = useState<ReminderLogEntry[]>([]);
   const [autostartAvailable, setAutostartAvailable] = useState(false);
   const [autostartEnabled, setAutostartEnabled] = useState(false);
+  const [backupStatus, setBackupStatus] = useState<
+    { kind: "idle" } | { kind: "success"; message: string } | { kind: "error"; message: string }
+  >({ kind: "idle" });
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -101,6 +122,60 @@ export function SettingsPage() {
       setAutostartEnabled(checked);
     } catch {
       // Ignore when running outside Tauri runtime
+    }
+  };
+
+  const handleDownloadBackup = async () => {
+    setBackupStatus({ kind: "idle" });
+    const payload = await createBackupPayload(services);
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: "application/json;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `jobfollo-backup-${services.localToday()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleRestoreFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBackupStatus({ kind: "idle" });
+
+    const text = await file.text();
+    const parsed = parseBackupJson(text);
+    if (!parsed.ok) {
+      setBackupStatus({ kind: "error", message: parsed.error });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      t("pages.settings.restoreConfirm", {
+        workflows: parsed.payload.customWorkflows.length,
+        items: parsed.payload.items.length,
+      }),
+    );
+    if (!confirmed) return;
+
+    try {
+      const summary = await restoreBackup(services, parsed.payload);
+      bumpRevision();
+      setBackupStatus({
+        kind: "success",
+        message: t("pages.settings.restoreSuccess", {
+          workflows: summary.workflowsRestored,
+          items: summary.itemsRestored,
+        }),
+      });
+    } catch (err) {
+      setBackupStatus({
+        kind: "error",
+        message: err instanceof Error ? err.message : String(err),
+      });
     }
   };
 
@@ -599,6 +674,43 @@ export function SettingsPage() {
           <p className="text-xs text-[var(--fg-muted)]">
             {t("pages.settings.dataLocationDescription")}
           </p>
+        </div>
+
+        <div className="space-y-2 border-t border-[var(--border)] pt-4">
+          <h3 className="text-sm font-medium">{t("pages.settings.backupHeading")}</h3>
+          <p className="text-xs text-[var(--fg-muted)]">
+            {t("pages.settings.backupDescription")}
+          </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => void handleDownloadBackup()}
+              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--surface-muted)]"
+            >
+              <Download className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{t("pages.settings.downloadBackup")}</span>
+            </button>
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium hover:bg-[var(--surface-muted)]">
+              <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{t("pages.settings.restoreBackup")}</span>
+              <input
+                type="file"
+                accept=".json,application/json"
+                onChange={(e) => void handleRestoreFile(e)}
+                className="sr-only"
+              />
+            </label>
+          </div>
+          {backupStatus.kind === "success" && (
+            <p role="status" className="text-xs font-medium text-[var(--success)]">
+              {backupStatus.message}
+            </p>
+          )}
+          {backupStatus.kind === "error" && (
+            <p role="alert" className="text-xs font-medium text-[var(--danger)]">
+              {backupStatus.message}
+            </p>
+          )}
         </div>
       </div>
     </section>

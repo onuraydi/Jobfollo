@@ -7,6 +7,7 @@
     "label": "Main navigation",
     "today": "Today",
     "items": "Items",
+    "workflows": "Workflows",
     "settings": "Settings"
   },
   "pages": {
@@ -126,6 +127,36 @@
       "channelLabel": "Channel",
       "roleLabel": "Role"
     },
+    "workflows": {
+      "title": "Workflows",
+      "subtitle": "Manage follow-up templates and customize your own steps.",
+      "newWorkflow": "New workflow",
+      "builtInBadge": "Built-in",
+      "customBadge": "Custom",
+      "stepCount_one": "1 step",
+      "stepCount_other": "{{count}} steps",
+      "duplicateToCustomize": "Duplicate to customize",
+      "copySuffix": "(Copy)",
+      "edit": "Edit",
+      "builtInReadOnlyHint": "Built-in templates cannot be edited directly. Duplicate to create a custom copy.",
+      "nameLabel": "Workflow name",
+      "stopOutcomesLabel": "Outcomes that stop pending steps",
+      "stepsHeading": "Steps",
+      "addStep": "Add step",
+      "stepKeyLabel": "Step key",
+      "stepTitleLabel": "Step title",
+      "anchorLabel": "Anchor",
+      "anchorStart": "Item start date",
+      "anchorAfterStep": "After: {{step}}",
+      "offsetDaysLabel": "Offset (days)",
+      "suggestsOutcomeLabel": "Suggest outcome",
+      "suggestsOutcomeNone": "None",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "removeStep": "Remove step",
+      "savedMessage": "Workflow saved.",
+      "inUseError": "Cannot delete this workflow because one or more items still use it."
+    },
     "settings": {
       "title": "Settings",
       "subtitle": "Language, theme, and local storage.",
@@ -166,7 +197,13 @@
       "reminderHistoryEmpty": "No digest emails have been sent yet.",
       "reminderStatusSent": "Sent",
       "reminderStatusFailed": "Failed",
-      "reminderAttempt": "Attempt {{count}}"
+      "reminderAttempt": "Attempt {{count}}",
+      "backupHeading": "Backup & restore",
+      "backupDescription": "Export or restore your custom workflows and items as JSON. SMTP passwords are never included in backups.",
+      "downloadBackup": "Download backup (JSON)",
+      "restoreBackup": "Restore from backup",
+      "restoreConfirm": "Restore {{workflows}} custom workflow(s) and {{items}} item(s) from this backup?",
+      "restoreSuccess": "Restored {{workflows}} custom workflow(s) and {{items}} item(s)."
     }
   },
   "theme": {

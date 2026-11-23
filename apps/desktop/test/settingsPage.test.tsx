@@ -21,7 +21,7 @@ import { ServicesProvider, type AppServices } from "../src/boot/index.js";
 import "../src/i18n/index.js";
 import type { MailClient, SendEmailPayload } from "../src/mail/index.js";
 import { SettingsPage } from "../src/pages/SettingsPage.js";
-import { PreferencesProvider } from "../src/shell/index.js";
+import { DataRevisionProvider, PreferencesProvider } from "../src/shell/index.js";
 import { localToday } from "../src/time/index.js";
 
 describe("SettingsPage (integration with real in-memory SQLite)", () => {
@@ -78,9 +78,11 @@ describe("SettingsPage (integration with real in-memory SQLite)", () => {
     render(
       <MemoryRouter initialEntries={["/settings"]}>
         <ServicesProvider services={services}>
-          <PreferencesProvider>
-            <SettingsPage />
-          </PreferencesProvider>
+          <DataRevisionProvider>
+            <PreferencesProvider>
+              <SettingsPage />
+            </PreferencesProvider>
+          </DataRevisionProvider>
         </ServicesProvider>
       </MemoryRouter>,
     );
@@ -140,9 +142,11 @@ describe("SettingsPage (integration with real in-memory SQLite)", () => {
     render(
       <MemoryRouter initialEntries={["/settings"]}>
         <ServicesProvider services={services}>
-          <PreferencesProvider>
-            <SettingsPage />
-          </PreferencesProvider>
+          <DataRevisionProvider>
+            <PreferencesProvider>
+              <SettingsPage />
+            </PreferencesProvider>
+          </DataRevisionProvider>
         </ServicesProvider>
       </MemoryRouter>,
     );

@@ -48,8 +48,8 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] Daily digest sender with reminder log and catch-up on launch
 - [x] Tray, minimize-on-close, launch at login
 - [x] Excel/CSV import and export
-- [ ] Workflow editor
-- [ ] Backup and restore
+- [x] Workflow editor
+- [x] Backup and restore
 
 ## Phase 5 — Packaging
 - [ ] GitHub Actions release builds for Windows, macOS, Linux

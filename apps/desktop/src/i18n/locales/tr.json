@@ -7,6 +7,7 @@
     "label": "Ana gezinme",
     "today": "Bugün",
     "items": "Kayıtlar",
+    "workflows": "İş akışları",
     "settings": "Ayarlar"
   },
   "pages": {
@@ -126,6 +127,36 @@
       "channelLabel": "Kanal",
       "roleLabel": "Rol"
     },
+    "workflows": {
+      "title": "İş akışları",
+      "subtitle": "Takip şablonlarını yönetin ve kendi adımlarınızı özelleştirin.",
+      "newWorkflow": "Yeni iş akışı",
+      "builtInBadge": "Yerleşik",
+      "customBadge": "Özel",
+      "stepCount_one": "1 adım",
+      "stepCount_other": "{{count}} adım",
+      "duplicateToCustomize": "Özelleştirmek için kopyala",
+      "copySuffix": "(Kopya)",
+      "edit": "Düzenle",
+      "builtInReadOnlyHint": "Yerleşik şablonlar doğrudan düzenlenemez. Özel bir kopya oluşturmak için kopyalayın.",
+      "nameLabel": "İş akışı adı",
+      "stopOutcomesLabel": "Bekleyen adımları durduran sonuçlar",
+      "stepsHeading": "Adımlar",
+      "addStep": "Adım ekle",
+      "stepKeyLabel": "Adım anahtarı",
+      "stepTitleLabel": "Adım başlığı",
+      "anchorLabel": "Referans (Anchor)",
+      "anchorStart": "Kayıt başlangıç tarihi",
+      "anchorAfterStep": "Sonrasında: {{step}}",
+      "offsetDaysLabel": "Gün aralığı",
+      "suggestsOutcomeLabel": "Sonuç önerisi",
+      "suggestsOutcomeNone": "Yok",
+      "moveUp": "Yukarı taşı",
+      "moveDown": "Aşağı taşı",
+      "removeStep": "Adımı sil",
+      "savedMessage": "İş akışı kaydedildi.",
+      "inUseError": "Bir veya daha fazla kayıt bu iş akışını kullandığı için silinemiyor."
+    },
     "settings": {
       "title": "Ayarlar",
       "subtitle": "Dil, tema ve yerel depolama.",
@@ -166,7 +197,13 @@
       "reminderHistoryEmpty": "Henüz özet e-postası gönderilmedi.",
       "reminderStatusSent": "Gönderildi",
       "reminderStatusFailed": "Başarısız",
-      "reminderAttempt": "{{count}}. deneme"
+      "reminderAttempt": "{{count}}. deneme",
+      "backupHeading": "Yedekleme ve geri yükleme",
+      "backupDescription": "Özel iş akışlarınızı ve kayıtlarınızı JSON olarak yedekleyin veya geri yükleyin. SMTP şifreleri yedeklere asla dahil edilmez.",
+      "downloadBackup": "Yedek indir (JSON)",
+      "restoreBackup": "Yedekten geri yükle",
+      "restoreConfirm": "Bu yedekten {{workflows}} özel iş akışı ve {{items}} kayıt geri yüklensin mi?",
+      "restoreSuccess": "{{workflows}} özel iş akışı ve {{items}} kayıt geri yüklendi."
     }
   },
   "theme": {

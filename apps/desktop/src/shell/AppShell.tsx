@@ -1,4 +1,4 @@
-import { CalendarCheck2, FolderKanban, Settings } from "lucide-react";
+import { CalendarCheck2, FolderKanban, GitBranch, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Route, Routes } from "react-router";
 import { cn } from "../lib/cn.js";
@@ -6,6 +6,7 @@ import { ItemDetailPage } from "../pages/ItemDetailPage.js";
 import { ItemsPage } from "../pages/ItemsPage.js";
 import { SettingsPage } from "../pages/SettingsPage.js";
 import { TodayPage } from "../pages/TodayPage.js";
+import { WorkflowsPage } from "../pages/WorkflowsPage.js";
 import { useDigestScheduler } from "../reminders/index.js";
 
 export function AppShell() {
@@ -15,6 +16,7 @@ export function AppShell() {
   const navItems = [
     { to: "/", label: t("nav.today"), icon: CalendarCheck2, end: true },
     { to: "/items", label: t("nav.items"), icon: FolderKanban, end: false },
+    { to: "/workflows", label: t("nav.workflows"), icon: GitBranch, end: false },
     { to: "/settings", label: t("nav.settings"), icon: Settings, end: false },
   ];
 
@@ -59,6 +61,7 @@ export function AppShell() {
           <Route path="/" element={<TodayPage />} />
           <Route path="/items" element={<ItemsPage />} />
           <Route path="/items/:id" element={<ItemDetailPage />} />
+          <Route path="/workflows" element={<WorkflowsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>
