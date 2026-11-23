@@ -79,6 +79,30 @@ export interface NextStep {
   suggestsOutcome?: string;
 }
 
+export interface DigestRow {
+  itemId: string;
+  itemTitle: string;
+  stepKey: string;
+  stepTitle: string;
+  dueDate: ISODate;
+  /** Negative when overdue, 0 when due today, positive when upcoming. */
+  daysLeft: number;
+  suggestsOutcome?: string;
+}
+
+export interface BuildDigestOptions {
+  /** Include steps due in the next N days (1..upcomingDays). Default: 0. */
+  upcomingDays?: number;
+}
+
+export interface Digest {
+  date: ISODate;
+  overdue: DigestRow[];
+  today: DigestRow[];
+  upcoming: DigestRow[];
+  isEmpty: boolean;
+}
+
 export type ValidationErrorCode =
   | "empty_workflow_id"
   | "empty_workflow_name"
