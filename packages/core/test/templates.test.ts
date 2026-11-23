@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { jobApplicationNetworking } from "../src/index.js";
+import { jobApplicationNetworking, validateWorkflow } from "../src/index.js";
 
 describe("job-application-networking template", () => {
   const { steps } = jobApplicationNetworking;
   const keys = steps.map((s) => s.key);
+
+  it("passes workflow validation", () => {
+    expect(validateWorkflow(jobApplicationNetworking)).toEqual([]);
+  });
 
   it("has unique step keys", () => {
     expect(new Set(keys).size).toBe(keys.length);

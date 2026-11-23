@@ -9,7 +9,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [ ] License holder name set in `LICENSE`
 
 ## Phase 1 — Core (`packages/core`) — spec: `tasks/phase-1-core.md`
-- [ ] T1.1 Types and template validation
+- [x] T1.1 Types and template validation
 - [ ] T1.2 Calendar date utilities
 - [ ] T1.3 `computeSchedule`
 - [ ] T1.4 `computeNextStep`

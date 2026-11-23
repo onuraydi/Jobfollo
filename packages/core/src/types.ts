@@ -59,3 +59,22 @@ export interface NextStep {
   /** Negative when overdue, 0 when due today. */
   daysLeft: number;
 }
+
+export type ValidationErrorCode =
+  | "empty_workflow_id"
+  | "empty_workflow_name"
+  | "empty_step_key"
+  | "empty_step_title"
+  | "duplicate_step_key"
+  | "invalid_anchor"
+  | "unknown_anchor_step"
+  | "anchor_cycle"
+  | "invalid_offset_days"
+  | "invalid_run_if"
+  | "invalid_records";
+
+export interface ValidationError {
+  code: ValidationErrorCode;
+  stepKey?: string;
+  message: string;
+}
