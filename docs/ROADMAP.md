@@ -18,7 +18,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T1.7 `renderDigest` (TR + EN, text + HTML)
 - [x] T1.8 Additional built-in templates
 - [x] T1.9 Localized workflow titles (before T3.5)
-- [ ] T1.10 `shouldSendDigest` (before Phase 4)
+- [x] T1.10 `shouldSendDigest` (before Phase 4)
 
 ## Phase 2 — Data (`packages/data`) — spec: `tasks/phase-2-data.md`
 - [x] T2.0 Package scaffold and decisions

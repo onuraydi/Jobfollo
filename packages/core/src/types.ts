@@ -118,6 +118,43 @@ export interface RenderedDigest {
   html: string;
 }
 
+/** Local wall-clock time in 24-hour `HH:MM` format (`00:00`..`23:59`). */
+export type TimeOfDay = string;
+
+export interface ShouldSendDigestInput {
+  /** Whether daily email reminders are enabled in settings. */
+  enabled: boolean;
+  /** Today's local calendar date (`YYYY-MM-DD`). */
+  today: ISODate;
+  /** Current local wall-clock time (`HH:MM`). */
+  nowTime: TimeOfDay;
+  /** Configured daily send time (`HH:MM`). */
+  sendTime: TimeOfDay;
+  /** Whether a digest has already been successfully sent for `today`. */
+  alreadySentToday: boolean;
+  /** Number of failed send attempts already recorded for `today`. */
+  failureCountToday: number;
+  /** Maximum attempts allowed per day (default: 3). */
+  maxAttemptsPerDay?: number;
+  /** The digest computed for `today` (or its `isEmpty` flag). */
+  digest: Pick<Digest, "isEmpty">;
+  /** Whether to send an email even when the digest is empty (default: false). */
+  sendIfEmpty?: boolean;
+}
+
+export type DigestSkipReason =
+  | "disabled"
+  | "invalid_date"
+  | "invalid_time"
+  | "already_sent"
+  | "max_attempts_reached"
+  | "before_send_time"
+  | "empty_digest";
+
+export type ShouldSendDigestResult =
+  | { send: true }
+  | { send: false; reason: DigestSkipReason };
+
 export type ValidationErrorCode =
   | "empty_workflow_id"
   | "empty_workflow_name"

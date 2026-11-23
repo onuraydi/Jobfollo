@@ -13,3 +13,4 @@ export { computeNextStep } from "./next-step.js";
 export { buildDigest } from "./digest.js";
 export { renderDigest } from "./render-digest.js";
 export { localizedText, stepTitle, workflowName } from "./localize.js";
+export { isValidTimeOfDay, shouldSendDigest } from "./should-send-digest.js";
