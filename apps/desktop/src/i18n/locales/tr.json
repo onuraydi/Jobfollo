@@ -1,0 +1,62 @@
+{
+  "app": {
+    "name": "Jobfollo",
+    "skipToContent": "Ana içeriğe geç"
+  },
+  "nav": {
+    "label": "Ana gezinme",
+    "today": "Bugün",
+    "items": "Kayıtlar",
+    "settings": "Ayarlar"
+  },
+  "pages": {
+    "today": {
+      "title": "Bugün",
+      "subtitle": "Bugün yapılacak ve geciken takipleriniz."
+    },
+    "items": {
+      "title": "Tüm kayıtlar",
+      "subtitle": "Tüm başvuru, teklif ve takiplerinizi yönetin."
+    },
+    "settings": {
+      "title": "Ayarlar",
+      "subtitle": "Dil, tema ve yerel depolama."
+    }
+  },
+  "theme": {
+    "label": "Tema",
+    "system": "Sistem",
+    "light": "Açık",
+    "dark": "Koyu"
+  },
+  "language": {
+    "label": "Dil",
+    "system": "Sistem",
+    "en": "English",
+    "tr": "Türkçe"
+  },
+  "status": {
+    "overdue": "Geciken",
+    "due_today": "Bugün",
+    "pending": "Yaklaşan",
+    "done": "Tamamlandı",
+    "skipped": "Atlandı",
+    "blocked": "Bekliyor",
+    "stopped": "Durduruldu"
+  },
+  "outcomes": {
+    "in_progress": "Devam ediyor",
+    "reply": "Yanıt geldi",
+    "interview": "Mülakat",
+    "offer": "Teklif",
+    "negative": "Olumsuz"
+  },
+  "actions": {
+    "done": "Tamamla",
+    "skip": "Atla",
+    "undo": "Geri al",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil"
+  }
+}

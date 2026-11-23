@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
+import { HashRouter } from "react-router";
 import {
-  BOOT_MESSAGES,
   BootErrorScreen,
   BootLoadingScreen,
   ServicesProvider,
@@ -9,6 +9,7 @@ import {
   retryBoot,
   subscribeBoot,
 } from "./boot/index.js";
+import { AppShell, PreferencesProvider } from "./shell/index.js";
 
 export function App() {
   const snapshot = useSyncExternalStore(subscribeBoot, getBootSnapshot, getBootSnapshot);
@@ -35,10 +36,11 @@ export function App() {
 
   return (
     <ServicesProvider services={snapshot.services}>
-      <main>
-        <h1>Jobfollo</h1>
-        <p>{BOOT_MESSAGES[locale].readySubtitle}</p>
-      </main>
+      <PreferencesProvider>
+        <HashRouter>
+          <AppShell />
+        </HashRouter>
+      </PreferencesProvider>
     </ServicesProvider>
   );
 }

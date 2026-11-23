@@ -34,7 +34,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T3.1 Rust SQLite pipe (`src-tauri`)
 - [x] T3.2a TypeScript bridge, contract fixtures, and `@jobfollo/data/testing`
 - [x] T3.2b App services, bootstrap, and boot screens
-- [ ] T3.3 App shell, i18n, theme
+- [x] T3.3 App shell, i18n, theme
 - [ ] T3.4 Clock and refresh
 - [ ] T3.5 Today screen
 - [ ] T3.6 Items list and create/edit form

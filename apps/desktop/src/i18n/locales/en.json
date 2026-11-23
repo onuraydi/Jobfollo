@@ -1,0 +1,62 @@
+{
+  "app": {
+    "name": "Jobfollo",
+    "skipToContent": "Skip to main content"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "today": "Today",
+    "items": "Items",
+    "settings": "Settings"
+  },
+  "pages": {
+    "today": {
+      "title": "Today",
+      "subtitle": "Your follow-ups due today and overdue."
+    },
+    "items": {
+      "title": "All items",
+      "subtitle": "Track all applications, proposals, and outreach."
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Language, theme, and local storage."
+    }
+  },
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "label": "Language",
+    "system": "System",
+    "en": "English",
+    "tr": "Türkçe"
+  },
+  "status": {
+    "overdue": "Overdue",
+    "due_today": "Due today",
+    "pending": "Upcoming",
+    "done": "Done",
+    "skipped": "Skipped",
+    "blocked": "Waiting",
+    "stopped": "Stopped"
+  },
+  "outcomes": {
+    "in_progress": "In progress",
+    "reply": "Reply",
+    "interview": "Interview",
+    "offer": "Offer",
+    "negative": "Negative"
+  },
+  "actions": {
+    "done": "Done",
+    "skip": "Skip",
+    "undo": "Undo",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  }
+}
