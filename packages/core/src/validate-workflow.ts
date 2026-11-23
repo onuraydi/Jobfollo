@@ -7,6 +7,75 @@ const VALID_CONTACT_STATUSES: ReadonlySet<string> = new Set<ContactStatus>([
 ]);
 
 const STEP_ANCHOR_PREFIX = "step:";
+const LOCALE_KEY_RE = /^[a-z]{2}$/;
+const MAX_LOCALIZED_TEXT_LENGTH = 200;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    (Object.getPrototypeOf(value) === Object.prototype ||
+      Object.getPrototypeOf(value) === null)
+  );
+}
+
+function validateLocalizedMap(
+  map: unknown,
+  fieldLabel: string,
+  stepKey: string | undefined,
+  errors: ValidationError[],
+): void {
+  if (!isPlainObject(map)) {
+    errors.push({
+      code: "invalid_localized_text",
+      ...(stepKey !== undefined ? { stepKey } : {}),
+      message: `${fieldLabel} must be a plain object mapping locale codes to strings.`,
+    });
+    return;
+  }
+
+  for (const [locale, value] of Object.entries(map)) {
+    if (!LOCALE_KEY_RE.test(locale)) {
+      errors.push({
+        code: "invalid_localized_text",
+        ...(stepKey !== undefined ? { stepKey } : {}),
+        locale,
+        message: `${fieldLabel} has invalid locale key "${locale}". Expected two lowercase ASCII letters.`,
+      });
+      continue;
+    }
+
+    if (typeof value !== "string" || value.trim().length === 0) {
+      errors.push({
+        code: "invalid_localized_text",
+        ...(stepKey !== undefined ? { stepKey } : {}),
+        locale,
+        message: `${fieldLabel}.${locale} must be a non-empty string.`,
+      });
+      continue;
+    }
+
+    if (value.includes("\r") || value.includes("\n")) {
+      errors.push({
+        code: "invalid_localized_text",
+        ...(stepKey !== undefined ? { stepKey } : {}),
+        locale,
+        message: `${fieldLabel}.${locale} must be a single line (no CR/LF).`,
+      });
+      continue;
+    }
+
+    if (value.length > MAX_LOCALIZED_TEXT_LENGTH) {
+      errors.push({
+        code: "invalid_localized_text",
+        ...(stepKey !== undefined ? { stepKey } : {}),
+        locale,
+        message: `${fieldLabel}.${locale} must be at most ${MAX_LOCALIZED_TEXT_LENGTH} characters.`,
+      });
+    }
+  }
+}
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
@@ -98,6 +167,10 @@ function validateStepFields(
       message: `Unsupported records value "${String(step.records)}". Expected "contactStatus".`,
     });
   }
+
+  if (step.titles !== undefined) {
+    validateLocalizedMap(step.titles, "titles", stepKey, errors);
+  }
 }
 
 function detectAnchorCycles(
@@ -148,6 +221,10 @@ export function validateWorkflow(workflow: Workflow): ValidationError[] {
       code: "empty_workflow_name",
       message: "Workflow name must be a non-empty string.",
     });
+  }
+
+  if (workflow.names !== undefined) {
+    validateLocalizedMap(workflow.names, "names", undefined, errors);
   }
 
   const seenKeys = new Set<string>();

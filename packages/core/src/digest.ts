@@ -71,6 +71,9 @@ export function buildDigest(
       dueDate: next.dueDate,
       daysLeft: next.daysLeft,
     };
+    if (next.titles !== undefined) {
+      row.stepTitles = { ...next.titles };
+    }
     if (next.suggestsOutcome !== undefined) {
       row.suggestsOutcome = next.suggestsOutcome;
     }

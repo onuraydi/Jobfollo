@@ -95,6 +95,9 @@ export function computeSchedule(
       title: step.title,
       status,
     };
+    if (step.titles !== undefined) {
+      instance.titles = { ...step.titles };
+    }
     if (dueDate !== undefined) {
       instance.dueDate = dueDate;
     }

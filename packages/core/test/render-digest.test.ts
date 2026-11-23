@@ -219,6 +219,36 @@ describe("renderDigest", () => {
 
     const tr = renderDigest(digest, "tr");
     expect(tr.subject).toBe("Jobfollo: 1 bugün, 1 geciken");
+    expect(tr.text).toContain("Başvur (e-posta veya site)");
+    expect(tr.html).toContain("Başvur (e-posta veya site)");
+    expect(en.text).toContain("Apply (mail or site)");
+  });
+
+  it("falls back to plain stepTitle when stepTitles is absent and escapes/normalizes custom localized titles", () => {
+    const digest = makeDigest({
+      today: [
+        makeRow({
+          itemId: "custom-no-titles",
+          itemTitle: "Custom Co",
+          stepTitle: "Plain Custom Step",
+        }),
+        makeRow({
+          itemId: "custom-with-titles",
+          itemTitle: "User Co",
+          stepTitle: "Fallback",
+          stepTitles: {
+            tr: "Satır 1\n<b>tehlikeli</b>",
+          },
+        }),
+      ],
+    });
+
+    const tr = renderDigest(digest, "tr");
+    expect(tr.text).toContain("Plain Custom Step");
+    expect(tr.text).toContain("Satır 1 <b>tehlikeli</b>");
+    expect(tr.text).not.toContain("Satır 1\n");
+    expect(tr.html).toContain("Satır 1 &lt;b&gt;tehlikeli&lt;/b&gt;");
+    expect(tr.html).not.toContain("<b>tehlikeli</b>");
   });
 
   it("throws RangeError for unsupported locale at runtime", () => {

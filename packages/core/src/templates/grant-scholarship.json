@@ -1,10 +1,41 @@
 {
   "id": "grant-scholarship",
   "name": "Grant / scholarship application",
+  "names": {
+    "en": "Grant / scholarship application",
+    "tr": "Burs / hibe başvurusu"
+  },
   "steps": [
-    { "key": "submit", "title": "Submit application", "anchor": "start", "offsetDays": 0 },
-    { "key": "confirmation_check", "title": "Confirmation check", "anchor": "start", "offsetDays": 7 },
-    { "key": "status_check", "title": "Status check", "anchor": "start", "offsetDays": 30 }
+    {
+      "key": "submit",
+      "title": "Submit application",
+      "titles": {
+        "en": "Submit application",
+        "tr": "Başvuruyu gönder"
+      },
+      "anchor": "start",
+      "offsetDays": 0
+    },
+    {
+      "key": "confirmation_check",
+      "title": "Confirmation check",
+      "titles": {
+        "en": "Confirmation check",
+        "tr": "Başvurunun alındığını kontrol et"
+      },
+      "anchor": "start",
+      "offsetDays": 7
+    },
+    {
+      "key": "status_check",
+      "title": "Status check",
+      "titles": {
+        "en": "Status check",
+        "tr": "Başvuru durumunu kontrol et"
+      },
+      "anchor": "start",
+      "offsetDays": 30
+    }
   ],
   "stopOutcomes": ["accepted", "rejected", "withdrawn"]
 }

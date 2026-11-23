@@ -40,6 +40,18 @@ describe("built-in templates", () => {
       expect(validateWorkflow(template)).toEqual([]);
     }
   });
+
+  it("every built-in template and step has en and tr translations with en identical to plain name/title", () => {
+    for (const template of builtInTemplates) {
+      expect(template.names?.en).toBe(template.name);
+      expect(template.names?.tr?.trim().length).toBeGreaterThan(0);
+
+      for (const step of template.steps) {
+        expect(step.titles?.en).toBe(step.title);
+        expect(step.titles?.tr?.trim().length).toBeGreaterThan(0);
+      }
+    }
+  });
 });
 
 describe("job-application-networking template", () => {

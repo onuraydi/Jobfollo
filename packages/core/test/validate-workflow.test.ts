@@ -263,4 +263,59 @@ describe("validateWorkflow", () => {
     expect(() => validateWorkflow(workflow)).not.toThrow();
     expect(validateWorkflow(workflow)).toEqual([]);
   });
+
+  describe("localized names and titles", () => {
+    it("allows valid names and titles including well-formed unknown locales (e.g. de) and without en", () => {
+      const workflow = makeWorkflow({
+        names: { tr: "Özel akış", de: "Benutzerdefiniert" } as Workflow["names"],
+        steps: [
+          makeStep({
+            key: "s1",
+            titles: { tr: "İlk adım", de: "Erster Schritt" } as WorkflowStep["titles"],
+          }),
+        ],
+      });
+      expect(validateWorkflow(workflow)).toEqual([]);
+    });
+
+    it.each([
+      { label: "null names", names: null },
+      { label: "array names", names: ["en"] },
+      { label: "uppercase locale key", names: { TR: "Merhaba" } },
+      { label: "long locale key", names: { turkish: "Merhaba" } },
+      { label: "empty locale key", names: { "": "Merhaba" } },
+      { label: "whitespace value", names: { tr: "   " } },
+      { label: "multiline LF value", names: { tr: "Line 1\nLine 2" } },
+      { label: "multiline CR value", names: { tr: "Line 1\rLine 2" } },
+      { label: "value over 200 chars", names: { tr: "a".repeat(201) } },
+    ])("rejects invalid workflow.names ($label)", ({ names }) => {
+      const workflow = makeWorkflow({ names: names as Workflow["names"] });
+      const errors = validateWorkflow(workflow);
+      expect(errors.length).toBeGreaterThanOrEqual(1);
+      expect(errors[0]?.code).toBe("invalid_localized_text");
+    });
+
+    it("reports each step title violation separately with stepKey and locale", () => {
+      const workflow = makeWorkflow({
+        steps: [
+          makeStep({
+            key: "apply",
+            titles: {
+              TR: "Bad key",
+              en: "Line1\nLine2",
+              tr: "   ",
+            } as unknown as WorkflowStep["titles"],
+          }),
+        ],
+      });
+      const errors = validateWorkflow(workflow);
+      expect(errors).toHaveLength(3);
+      for (const err of errors) {
+        expect(err.code).toBe("invalid_localized_text");
+        expect(err.stepKey).toBe("apply");
+        expect(err.locale).toBeDefined();
+      }
+      expect(errors.map((e) => e.locale).sort()).toEqual(["TR", "en", "tr"]);
+    });
+  });
 });

@@ -25,8 +25,10 @@ function cloneWorkflow(workflow: Workflow): Workflow {
   return {
     id: workflow.id,
     name: workflow.name,
+    ...(workflow.names !== undefined ? { names: { ...workflow.names } } : {}),
     steps: workflow.steps.map((step) => ({
       ...step,
+      ...(step.titles !== undefined ? { titles: { ...step.titles } } : {}),
       ...(step.runIf !== undefined ? { runIf: { ...step.runIf } } : {}),
     })),
     stopOutcomes: [...workflow.stopOutcomes],

@@ -12,3 +12,4 @@ export { computeSchedule } from "./schedule.js";
 export { computeNextStep } from "./next-step.js";
 export { buildDigest } from "./digest.js";
 export { renderDigest } from "./render-digest.js";
+export { localizedText, stepTitle, workflowName } from "./localize.js";

@@ -1,6 +1,10 @@
 {
   "id": "blank",
   "name": "Blank",
+  "names": {
+    "en": "Blank",
+    "tr": "Boş şablon"
+  },
   "steps": [],
   "stopOutcomes": ["reply", "interview", "offer", "negative"]
 }

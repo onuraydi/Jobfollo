@@ -52,21 +52,29 @@ buildDigest(items, workflows, today, opts): { overdue: Row[]; today: Row[]; upco
 renderDigest(digest, locale): { subject: string; text: string; html: string }
 ```
 
-## Workflow data format (draft)
+## Workflow data format
 
-A step is due `offsetDays` after its anchor. `runIf` is limited to a small fixed vocabulary (contact status), not arbitrary expressions.
+A step is due `offsetDays` after its anchor. `runIf` is limited to a small fixed vocabulary (contact status), not arbitrary expressions. Optional `names` and `titles` maps provide localized labels (`{ en, tr }`) with fallback to the required plain `name` / `title` (see ADR-012).
 
 ```json
 {
   "id": "job-application-networking",
+  "name": "Job application + networking",
+  "names": { "en": "Job application + networking", "tr": "İş başvurusu + networking" },
   "steps": [
-    { "key": "apply",           "title": "Apply (mail or site)",          "anchor": "start",             "offsetDays": 0 },
-    { "key": "connect_request", "title": "Send LinkedIn connection request","anchor": "step:apply",       "offsetDays": 0 },
-    { "key": "check_accept",    "title": "Check if connection accepted",  "anchor": "step:connect_request","offsetDays": 1, "records": "contactStatus" },
-    { "key": "first_message",   "title": "Send first message",            "anchor": "step:check_accept", "offsetDays": 0, "runIf": { "contactStatus": "accepted" } },
-    { "key": "followup_1",      "title": "Reminder 1",                    "anchor": "start",             "offsetDays": 7 },
-    { "key": "followup_2",      "title": "Reminder 2",                    "anchor": "start",             "offsetDays": 14 },
-    { "key": "close",           "title": "Mark as negative",              "anchor": "step:followup_2",   "offsetDays": 3, "suggestsOutcome": "negative" }
+    {
+      "key": "apply",
+      "title": "Apply (mail or site)",
+      "titles": { "en": "Apply (mail or site)", "tr": "Başvur (e-posta veya site)" },
+      "anchor": "start",
+      "offsetDays": 0
+    },
+    { "key": "connect_request", "title": "Send LinkedIn connection request", "anchor": "step:apply", "offsetDays": 0 },
+    { "key": "check_accept", "title": "Check if connection accepted", "anchor": "step:connect_request", "offsetDays": 1, "records": "contactStatus" },
+    { "key": "first_message", "title": "Send first message", "anchor": "step:check_accept", "offsetDays": 0, "runIf": { "contactStatus": "accepted" } },
+    { "key": "followup_1", "title": "Reminder 1", "anchor": "start", "offsetDays": 7 },
+    { "key": "followup_2", "title": "Reminder 2", "anchor": "start", "offsetDays": 14 },
+    { "key": "close", "title": "Mark as negative", "anchor": "step:followup_2", "offsetDays": 3, "suggestsOutcome": "negative" }
   ],
   "stopOutcomes": ["reply", "interview", "offer", "negative"]
 }

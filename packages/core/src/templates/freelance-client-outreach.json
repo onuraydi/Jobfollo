@@ -1,11 +1,52 @@
 {
   "id": "freelance-client-outreach",
   "name": "Freelance client outreach",
+  "names": {
+    "en": "Freelance client outreach",
+    "tr": "Freelance müşteri bulma"
+  },
   "steps": [
-    { "key": "send_proposal", "title": "Send proposal", "anchor": "start", "offsetDays": 0 },
-    { "key": "followup_1", "title": "Follow-up 1", "anchor": "start", "offsetDays": 3 },
-    { "key": "last_followup", "title": "Last follow-up", "anchor": "start", "offsetDays": 10 },
-    { "key": "close", "title": "Close as negative", "anchor": "step:last_followup", "offsetDays": 3, "suggestsOutcome": "negative" }
+    {
+      "key": "send_proposal",
+      "title": "Send proposal",
+      "titles": {
+        "en": "Send proposal",
+        "tr": "Teklifi gönder"
+      },
+      "anchor": "start",
+      "offsetDays": 0
+    },
+    {
+      "key": "followup_1",
+      "title": "Follow-up 1",
+      "titles": {
+        "en": "Follow-up 1",
+        "tr": "1. takip mesajı"
+      },
+      "anchor": "start",
+      "offsetDays": 3
+    },
+    {
+      "key": "last_followup",
+      "title": "Last follow-up",
+      "titles": {
+        "en": "Last follow-up",
+        "tr": "Son takip mesajı"
+      },
+      "anchor": "start",
+      "offsetDays": 10
+    },
+    {
+      "key": "close",
+      "title": "Close as negative",
+      "titles": {
+        "en": "Close as negative",
+        "tr": "Olumsuz olarak işaretle"
+      },
+      "anchor": "step:last_followup",
+      "offsetDays": 3,
+      "suggestsOutcome": "negative"
+    }
   ],
   "stopOutcomes": ["reply", "meeting", "won", "negative"]
 }

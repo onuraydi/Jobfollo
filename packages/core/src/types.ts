@@ -1,6 +1,10 @@
 /** Local calendar date, `YYYY-MM-DD`. */
 export type ISODate = string;
 
+export type Locale = "tr" | "en";
+
+export type LocalizedText = Partial<Record<Locale, string>>;
+
 export type ContactStatus = "pending" | "accepted" | "not_accepted";
 
 /** `start` = the item's start date; `step:<key>` = completion date of that step. */
@@ -9,6 +13,7 @@ export type Anchor = "start" | `step:${string}`;
 export interface WorkflowStep {
   key: string;
   title: string;
+  titles?: LocalizedText;
   anchor: Anchor;
   offsetDays: number;
   /** The user records the contact status when completing this step. */
@@ -22,6 +27,7 @@ export interface WorkflowStep {
 export interface Workflow {
   id: string;
   name: string;
+  names?: LocalizedText;
   steps: WorkflowStep[];
   /** Outcomes that stop all pending steps. */
   stopOutcomes: string[];
@@ -64,6 +70,7 @@ export type StepStatus =
 export interface StepInstance {
   stepKey: string;
   title: string;
+  titles?: LocalizedText;
   dueDate?: ISODate;
   completedOn?: ISODate;
   status: StepStatus;
@@ -73,6 +80,7 @@ export interface StepInstance {
 export interface NextStep {
   stepKey: string;
   title: string;
+  titles?: LocalizedText;
   dueDate: ISODate;
   /** Negative when overdue, 0 when due today. */
   daysLeft: number;
@@ -84,6 +92,7 @@ export interface DigestRow {
   itemTitle: string;
   stepKey: string;
   stepTitle: string;
+  stepTitles?: LocalizedText;
   dueDate: ISODate;
   /** Negative when overdue, 0 when due today, positive when upcoming. */
   daysLeft: number;
@@ -103,8 +112,6 @@ export interface Digest {
   isEmpty: boolean;
 }
 
-export type Locale = "tr" | "en";
-
 export interface RenderedDigest {
   subject: string;
   text: string;
@@ -122,10 +129,12 @@ export type ValidationErrorCode =
   | "anchor_cycle"
   | "invalid_offset_days"
   | "invalid_run_if"
-  | "invalid_records";
+  | "invalid_records"
+  | "invalid_localized_text";
 
 export interface ValidationError {
   code: ValidationErrorCode;
   stepKey?: string;
+  locale?: string;
   message: string;
 }

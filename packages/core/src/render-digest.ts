@@ -1,3 +1,4 @@
+import { localizedText } from "./localize.js";
 import type { Digest, DigestRow, Locale, RenderedDigest } from "./types.js";
 
 interface DigestStrings {
@@ -45,6 +46,14 @@ const STRINGS: Record<Locale, DigestStrings> = {
     inDays: (days) => `${days} gün sonra`,
   },
 };
+
+function normalizeSingleLine(value: string): string {
+  return value.replace(/[\r\n]+/g, " ").trim();
+}
+
+function resolveRowStepTitle(row: DigestRow, locale: Locale): string {
+  return normalizeSingleLine(localizedText(row.stepTitle, row.stepTitles, locale));
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -96,7 +105,12 @@ function getNonEmptySections(digest: Digest, strings: DigestStrings): Section[] 
   return sections.filter((section) => section.rows.length > 0);
 }
 
-function buildText(digest: Digest, sections: readonly Section[], strings: DigestStrings): string {
+function buildText(
+  digest: Digest,
+  locale: Locale,
+  sections: readonly Section[],
+  strings: DigestStrings,
+): string {
   const lines: string[] = [`Jobfollo — ${digest.date}`, ""];
 
   if (sections.length === 0) {
@@ -108,7 +122,8 @@ function buildText(digest: Digest, sections: readonly Section[], strings: Digest
     lines.push(`${section.heading} (${section.rows.length})`);
     for (const row of section.rows) {
       const timing = formatTiming(row, strings);
-      lines.push(`- ${row.itemTitle} — ${row.stepTitle} (${row.dueDate}, ${timing})`);
+      const title = resolveRowStepTitle(row, locale);
+      lines.push(`- ${normalizeSingleLine(row.itemTitle)} — ${title} (${row.dueDate}, ${timing})`);
     }
     lines.push("");
   }
@@ -132,7 +147,8 @@ function buildHtml(
             const itemsHtml = section.rows
               .map((row) => {
                 const timing = formatTiming(row, strings);
-                return `<li><strong>${escapeHtml(row.itemTitle)}</strong> — ${escapeHtml(row.stepTitle)} <span style="color:#666;">(${escapeHtml(row.dueDate)}, ${escapeHtml(timing)})</span></li>`;
+                const title = resolveRowStepTitle(row, locale);
+                return `<li><strong>${escapeHtml(normalizeSingleLine(row.itemTitle))}</strong> — ${escapeHtml(title)} <span style="color:#666;">(${escapeHtml(row.dueDate)}, ${escapeHtml(timing)})</span></li>`;
               })
               .join("");
             return `<h2 style="font-size:16px;margin:16px 0 8px;">${escapeHtml(section.heading)} (${section.rows.length})</h2><ul style="margin:0;padding-left:20px;">${itemsHtml}</ul>`;
@@ -161,7 +177,7 @@ export function renderDigest(digest: Digest, locale: Locale): RenderedDigest {
 
   return {
     subject: buildSubject(digest, strings),
-    text: buildText(digest, sections, strings),
+    text: buildText(digest, locale, sections, strings),
     html: buildHtml(digest, locale, sections, strings),
   };
 }

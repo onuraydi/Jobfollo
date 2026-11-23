@@ -40,6 +40,9 @@ export function computeNextStep(
     dueDate: earliest.dueDate,
     daysLeft: diffDays(today, earliest.dueDate),
   };
+  if (earliest.titles !== undefined) {
+    nextStep.titles = { ...earliest.titles };
+  }
   if (earliest.suggestsOutcome !== undefined) {
     nextStep.suggestsOutcome = earliest.suggestsOutcome;
   }

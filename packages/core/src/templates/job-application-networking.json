@@ -1,14 +1,84 @@
 {
   "id": "job-application-networking",
   "name": "Job application + networking",
+  "names": {
+    "en": "Job application + networking",
+    "tr": "İş başvurusu + networking"
+  },
   "steps": [
-    { "key": "apply", "title": "Apply (mail or site)", "anchor": "start", "offsetDays": 0 },
-    { "key": "connect_request", "title": "Send LinkedIn connection request", "anchor": "step:apply", "offsetDays": 0 },
-    { "key": "check_accept", "title": "Check if connection accepted", "anchor": "step:connect_request", "offsetDays": 1, "records": "contactStatus" },
-    { "key": "first_message", "title": "Send first message", "anchor": "step:check_accept", "offsetDays": 0, "runIf": { "contactStatus": "accepted" } },
-    { "key": "followup_1", "title": "Reminder 1", "anchor": "start", "offsetDays": 7 },
-    { "key": "followup_2", "title": "Reminder 2", "anchor": "start", "offsetDays": 14 },
-    { "key": "close", "title": "Mark as negative", "anchor": "step:followup_2", "offsetDays": 3, "suggestsOutcome": "negative" }
+    {
+      "key": "apply",
+      "title": "Apply (mail or site)",
+      "titles": {
+        "en": "Apply (mail or site)",
+        "tr": "Başvur (e-posta veya site)"
+      },
+      "anchor": "start",
+      "offsetDays": 0
+    },
+    {
+      "key": "connect_request",
+      "title": "Send LinkedIn connection request",
+      "titles": {
+        "en": "Send LinkedIn connection request",
+        "tr": "LinkedIn bağlantı isteği gönder"
+      },
+      "anchor": "step:apply",
+      "offsetDays": 0
+    },
+    {
+      "key": "check_accept",
+      "title": "Check if connection accepted",
+      "titles": {
+        "en": "Check if connection accepted",
+        "tr": "Bağlantının kabul edilip edilmediğini kontrol et"
+      },
+      "anchor": "step:connect_request",
+      "offsetDays": 1,
+      "records": "contactStatus"
+    },
+    {
+      "key": "first_message",
+      "title": "Send first message",
+      "titles": {
+        "en": "Send first message",
+        "tr": "İlk mesajı gönder"
+      },
+      "anchor": "step:check_accept",
+      "offsetDays": 0,
+      "runIf": { "contactStatus": "accepted" }
+    },
+    {
+      "key": "followup_1",
+      "title": "Reminder 1",
+      "titles": {
+        "en": "Reminder 1",
+        "tr": "1. hatırlatma"
+      },
+      "anchor": "start",
+      "offsetDays": 7
+    },
+    {
+      "key": "followup_2",
+      "title": "Reminder 2",
+      "titles": {
+        "en": "Reminder 2",
+        "tr": "2. hatırlatma"
+      },
+      "anchor": "start",
+      "offsetDays": 14
+    },
+    {
+      "key": "close",
+      "title": "Mark as negative",
+      "titles": {
+        "en": "Mark as negative",
+        "tr": "Olumsuz olarak işaretle"
+      },
+      "anchor": "step:followup_2",
+      "offsetDays": 3,
+      "suggestsOutcome": "negative"
+    }
   ],
   "stopOutcomes": ["reply", "interview", "offer", "negative"]
 }

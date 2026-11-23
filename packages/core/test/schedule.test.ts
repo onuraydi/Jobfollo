@@ -36,6 +36,7 @@ describe("computeSchedule", () => {
     expect(map["apply"]).toEqual({
       stepKey: "apply",
       title: "Apply (mail or site)",
+      titles: { en: "Apply (mail or site)", tr: "Başvur (e-posta veya site)" },
       dueDate: "2026-03-01",
       status: "due_today",
     });
@@ -201,6 +202,7 @@ describe("computeSchedule", () => {
     expect(map["close"]).toEqual({
       stepKey: "close",
       title: "Mark as negative",
+      titles: { en: "Mark as negative", tr: "Olumsuz olarak işaretle" },
       dueDate: "2026-03-18",
       status: "due_today",
       suggestsOutcome: "negative",
@@ -226,6 +228,18 @@ describe("computeSchedule", () => {
   it("returns an empty array for a blank workflow", () => {
     const blank: Workflow = { id: "blank", name: "Blank", steps: [], stopOutcomes: [] };
     expect(computeSchedule(makeItem({ workflowId: "blank" }), blank, "2026-03-01")).toEqual([]);
+  });
+
+  it("omits titles key on StepInstance when the step has no titles", () => {
+    const custom: Workflow = {
+      id: "custom",
+      name: "Custom",
+      steps: [{ key: "ping", title: "Ping", anchor: "start", offsetDays: 0 }],
+      stopOutcomes: [],
+    };
+    const [inst] = computeSchedule(makeItem({ workflowId: "custom" }), custom, "2026-03-01");
+    expect(inst).toBeDefined();
+    expect("titles" in inst!).toBe(false);
   });
 
   it.each([
