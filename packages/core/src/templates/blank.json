@@ -1,0 +1,6 @@
+{
+  "id": "blank",
+  "name": "Blank",
+  "steps": [],
+  "stopOutcomes": ["reply", "interview", "offer", "negative"]
+}

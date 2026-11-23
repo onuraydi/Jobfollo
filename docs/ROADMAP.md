@@ -16,7 +16,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T1.5 Outcomes stop the flow
 - [x] T1.6 `buildDigest`
 - [x] T1.7 `renderDigest` (TR + EN, text + HTML)
-- [ ] T1.8 Additional built-in templates
+- [x] T1.8 Additional built-in templates
 
 ## Phase 2 — Data
 - [ ] SQLite layer and migrations
