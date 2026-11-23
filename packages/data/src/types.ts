@@ -1,3 +1,5 @@
+import type { Workflow } from "@jobfollo/core";
+
 export type SqlValue = string | number | null;
 
 export interface SqlStatement {
@@ -33,4 +35,30 @@ export interface Migration {
 export interface MigrationRunResult {
   applied: number[];
   currentVersion: number;
+}
+
+export type WorkflowKind = "builtin" | "custom";
+
+export interface WorkflowListEntry {
+  workflow: Workflow;
+  kind: WorkflowKind;
+}
+
+export interface InvalidStoredWorkflow {
+  id: string;
+  reason: string;
+}
+
+export interface CustomWorkflowListResult {
+  workflows: Workflow[];
+  invalid: InvalidStoredWorkflow[];
+}
+
+export interface WorkflowRepository {
+  listAll(): Promise<WorkflowListEntry[]>;
+  listCustom(): Promise<CustomWorkflowListResult>;
+  get(id: string): Promise<Workflow | null>;
+  save(workflow: Workflow): Promise<Workflow>;
+  duplicate(sourceId: string, name: string): Promise<Workflow>;
+  delete(id: string): Promise<boolean>;
 }
