@@ -254,4 +254,79 @@ describe("computeSchedule", () => {
 
     expect(() => computeSchedule(item, workflow, "2026-03-01")).not.toThrow();
   });
+
+  describe("outcomes stop the flow", () => {
+    it("marks all unfinished steps as stopped when a stopOutcome is set on a fresh item", () => {
+      const item = makeItem({ startDate: "2026-03-01", outcome: "negative" });
+      const schedule = computeSchedule(item, jobApplicationNetworking, "2026-03-08");
+      const map = byKey(schedule);
+
+      for (const step of schedule) {
+        expect(step.status).toBe("stopped");
+      }
+      expect(map["apply"]?.dueDate).toBe("2026-03-01");
+      expect(map["followup_1"]?.dueDate).toBe("2026-03-08");
+      expect(map["followup_2"]?.dueDate).toBe("2026-03-15");
+      expect(map["connect_request"]?.dueDate).toBeUndefined();
+    });
+
+    it("preserves done and runIf-skipped steps while stopping remaining steps mid-flow", () => {
+      const item = makeItem({
+        startDate: "2026-03-01",
+        contacts: [{ name: "Jane Doe", status: "not_accepted" }],
+        steps: [
+          { stepKey: "apply", completedOn: "2026-03-01" },
+          { stepKey: "connect_request", completedOn: "2026-03-01" },
+          { stepKey: "check_accept", completedOn: "2026-03-02" },
+        ],
+        outcome: "interview",
+      });
+      const map = byKey(computeSchedule(item, jobApplicationNetworking, "2026-03-08"));
+
+      expect(map["apply"]?.status).toBe("done");
+      expect(map["connect_request"]?.status).toBe("done");
+      expect(map["check_accept"]?.status).toBe("done");
+      expect(map["first_message"]?.status).toBe("skipped");
+      expect(map["followup_1"]?.status).toBe("stopped");
+      expect(map["followup_2"]?.status).toBe("stopped");
+      expect(map["close"]?.status).toBe("stopped");
+    });
+
+    it("preserves manually skipped steps when a stopOutcome is set", () => {
+      const item = makeItem({
+        startDate: "2026-03-01",
+        steps: [
+          { stepKey: "apply", completedOn: "2026-03-01" },
+          { stepKey: "connect_request", skipped: true },
+        ],
+        outcome: "reply",
+      });
+      const map = byKey(computeSchedule(item, jobApplicationNetworking, "2026-03-02"));
+
+      expect(map["apply"]?.status).toBe("done");
+      expect(map["connect_request"]?.status).toBe("skipped");
+      expect(map["check_accept"]?.status).toBe("stopped");
+      expect(map["followup_1"]?.status).toBe("stopped");
+    });
+
+    it("does not stop the flow for non-stopping outcomes", () => {
+      const item = makeItem({ startDate: "2026-03-01", outcome: "in_progress" });
+      const schedule = computeSchedule(item, jobApplicationNetworking, "2026-03-01");
+
+      expect(schedule.some((s) => s.status === "stopped")).toBe(false);
+      expect(byKey(schedule)["apply"]?.status).toBe("due_today");
+    });
+
+    it("does not stop the flow when workflow.stopOutcomes is empty", () => {
+      const workflow: Workflow = {
+        ...jobApplicationNetworking,
+        stopOutcomes: [],
+      };
+      const item = makeItem({ startDate: "2026-03-01", outcome: "negative" });
+      const schedule = computeSchedule(item, workflow, "2026-03-01");
+
+      expect(schedule.some((s) => s.status === "stopped")).toBe(false);
+      expect(byKey(schedule)["apply"]?.status).toBe("due_today");
+    });
+  });
 });

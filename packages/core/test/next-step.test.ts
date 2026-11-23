@@ -232,4 +232,31 @@ describe("computeNextStep", () => {
       daysLeft: 1,
     });
   });
+
+  describe("outcomes stop the flow", () => {
+    it.each(["reply", "interview", "offer", "negative"])(
+      "returns null when item.outcome is stopOutcome %s",
+      (outcome) => {
+        const item = makeItem({
+          startDate: "2026-03-01",
+          steps: [{ stepKey: "apply", completedOn: "2026-03-01" }],
+          outcome,
+        });
+        expect(computeNextStep(item, jobApplicationNetworking, "2026-03-05")).toBeNull();
+      },
+    );
+
+    it("continues returning the next step when item.outcome is not a stopOutcome", () => {
+      const item = makeItem({
+        startDate: "2026-03-01",
+        outcome: "in_progress",
+      });
+      expect(computeNextStep(item, jobApplicationNetworking, "2026-03-01")).toEqual({
+        stepKey: "apply",
+        title: "Apply (mail or site)",
+        dueDate: "2026-03-01",
+        daysLeft: 0,
+      });
+    });
+  });
 });

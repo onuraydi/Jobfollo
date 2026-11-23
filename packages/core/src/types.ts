@@ -58,7 +58,8 @@ export type StepStatus =
   | "pending"
   | "overdue"
   | "due_today"
-  | "blocked";
+  | "blocked"
+  | "stopped";
 
 export interface StepInstance {
   stepKey: string;

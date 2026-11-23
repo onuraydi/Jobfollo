@@ -67,6 +67,9 @@ export function computeSchedule(
     recordsByKey.set(record.stepKey, record);
   }
 
+  const isStopped =
+    item.outcome !== undefined && workflow.stopOutcomes.includes(item.outcome);
+
   return workflow.steps.map((step): StepInstance => {
     const record = recordsByKey.get(step.key);
     const anchorDate = resolveAnchorDate(step, item, recordsByKey);
@@ -77,10 +80,12 @@ export function computeSchedule(
       status = "done";
     } else if (record?.skipped) {
       status = "skipped";
+    } else if (dueDate !== undefined && !isRunIfSatisfied(step, item)) {
+      status = "skipped";
+    } else if (isStopped) {
+      status = "stopped";
     } else if (dueDate === undefined) {
       status = "blocked";
-    } else if (!isRunIfSatisfied(step, item)) {
-      status = "skipped";
     } else {
       status = classifyDueDate(dueDate, today);
     }
