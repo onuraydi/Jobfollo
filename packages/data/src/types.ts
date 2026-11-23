@@ -23,3 +23,14 @@ export interface Clock {
 export interface IdGenerator {
   newId(): string;
 }
+
+export interface Migration {
+  version: number;
+  name: string;
+  sql: string;
+}
+
+export interface MigrationRunResult {
+  applied: number[];
+  currentVersion: number;
+}

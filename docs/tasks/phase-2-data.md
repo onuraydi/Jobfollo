@@ -43,7 +43,7 @@ Clock and id generator are injected so tests are deterministic. The data package
 
 ## Schema (migration `0001_init.sql`)
 
-Dates are `TEXT` `YYYY-MM-DD` with a `CHECK` using `GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'`. Timestamps are ISO-8601 UTC text.
+Dates are `TEXT` `YYYY-MM-DD` with `CHECK (date(col) IS col)` for `NOT NULL` columns and `CHECK (col IS NULL OR date(col) IS col)` for nullable columns. Timestamps are ISO-8601 UTC text.
 
 | Table | Columns / rules |
 |---|---|
