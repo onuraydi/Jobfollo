@@ -2,6 +2,7 @@ import { CalendarCheck2, FolderKanban, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Route, Routes } from "react-router";
 import { cn } from "../lib/cn.js";
+import { ItemsPage } from "../pages/ItemsPage.js";
 import { TodayPage } from "../pages/TodayPage.js";
 
 function PlaceholderPage({ titleKey, subtitleKey }: { titleKey: string; subtitleKey: string }) {
@@ -62,15 +63,7 @@ export function AppShell() {
       <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-6">
         <Routes>
           <Route path="/" element={<TodayPage />} />
-          <Route
-            path="/items"
-            element={
-              <PlaceholderPage
-                titleKey="pages.items.title"
-                subtitleKey="pages.items.subtitle"
-              />
-            }
-          />
+          <Route path="/items" element={<ItemsPage />} />
           <Route
             path="/items/:id"
             element={
