@@ -24,7 +24,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T2.2 Workflow repository
 - [x] T2.3 Item repository
 - [x] T2.4 Steps, contacts and outcome
-- [ ] T2.5 Settings and reminder log
+- [x] T2.5 Settings and reminder log
 - [ ] T2.6 Restart-persistence integration test
 
 ## Phase 3 — UI

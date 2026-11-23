@@ -152,3 +152,22 @@ export interface ItemRepository {
   updateContact(itemId: string, contactId: string, patch: UpdateContactPatch): Promise<void>;
   removeContact(itemId: string, contactId: string): Promise<boolean>;
 }
+
+export type ReminderLogStatus = "sent" | "failed";
+
+export interface ReminderLogEntry {
+  date: ISODate;
+  status: ReminderLogStatus;
+  attempt: number;
+  createdAt: string;
+  error?: string;
+}
+
+export interface ReminderLogRepository {
+  recordSent(date: ISODate, attempt?: number): Promise<void>;
+  recordFailure(date: ISODate, error: string, attempt: number): Promise<void>;
+  wasSentOn(date: ISODate): Promise<boolean>;
+  lastSentDate(): Promise<ISODate | null>;
+  failureCountOn(date: ISODate): Promise<number>;
+  recent(limit?: number): Promise<ReminderLogEntry[]>;
+}

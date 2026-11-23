@@ -82,7 +82,7 @@ Dates are stored as `YYYY-MM-DD` local calendar dates (no timezone math for due 
 1. **Scheduler (clock).** A Rust interval (every 60 s) checks: is it past the configured send time, and is there no successful `reminder_log` row for today? If so it emits a `reminder:due` event.
 2. **Digest.** The UI layer (kept alive while the window is hidden in the tray) calls `buildDigest` + `renderDigest` from `core`, then invokes the Rust command `send_digest(subject, text, html)`.
 3. **Send.** Rust reads SMTP credentials from the keychain, sends via `lettre`, returns success or a typed error.
-4. **Log.** Result is written to `reminder_log`. On failure: backoff, max 3 attempts per day, error shown in Settings.
+4. **Log.** Result is written to `reminder_log`. On failure: backoff, max 3 attempts per day, error shown in Settings. The error text passed to `recordFailure` must never contain credentials, and the Rust side scrubs it before returning errors to the UI.
 5. **Catch-up.** The same check runs at startup and on resume from sleep.
 
 **Known risk (spike required in Phase 4):** hidden webviews may be throttled or suspended on some OSes. If the spike shows unreliable behaviour, the fallback is to run `buildDigest` in a headless Node sidecar or compile `core` to WASM called from Rust. Because `core` is pure, either move is cheap. Do not duplicate business rules in Rust.

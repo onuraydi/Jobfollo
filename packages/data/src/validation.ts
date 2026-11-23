@@ -123,3 +123,60 @@ export function validateOutcome(outcome: unknown, issues: FieldValidationIssue[]
     });
   }
 }
+
+const SEND_TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const CONTROL_CHARS_RE = /[\x00-\x1F\x7F]/;
+const CONTROL_CHARS_RUN_RE = /[\r\n\x00-\x1F\x7F]+/g;
+const FORBIDDEN_EMAIL_CHARS_RE = /[\s,;<>'"\x00-\x1F\x7F]/;
+const VALID_HOST_CHARS_RE = /^[A-Za-z0-9.:\-[\]]+$/;
+
+export function isValidSendTime(value: unknown): value is string {
+  return typeof value === "string" && SEND_TIME_RE.test(value);
+}
+
+export function isValidIntegerInRange(value: unknown, min: number, max: number): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= min && value <= max;
+}
+
+export function isValidRecipientEmail(value: unknown): value is string {
+  if (typeof value !== "string" || value.length === 0 || value.length > 254) {
+    return false;
+  }
+  if (FORBIDDEN_EMAIL_CHARS_RE.test(value)) {
+    return false;
+  }
+  const atIndex = value.indexOf("@");
+  if (atIndex <= 0 || atIndex !== value.lastIndexOf("@")) {
+    return false;
+  }
+  const domain = value.slice(atIndex + 1);
+  if (domain.length < 3 || domain.startsWith(".") || domain.endsWith(".") || !domain.includes(".")) {
+    return false;
+  }
+  return true;
+}
+
+export function isValidSmtpHost(value: unknown): value is string {
+  if (typeof value !== "string" || value.length === 0 || value.length > 253) {
+    return false;
+  }
+  if (/\s/.test(value) || CONTROL_CHARS_RE.test(value) || value.includes("://")) {
+    return false;
+  }
+  if (!VALID_HOST_CHARS_RE.test(value)) {
+    return false;
+  }
+  return true;
+}
+
+export function isValidSmtpUsername(value: unknown): value is string {
+  if (typeof value !== "string" || value.length === 0 || value.length > 254) {
+    return false;
+  }
+  return !/[\r\n\0]/.test(value);
+}
+
+export function normalizeReminderError(error: string): string {
+  const cleaned = error.replace(CONTROL_CHARS_RUN_RE, " ").trim().slice(0, 500);
+  return cleaned.length > 0 ? cleaned : "Unknown error";
+}

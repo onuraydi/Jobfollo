@@ -98,3 +98,35 @@ export class ContactNotFoundError extends Error {
     this.contactId = contactId;
   }
 }
+
+export class UnknownSettingError extends Error {
+  readonly key: string;
+
+  constructor(key: string) {
+    super(`Unknown setting key "${key}".`);
+    this.name = "UnknownSettingError";
+    this.key = key;
+  }
+}
+
+export class SettingValidationError extends Error {
+  readonly issues: readonly FieldValidationIssue[];
+
+  constructor(issues: readonly FieldValidationIssue[]) {
+    super(
+      `Setting validation failed: ${issues.map((i) => `${i.field}: ${i.message}`).join("; ")}`,
+    );
+    this.name = "SettingValidationError";
+    this.issues = issues;
+  }
+}
+
+export class AlreadySentError extends Error {
+  readonly date: string;
+
+  constructor(date: string) {
+    super(`Digest was already marked as sent on "${date}".`);
+    this.name = "AlreadySentError";
+    this.date = date;
+  }
+}
