@@ -1,22 +1,29 @@
 import {
+  disable as disableAutostart,
+  enable as enableAutostart,
+  isEnabled as isAutostartEnabled,
+} from "@tauri-apps/plugin-autostart";
+import {
   SettingValidationError,
   type LanguageSetting,
+  type ReminderLogEntry,
   type SmtpSecuritySetting,
   type ThemeSetting,
 } from "@jobfollo/data";
-import { Database, Globe, KeyRound, Mail, Palette, Send } from "lucide-react";
+import { Database, Globe, History, KeyRound, Mail, Palette, Power, Send } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useServices } from "../boot/index.js";
 import { usePreferences } from "../shell/index.js";
+import { formatDisplayDate } from "../time/index.js";
 
 const LANGUAGE_OPTIONS: readonly LanguageSetting[] = ["system", "en", "tr"];
 const THEME_OPTIONS: readonly ThemeSetting[] = ["system", "light", "dark"];
 
 export function SettingsPage() {
   const { t } = useTranslation();
-  const { settings, dataLocation, mail } = useServices();
-  const { language, theme, setLanguage, setTheme } = usePreferences();
+  const { settings, reminderLog, dataLocation, mail } = useServices();
+  const { language, resolvedLocale, theme, setLanguage, setTheme } = usePreferences();
 
   const [remindersEnabled, setRemindersEnabled] = useState(false);
   const [sendTime, setSendTime] = useState("09:00");
@@ -29,6 +36,9 @@ export function SettingsPage() {
 
   const [passwordInput, setPasswordInput] = useState("");
   const [hasPassword, setHasPassword] = useState(false);
+  const [recentLogs, setRecentLogs] = useState<ReminderLogEntry[]>([]);
+  const [autostartAvailable, setAutostartAvailable] = useState(false);
+  const [autostartEnabled, setAutostartEnabled] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -44,7 +54,8 @@ export function SettingsPage() {
     void Promise.all([
       settings.getAll(),
       mail ? mail.hasPassword().catch(() => false) : Promise.resolve(false),
-    ]).then(([all, storedPassword]) => {
+      reminderLog.recent(5).catch(() => [] as ReminderLogEntry[]),
+    ]).then(([all, storedPassword, logs]) => {
       if (!active) return;
       const v = all.values;
       setRemindersEnabled(v["reminders.enabled"]);
@@ -56,11 +67,42 @@ export function SettingsPage() {
       setSmtpSecurity(v["smtp.security"]);
       setSmtpUsername(v["smtp.username"] ?? "");
       setHasPassword(storedPassword);
+      setRecentLogs(logs);
     });
     return () => {
       active = false;
     };
-  }, [settings, mail]);
+  }, [settings, reminderLog, mail]);
+
+  useEffect(() => {
+    let active = true;
+    void isAutostartEnabled()
+      .then((enabled) => {
+        if (!active) return;
+        setAutostartAvailable(true);
+        setAutostartEnabled(enabled);
+      })
+      .catch(() => {
+        if (!active) return;
+        setAutostartAvailable(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleToggleAutostart = async (checked: boolean) => {
+    try {
+      if (checked) {
+        await enableAutostart();
+      } else {
+        await disableAutostart();
+      }
+      setAutostartEnabled(checked);
+    } catch {
+      // Ignore when running outside Tauri runtime
+    }
+  };
 
   const handleSaveEmailSettings = async (e: FormEvent) => {
     e.preventDefault();
@@ -232,6 +274,29 @@ export function SettingsPage() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
+          <div className="space-y-0.5">
+            <label
+              htmlFor="settings-autostart"
+              className="inline-flex items-center gap-1.5 text-sm font-medium"
+            >
+              <Power className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+              <span>{t("pages.settings.autostartLabel")}</span>
+            </label>
+            <p className="text-xs text-[var(--fg-muted)]">
+              {t("pages.settings.autostartDescription")}
+            </p>
+          </div>
+          <input
+            id="settings-autostart"
+            type="checkbox"
+            disabled={!autostartAvailable}
+            checked={autostartEnabled}
+            onChange={(e) => void handleToggleAutostart(e.target.checked)}
+            className="h-4 w-4"
+          />
         </div>
       </div>
 
@@ -467,6 +532,49 @@ export function SettingsPage() {
           </div>
         </div>
       </form>
+
+      <div className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+        <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
+          <History className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+          <span>{t("pages.settings.reminderHistoryHeading")}</span>
+        </h2>
+
+        {recentLogs.length === 0 ? (
+          <p className="text-xs text-[var(--fg-muted)]">
+            {t("pages.settings.reminderHistoryEmpty")}
+          </p>
+        ) : (
+          <ul className="divide-y divide-[var(--border)] text-xs">
+            {recentLogs.map((entry, idx) => (
+              <li
+                key={`${entry.date}-${entry.attempt}-${idx}`}
+                className="flex flex-wrap items-center justify-between gap-2 py-2"
+              >
+                <div className="space-y-0.5">
+                  <div className="font-medium">
+                    {formatDisplayDate(entry.date, resolvedLocale)} ·{" "}
+                    {t("pages.settings.reminderAttempt", { count: entry.attempt })}
+                  </div>
+                  {entry.error && (
+                    <div className="text-[var(--danger)]">{entry.error}</div>
+                  )}
+                </div>
+                <span
+                  className={`rounded-full px-2 py-0.5 font-medium ${
+                    entry.status === "sent"
+                      ? "bg-[var(--success-bg)] text-[var(--success)]"
+                      : "bg-[var(--danger-bg)] text-[var(--danger)]"
+                  }`}
+                >
+                  {entry.status === "sent"
+                    ? t("pages.settings.reminderStatusSent")
+                    : t("pages.settings.reminderStatusFailed")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
         <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">

@@ -6,9 +6,11 @@ import { ItemDetailPage } from "../pages/ItemDetailPage.js";
 import { ItemsPage } from "../pages/ItemsPage.js";
 import { SettingsPage } from "../pages/SettingsPage.js";
 import { TodayPage } from "../pages/TodayPage.js";
+import { useDigestScheduler } from "../reminders/index.js";
 
 export function AppShell() {
   const { t } = useTranslation();
+  useDigestScheduler();
 
   const navItems = [
     { to: "/", label: t("nav.today"), icon: CalendarCheck2, end: true },

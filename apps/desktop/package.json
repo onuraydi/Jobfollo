@@ -17,6 +17,7 @@
     "@jobfollo/data": "workspace:*",
     "@tailwindcss/vite": "^4.3.5",
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-autostart": "^2.7.0",
     "@tauri-apps/plugin-opener": "^2",
     "clsx": "^2.1.1",
     "i18next": "^27.2.5",

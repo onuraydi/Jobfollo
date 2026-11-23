@@ -45,8 +45,8 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 ## Phase 4 — Reminders and tools
 - [ ] Scheduler spike: hidden-window reliability on Windows, macOS, Linux
 - [x] SMTP settings, keychain storage, test email
-- [ ] Daily digest sender with reminder log and catch-up on launch
-- [ ] Tray, minimize-on-close, launch at login
+- [x] Daily digest sender with reminder log and catch-up on launch
+- [x] Tray, minimize-on-close, launch at login
 - [ ] Excel/CSV import and export
 - [ ] Workflow editor
 - [ ] Backup and restore

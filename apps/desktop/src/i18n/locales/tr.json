@@ -123,6 +123,8 @@
       "appearanceHeading": "Görünüm ve dil",
       "languageDescription": "Arayüz dilini seçin veya işletim sistemini takip edin.",
       "themeDescription": "Açık, koyu veya işletim sistemi temasını seçin.",
+      "autostartLabel": "Bilgisayar açıldığında başlat",
+      "autostartDescription": "Günlük hatırlatıcıların tepside çalışması için oturum açtığınızda Jobfollo'yu otomatik başlatın.",
       "storageHeading": "Yerel veri",
       "dataLocationLabel": "Veritabanı konumu",
       "dataLocationDescription": "Tüm kayıtlarınız, iş akışlarınız ve ayarlarınız yalnızca bu cihazda yerel olarak saklanır.",
@@ -150,7 +152,12 @@
       "testEmailSuccess": "Test e-postası başarıyla gönderildi.",
       "testEmailMissingConfig": "Önce SMTP sunucusu, kullanıcı adı, alıcı e-posta ve şifre bilgilerini kaydedin.",
       "testEmailSubject": "Jobfollo test e-postası",
-      "testEmailBody": "Jobfollo SMTP ayarlarınız sorunsuz çalışıyor."
+      "testEmailBody": "Jobfollo SMTP ayarlarınız sorunsuz çalışıyor.",
+      "reminderHistoryHeading": "Son özet geçmişi",
+      "reminderHistoryEmpty": "Henüz özet e-postası gönderilmedi.",
+      "reminderStatusSent": "Gönderildi",
+      "reminderStatusFailed": "Başarısız",
+      "reminderAttempt": "{{count}}. deneme"
     }
   },
   "theme": {

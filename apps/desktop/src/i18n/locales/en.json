@@ -123,6 +123,8 @@
       "appearanceHeading": "Appearance & language",
       "languageDescription": "Choose the interface language or follow your operating system.",
       "themeDescription": "Choose light, dark, or match your operating system.",
+      "autostartLabel": "Launch at login",
+      "autostartDescription": "Start Jobfollo automatically when you sign in so daily reminders run in the tray.",
       "storageHeading": "Local data",
       "dataLocationLabel": "Database location",
       "dataLocationDescription": "All your items, workflows, and settings are stored locally on this device.",
@@ -150,7 +152,12 @@
       "testEmailSuccess": "Test email sent successfully.",
       "testEmailMissingConfig": "Fill in SMTP host, username, recipient, and save a password first.",
       "testEmailSubject": "Jobfollo test email",
-      "testEmailBody": "Your Jobfollo SMTP settings are working."
+      "testEmailBody": "Your Jobfollo SMTP settings are working.",
+      "reminderHistoryHeading": "Recent digest history",
+      "reminderHistoryEmpty": "No digest emails have been sent yet.",
+      "reminderStatusSent": "Sent",
+      "reminderStatusFailed": "Failed",
+      "reminderAttempt": "Attempt {{count}}"
     }
   },
   "theme": {
