@@ -31,7 +31,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 
 ## Phase 3 — UI (`apps/desktop`) — spec: `tasks/phase-3-ui.md`
 - [ ] T3.0 Scaffold and decisions
-- [ ] T3.1 Rust SQLite pipe (`src-tauri`)
+- [x] T3.1 Rust SQLite pipe (`src-tauri`)
 - [ ] T3.2 TypeScript bridge and startup
 - [ ] T3.3 App shell, i18n, theme
 - [ ] T3.4 Clock and refresh

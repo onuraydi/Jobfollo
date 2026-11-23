@@ -77,6 +77,21 @@ A step is due `offsetDays` after its anchor. `runIf` is limited to a small fixed
 `schema_migrations`, `workflow` (custom workflows only; built-ins resolve from `core`), `item`, `contact`, `step_record`, `app_setting` (no secrets), `reminder_log` (date, status, attempt, error, unique partial index for at most one `sent` per `date`).
 Dates are stored as `YYYY-MM-DD` local calendar dates (no timezone math for due dates); timestamps are ISO-8601 UTC text. Outcomes are plain text ids on `item.outcome` (no `outcome_definition` table in MVP; see ADR-008).
 
+## Rust IPC contract
+
+The Rust shell (`apps/desktop/src-tauri`) registers only three commands for database access (see ADR-006):
+
+- `db_select(sql: string, params?: value[]) -> Array<Record<string, value>>` — read-only queries (`Statement::readonly() == true`). Missing `params` defaults to `[]`. Rejects duplicate column names in a result set.
+- `db_batch(statements: Array<{ sql: string; params?: value[] }>) -> Array<{ rowsAffected: number }>` — write-only batch executed in one `BEGIN IMMEDIATE` transaction; any failing statement rolls back all statements and reports the 0-based statement index. Rejects row-returning statements.
+- `data_location() -> string` — absolute path of the folder containing `jobfollo.db`.
+
+Rules and limits:
+- Parameters accept JSON `null`, `i64` integer, finite `f64` real, and `string` (booleans, arrays, objects, and out-of-range integers fail with `invalid_argument`).
+- Result values convert `INTEGER` (within ±2^53), finite `REAL`, valid UTF-8 `TEXT`, and `NULL`; `BLOB` and out-of-range integers fail.
+- Limits: max `2,000` statements per batch, max `1,000,000` bytes per SQL string, max `50,000` rows per `db_select` (exceeding returns `limit`).
+- Open-time pragmas (`foreign_keys = ON`, `journal_mode = WAL`, `busy_timeout = 5000`, `synchronous = NORMAL`) run before a SQLite authorizer is installed that denies `ATTACH`, `DETACH`, all `PRAGMA`, `CREATE/DROP VIRTUAL TABLE`, and `load_extension`.
+- Errors serialize as `{ kind: "constraint" | "busy" | "sql" | "io" | "open" | "invalid_argument" | "forbidden" | "limit", message: string }`. Error messages never include bound parameter values. If opening the database fails at startup, the app still starts and `db_select`/`db_batch` return `kind: "open"`.
+
 ## Email reminder subsystem
 
 1. **Scheduler (clock).** A Rust interval (every 60 s) checks: is it past the configured send time, and is there no successful `reminder_log` row for today? If so it emits a `reminder:due` event.

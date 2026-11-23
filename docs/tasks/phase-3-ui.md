@@ -44,7 +44,7 @@ Implements ADR-006. Put all DB logic in a plain Rust module (no Tauri types) so 
 - Commands, nothing else registered: `db_select(sql, params) -> rows` (array of column→value objects), `db_batch(statements) -> [{ rowsAffected }]` (one transaction, rolled back entirely if any statement fails), and the read-only `data_location() -> string` for the settings screen.
 - Params are `null | integer | real | string` (reject anything else). Result values: INTEGER → number, REAL → number, TEXT → string, NULL → null, BLOB → error.
 - Defence in depth, since the webview can send SQL: `db_select` rejects statements that are not read-only (`Statement::readonly`); multi-statement strings are rejected (rusqlite already does); install an authorizer that denies `ATTACH`, `DETACH` and all `PRAGMA` coming through IPC (the open-time pragmas run before the authorizer is installed); extension loading stays disabled. If the authorizer cannot be enabled with the chosen features, stop and ask.
-- Errors are serializable `{ kind: "constraint" | "busy" | "sql" | "io", message }`; messages never contain parameter values.
+- Errors are serializable `{ kind: "constraint" | "busy" | "sql" | "io" | "open" | "invalid_argument" | "forbidden" | "limit", message }`; messages never contain parameter values.
 - `cargo test`: parameter binding for each type, batch rollback on the third statement failing, foreign key enforcement, read-only enforcement in `db_select`, multi-statement rejection, `ATTACH` and `PRAGMA` denied, WAL mode on a file database, integrity check ok, Turkish and emoji text round-trip, SQL injection string stored as plain text.
 
 ### T3.2 TypeScript bridge and startup
