@@ -26,6 +26,10 @@ jobfollo/
 ├─ packages/core/            # pure TS domain logic (own AGENTS.md)
 │  ├─ src/templates/         # built-in workflow templates (JSON data)
 │  └─ test/
+├─ packages/data/            # SQLite repositories, migrations, SqlExecutor (own AGENTS.md)
+│  ├─ migrations/            # immutable NNNN_name.sql migrations
+│  ├─ src/
+│  └─ test/
 └─ apps/desktop/             # Tauri 2 + React app (own AGENTS.md)
    ├─ src/                   # React UI
    └─ src-tauri/             # Rust: db, mail, keychain, scheduler, tray, autostart
@@ -34,8 +38,9 @@ jobfollo/
 ## Layering rules
 
 - `core` depends on nothing. It receives `today` as an argument. It never reads the clock, disk or network.
-- UI calls `core` for all workflow/date decisions. UI contains presentation only.
-- Rust contains **capabilities** (SQLite access, SMTP send, keychain, tray, timers), never business rules.
+- `data` depends only on `core` and an injected `SqlExecutor`. All SQL and migrations live in `packages/data`.
+- UI calls `core` for all workflow/date decisions and `data` for persistence. UI contains presentation only.
+- Rust contains **capabilities** (thin transactional SQLite pipe `db_select` / `db_batch`, SMTP send, keychain, tray, timers), never business rules.
 - Business rules exist in exactly one place: `core`.
 
 ## Core API (draft)
@@ -67,10 +72,10 @@ A step is due `offsetDays` after its anchor. `runIf` is limited to a small fixed
 }
 ```
 
-## Data model (draft)
+## Data model
 
-`workflow`, `item`, `contact`, `step_instance`, `outcome_definition`, `reminder_settings` (no secrets), `reminder_log` (date, status, error), `schema_migrations`.
-Dates are stored as `YYYY-MM-DD` local calendar dates (no timezone math for due dates).
+`schema_migrations`, `workflow` (custom workflows only; built-ins resolve from `core`), `item`, `contact`, `step_record`, `app_setting` (no secrets), `reminder_log` (date, status, attempt, error, unique partial index for at most one `sent` per `date`).
+Dates are stored as `YYYY-MM-DD` local calendar dates (no timezone math for due dates); timestamps are ISO-8601 UTC text. Outcomes are plain text ids on `item.outcome` (no `outcome_definition` table in MVP; see ADR-008).
 
 ## Email reminder subsystem
 

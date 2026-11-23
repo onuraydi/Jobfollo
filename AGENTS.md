@@ -5,6 +5,7 @@ Local-first desktop app that reminds users of follow-up steps (job applications,
 ## Project map
 
 - `packages/core` — pure TypeScript domain logic (has its own `AGENTS.md`)
+- `packages/data` — SQLite repositories, migrations, `SqlExecutor` interface (has its own `AGENTS.md`)
 - `apps/desktop` — Tauri 2 + React UI, Rust capabilities (has its own `AGENTS.md`)
 - `docs/` — PRD, architecture, roadmap, decisions, task specs in `docs/tasks/`
 - `.agents/workflows/` — slash-command workflows (`/new-core-feature`, `/pre-commit-check`, `/update-docs`)

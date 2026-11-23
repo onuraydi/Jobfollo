@@ -18,10 +18,14 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T1.7 `renderDigest` (TR + EN, text + HTML)
 - [x] T1.8 Additional built-in templates
 
-## Phase 2 — Data
-- [ ] SQLite layer and migrations
-- [ ] CRUD for items, contacts, workflows, step records
-- [ ] Restart persistence test
+## Phase 2 — Data (`packages/data`) — spec: `tasks/phase-2-data.md`
+- [x] T2.0 Package scaffold and decisions
+- [ ] T2.1 Migration runner and `0001_init.sql`
+- [ ] T2.2 Workflow repository
+- [ ] T2.3 Item repository
+- [ ] T2.4 Steps, contacts and outcome
+- [ ] T2.5 Settings and reminder log
+- [ ] T2.6 Restart-persistence integration test
 
 ## Phase 3 — UI
 - [ ] Scaffold Tauri 2 + React in `apps/desktop`

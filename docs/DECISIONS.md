@@ -26,3 +26,18 @@ Format: context, decision, consequences. Append new entries; do not rewrite old 
 **Context:** Needed a name conveying "job reminder". Earlier working name was Cadence.
 **Decision:** Jobfollo.
 **Consequences:** Package scope `@jobfollo/*`. Check GitHub/npm/domain availability before first public release.
+
+## ADR-006 — Rust is a thin transactional SQLite pipe; SQL is authored in TypeScript
+**Context:** `tauri-plugin-sql` pools connections, so multi-statement transactions across separate calls are unreliable, and Rust must not hold business rules. Hand-writing typed CRUD commands in Rust would duplicate the TS types.
+**Decision:** The Rust side (Phase 3) owns one SQLite connection (WAL, foreign keys on) and exposes only two commands: `db_select(sql, params)` and `db_batch(statements)` (atomic, one transaction). All SQL lives in `packages/data` repositories that depend on a `SqlExecutor` interface. Tests use an in-memory SQLite implementation of the same interface.
+**Consequences:** Real transactions; minimal Rust; repositories fully tested in Node; Rust can still read `app_setting` / `reminder_log` for the scheduler if ADR-004's spike requires it. The webview must load only bundled content (strict CSP) because it can send SQL to Rust.
+
+## ADR-007 — Items reference workflows by id and use the current definition
+**Context:** Users can edit workflows after items exist.
+**Decision:** `item.workflow_id` points to a built-in template (resolved from `core`, never stored in the DB) or a custom workflow row. Editing a workflow changes the schedule of its existing items. Editing a built-in creates a custom copy.
+**Consequences:** Simple model. Revisit with workflow versioning if users report surprise.
+
+## ADR-008 — No `outcome_definition` table in the MVP
+**Context:** Outcome ids (`reply`, `interview`, `offer`, `negative`, plus an "in progress" default) are generic; labels are localized in the UI.
+**Decision:** Outcomes are plain text ids on `item.outcome`; labels live in the UI i18n files. Custom outcomes are post-MVP.
+**Consequences:** Remove `outcome_definition` from the data model in `ARCHITECTURE.md`.
