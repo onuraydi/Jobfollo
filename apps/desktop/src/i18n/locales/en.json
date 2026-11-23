@@ -81,7 +81,16 @@
       "viewBoard": "Board",
       "boardEmptyColumn": "No items",
       "moveOutcomeLabel": "Move {{title}} to outcome",
-      "dragCardLabel": "Drag {{title}}"
+      "dragCardLabel": "Drag {{title}}",
+      "exportCsv": "Export CSV",
+      "importCsv": "Import CSV",
+      "importDialogTitle": "Import items from CSV",
+      "importFileLabel": "CSV file",
+      "importDefaultWorkflow": "Default workflow",
+      "importPreviewValid": "{{count}} valid row(s) ready to import.",
+      "importPreviewErrors": "{{count}} row(s) skipped due to errors:",
+      "importConfirm": "Import {{count}} item(s)",
+      "importDone": "Imported {{count}} item(s)."
     },
     "itemDetail": {
       "title": "Item detail",

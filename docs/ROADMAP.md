@@ -47,7 +47,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] SMTP settings, keychain storage, test email
 - [x] Daily digest sender with reminder log and catch-up on launch
 - [x] Tray, minimize-on-close, launch at login
-- [ ] Excel/CSV import and export
+- [x] Excel/CSV import and export
 - [ ] Workflow editor
 - [ ] Backup and restore
 

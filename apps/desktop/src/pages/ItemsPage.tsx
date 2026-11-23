@@ -12,17 +12,24 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  Download,
   Kanban,
   LayoutList,
   PauseCircle,
   Plus,
+  Upload,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useServices } from "../boot/index.js";
 import { useDataRevision, usePreferences } from "../shell/index.js";
 import { formatDisplayDate, useLocalToday } from "../time/index.js";
+import {
+  exportItemsToCsv,
+  parseItemsFromCsv,
+  type ParseCsvResult,
+} from "../transfer/index.js";
 import { KanbanBoard } from "./KanbanBoard.js";
 
 type SortMode = "dueDate" | "created" | "title";
@@ -60,6 +67,10 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
 
   const [items, setItems] = useState<StoredItem[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [importOpen, setImportOpen] = useState(false);
+  const [importDefaultWorkflow, setImportDefaultWorkflow] = useState("");
+  const [importCsvText, setImportCsvText] = useState("");
+  const [importBanner, setImportBanner] = useState<string | null>(null);
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [search, setSearch] = useState("");
   const [workflowFilter, setWorkflowFilter] = useState("all");
@@ -281,6 +292,70 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
     bumpRevision();
   };
 
+  const validWorkflowIds = useMemo(
+    () => new Set(workflows.map((w) => w.id)),
+    [workflows],
+  );
+
+  const importPreview = useMemo<ParseCsvResult | null>(() => {
+    if (!importCsvText) return null;
+    const fallbackWf = importDefaultWorkflow || workflows[0]?.id || "";
+    if (!fallbackWf) return null;
+    return parseItemsFromCsv(importCsvText, {
+      defaultWorkflowId: fallbackWf,
+      defaultStartDate: today,
+      validWorkflowIds,
+    });
+  }, [importCsvText, importDefaultWorkflow, workflows, today, validWorkflowIds]);
+
+  const handleExportCsv = async () => {
+    const allItems = await services.items.list({ includeArchived: true });
+    const csv = exportItemsToCsv(allItems);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `jobfollo-items-${today}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleOpenImport = () => {
+    setImportDefaultWorkflow(workflows[0]?.id ?? "");
+    setImportCsvText("");
+    setImportBanner(null);
+    setImportOpen(true);
+  };
+
+  const handleImportFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    void file.text().then((text) => {
+      setImportCsvText(text);
+    });
+  };
+
+  const handleConfirmImport = async () => {
+    if (!importPreview || importPreview.rows.length === 0) return;
+    let importedCount = 0;
+    for (const row of importPreview.rows) {
+      const created = await services.items.create(row.input);
+      if (row.outcome) {
+        await services.items.setOutcome(created.id, row.outcome);
+      }
+      if (row.archived) {
+        await services.items.archive(created.id);
+      }
+      importedCount++;
+    }
+    setImportOpen(false);
+    setImportCsvText("");
+    setImportBanner(t("pages.items.importDone", { count: importedCount }));
+    bumpRevision();
+  };
+
   return (
     <div className="mx-auto max-w-6xl space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
@@ -319,6 +394,22 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
           </div>
           <button
             type="button"
+            onClick={() => void handleExportCsv()}
+            className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-medium hover:bg-[var(--surface-muted)]"
+          >
+            <Download className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>{t("pages.items.exportCsv")}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleOpenImport}
+            className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs font-medium hover:bg-[var(--surface-muted)]"
+          >
+            <Upload className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>{t("pages.items.importCsv")}</span>
+          </button>
+          <button
+            type="button"
             onClick={openCreateDialog}
             className="inline-flex items-center gap-1.5 rounded-md bg-[var(--primary)] px-3.5 py-2 text-sm font-medium text-[var(--primary-fg)] hover:opacity-90"
           >
@@ -327,6 +418,15 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
           </button>
         </div>
       </header>
+
+      {importBanner && (
+        <div
+          role="status"
+          className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium text-[var(--success)]"
+        >
+          {importBanner}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
         <input
@@ -637,6 +737,100 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {importOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="import-csv-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        >
+          <div className="w-full max-w-md space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5 shadow-lg">
+            <h2 id="import-csv-title" className="text-lg font-semibold">
+              {t("pages.items.importDialogTitle")}
+            </h2>
+
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="import-default-workflow" className="block text-xs font-medium">
+                  {t("pages.items.importDefaultWorkflow")}
+                </label>
+                <select
+                  id="import-default-workflow"
+                  value={importDefaultWorkflow}
+                  onChange={(e) => setImportDefaultWorkflow(e.target.value)}
+                  className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1.5 text-sm"
+                >
+                  {workflows.map((wf) => (
+                    <option key={wf.id} value={wf.id}>
+                      {workflowName(wf, resolvedLocale)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="import-csv-file" className="block text-xs font-medium">
+                  {t("pages.items.importFileLabel")}
+                </label>
+                <input
+                  id="import-csv-file"
+                  type="file"
+                  accept=".csv,text/csv"
+                  onChange={handleImportFileChange}
+                  className="mt-1 w-full text-sm"
+                />
+              </div>
+
+              {importPreview && (
+                <div className="space-y-2 rounded-md border border-[var(--border)] bg-[var(--bg)] p-3 text-xs">
+                  <p className="font-medium">
+                    {t("pages.items.importPreviewValid", {
+                      count: importPreview.rows.length,
+                    })}
+                  </p>
+                  {importPreview.errors.length > 0 && (
+                    <div className="space-y-1 text-[var(--danger)]">
+                      <p className="font-medium">
+                        {t("pages.items.importPreviewErrors", {
+                          count: importPreview.errors.length,
+                        })}
+                      </p>
+                      <ul className="list-disc pl-4">
+                        {importPreview.errors.slice(0, 5).map((err) => (
+                          <li key={`${err.rowNumber}-${err.message}`}>
+                            #{err.rowNumber}: {err.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setImportOpen(false)}
+                className="rounded-md border border-[var(--border)] px-3 py-1.5 text-sm"
+              >
+                {t("actions.cancel")}
+              </button>
+              <button
+                type="button"
+                disabled={!importPreview || importPreview.rows.length === 0}
+                onClick={() => void handleConfirmImport()}
+                className="rounded-md bg-[var(--primary)] px-3.5 py-1.5 text-sm font-medium text-[var(--primary-fg)] disabled:opacity-50"
+              >
+                {t("pages.items.importConfirm", {
+                  count: importPreview?.rows.length ?? 0,
+                })}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

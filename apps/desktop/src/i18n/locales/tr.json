@@ -81,7 +81,16 @@
       "viewBoard": "Pano",
       "boardEmptyColumn": "Kayıt yok",
       "moveOutcomeLabel": "{{title}} sonucunu değiştir",
-      "dragCardLabel": "{{title}} kartını sürükle"
+      "dragCardLabel": "{{title}} kartını sürükle",
+      "exportCsv": "CSV Dışa Aktar",
+      "importCsv": "CSV İçe Aktar",
+      "importDialogTitle": "CSV'den kayıt içe aktar",
+      "importFileLabel": "CSV dosyası",
+      "importDefaultWorkflow": "Varsayılan iş akışı",
+      "importPreviewValid": "İçe aktarılmaya hazır {{count}} geçerli satır.",
+      "importPreviewErrors": "Hata nedeniyle atlanan {{count}} satır:",
+      "importConfirm": "{{count}} kaydı içe aktar",
+      "importDone": "{{count}} kayıt içe aktarıldı."
     },
     "itemDetail": {
       "title": "Kayıt detayı",
