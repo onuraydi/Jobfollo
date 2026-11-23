@@ -93,6 +93,17 @@ Rules and limits:
 - Errors serialize as `{ kind: "constraint" | "busy" | "sql" | "io" | "open" | "invalid_argument" | "forbidden" | "limit", message: string }`. Error messages never include bound parameter values. If opening the database fails at startup, the app still starts and `db_select`/`db_batch` return `kind: "open"`.
 - The TypeScript bridge (`apps/desktop/src/db/`) validates parameters before IPC, adds the client-only error kind `"ipc"` for malformed or non-contractual IPC responses/rejections, and shares literal camelCase JSON contract fixtures with Rust via `apps/desktop/contract/ipc-fixtures.json`.
 
+## Boot sequence
+
+Desktop startup runs through a single-flight `bootstrap()` controller (`apps/desktop/src/boot/`) so React StrictMode double-mounts and concurrent callers never run migrations twice:
+
+1. **Environment check** — actively exercises `crypto.getRandomValues` and `crypto.subtle.digest("SHA-256", ...)`. If unavailable, boot stops with `unsupported_environment` before touching IPC or SQLite.
+2. **Data location** — reads `data_location()` best-effort (a failure is non-fatal and yields `null`).
+3. **Migrations** — runs `runMigrations` from `@jobfollo/data` against the Tauri SQLite executor.
+4. **Services** — builds `@jobfollo/data` repositories, system UTC `Clock`, WebCrypto `IdGenerator` (falling back to RFC 4122 UUID v4 via `getRandomValues`), `localToday()`, and `dataLocation`.
+
+Boot errors are classified strictly by `instanceof` (typed `MigrationError` subclasses) and `SqlExecutionError.kind` (never by message text) into: `unsupported_environment`, `open_failed`, `database_busy`, `database_io`, `database_newer`, `migration_checksum`, `migration_invalid`, `migration_failed`, and `unknown`. Boot UI uses a self-contained TR/EN dictionary driven by `navigator.language`, never offers delete/reset/recreate, and never modifies the database on error.
+
 ## Email reminder subsystem
 
 1. **Scheduler (clock).** A Rust interval (every 60 s) checks: is it past the configured send time, and is there no successful `reminder_log` row for today? If so it emits a `reminder:due` event.

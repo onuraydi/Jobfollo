@@ -54,9 +54,9 @@ Implements ADR-006. Put all DB logic in a plain Rust module (no Tauri types) so 
 - Pulls `@jobfollo/data/testing` subpath export forward from T3.9 (re-exporting in-memory SQLite executor, fake clock, sequential IDs) and adds typed `MigrationError` subclasses in `@jobfollo/data`.
 
 ### T3.2b App services, bootstrap, and boot screens
-- App services (React context): repositories from `@jobfollo/data`, `Clock` (system, UTC), `IdGenerator` (`crypto.randomUUID`), `localToday()`.
-- Startup states: loading → ready, or a full-screen error with a plain explanation and the data path for: database cannot be opened, migration refused because the file is newer than the app, migration checksum mismatch. **The app never deletes or resets data on its own.**
-- Tests: startup state machine; the "newer database" refusal screen.
+- Pure `bootstrap(deps)` with 4-step sequence (active WebCrypto check → best-effort `data_location` → `runMigrations` → build services), single-flight `getBoot()`/`retryBoot()`, exhaustive `classifyBootError` by `instanceof` / `SqlExecutionError.kind`, and `localToday()` moved here under `src/time/`.
+- Startup states: loading (spinner delayed 150 ms) → ready (minimal placeholder), or a self-contained TR/EN boot error screen (driven by `navigator.language`, independent of DB/i18next) with per-kind actions, data path, and collapsible technical details + Copy button. **The app never deletes or resets data on its own.**
+- Tests: `localToday`, `bootstrap` with fake `invoke` + `@jobfollo/data/testing` in-memory SQLite, `classifyBootError`, `createCryptoIdGenerator`, single-flight controller, and boot error screen rendering.
 
 ### T3.3 App shell, i18n, theme
 - Sidebar: Today, Items, Settings. react-router. Light, dark and system theme (setting `theme`), language `system | tr | en` (setting `language`; `system` resolves from `navigator.language`, default English if neither).
@@ -65,7 +65,7 @@ Implements ADR-006. Put all DB logic in a plain Rust module (no Tauri types) so 
 - Date display through `Intl.DateTimeFormat` using the UI locale on dates built with `new Date(y, m - 1, d)`.
 
 ### T3.4 Clock and refresh
-- `localToday()` as in the ADR, plus a hook that re-evaluates at local midnight, on window focus / visibility change, and on a 60-second interval (sleep and resume).
+- `localToday()` lives in `src/time/` (added in T3.2b); T3.4 adds a hook that re-evaluates at local midnight, on window focus / visibility change, and on a 60-second interval (sleep and resume).
 - A simple data revision counter in context: mutations bump it and screens reload. No caching library.
 - Tests with fake timers and `TZ` set to `Europe/Istanbul` and `America/Los_Angeles`: 23:59 → 00:00 rollover; 00:30 local when UTC is still the previous day returns the local date; DST change day.
 
