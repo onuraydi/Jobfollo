@@ -9,7 +9,7 @@ import {
   retryBoot,
   subscribeBoot,
 } from "./boot/index.js";
-import { AppShell, PreferencesProvider } from "./shell/index.js";
+import { AppShell, DataRevisionProvider, PreferencesProvider } from "./shell/index.js";
 
 export function App() {
   const snapshot = useSyncExternalStore(subscribeBoot, getBootSnapshot, getBootSnapshot);
@@ -36,11 +36,13 @@ export function App() {
 
   return (
     <ServicesProvider services={snapshot.services}>
-      <PreferencesProvider>
-        <HashRouter>
-          <AppShell />
-        </HashRouter>
-      </PreferencesProvider>
+      <DataRevisionProvider>
+        <PreferencesProvider>
+          <HashRouter>
+            <AppShell />
+          </HashRouter>
+        </PreferencesProvider>
+      </DataRevisionProvider>
     </ServicesProvider>
   );
 }
