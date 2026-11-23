@@ -4,3 +4,4 @@ export { randomIdGenerator, systemClock } from "./defaults.js";
 export { computeChecksum, runMigrations, splitStatements } from "./migrator.js";
 export { builtInMigrations } from "./migrations.js";
 export { createWorkflowRepository, type WorkflowRepositoryDeps } from "./workflow-repo.js";
+export { createItemRepository, type ItemRepositoryDeps } from "./item-repo.js";

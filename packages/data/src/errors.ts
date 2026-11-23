@@ -1,4 +1,5 @@
 import type { ValidationError } from "@jobfollo/core";
+import type { FieldValidationIssue } from "./types.js";
 
 export class CorruptWorkflowError extends Error {
   readonly workflowId: string;
@@ -49,5 +50,25 @@ export class WorkflowNotFoundError extends Error {
     super(`Workflow "${workflowId}" was not found.`);
     this.name = "WorkflowNotFoundError";
     this.workflowId = workflowId;
+  }
+}
+
+export class ItemNotFoundError extends Error {
+  readonly itemId: string;
+
+  constructor(itemId: string) {
+    super(`Item "${itemId}" was not found.`);
+    this.name = "ItemNotFoundError";
+    this.itemId = itemId;
+  }
+}
+
+export class ItemValidationError extends Error {
+  readonly issues: readonly FieldValidationIssue[];
+
+  constructor(issues: readonly FieldValidationIssue[]) {
+    super(`Item validation failed: ${issues.map((i) => `${i.field}: ${i.message}`).join("; ")}`);
+    this.name = "ItemValidationError";
+    this.issues = issues;
   }
 }

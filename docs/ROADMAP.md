@@ -22,7 +22,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T2.0 Package scaffold and decisions
 - [x] T2.1 Migration runner and `0001_init.sql`
 - [x] T2.2 Workflow repository
-- [ ] T2.3 Item repository
+- [x] T2.3 Item repository
 - [ ] T2.4 Steps, contacts and outcome
 - [ ] T2.5 Settings and reminder log
 - [ ] T2.6 Restart-persistence integration test

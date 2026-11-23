@@ -1,4 +1,4 @@
-import type { Workflow } from "@jobfollo/core";
+import type { Contact, ISODate, Item, StepRecord, Workflow } from "@jobfollo/core";
 
 export type SqlValue = string | number | null;
 
@@ -61,4 +61,54 @@ export interface WorkflowRepository {
   save(workflow: Workflow): Promise<Workflow>;
   duplicate(sourceId: string, name: string): Promise<Workflow>;
   delete(id: string): Promise<boolean>;
+}
+
+export interface StoredContact extends Contact {
+  id: string;
+}
+
+export interface StoredItem extends Item {
+  contacts: StoredContact[];
+  archivedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateItemInput {
+  title: string;
+  role?: string;
+  channel?: string;
+  workflowId: string;
+  startDate: ISODate;
+  notes?: string;
+  contacts?: Contact[];
+  steps?: StepRecord[];
+}
+
+export interface UpdateItemPatch {
+  title?: string;
+  role?: string | null;
+  channel?: string | null;
+  workflowId?: string;
+  startDate?: ISODate;
+  notes?: string | null;
+}
+
+export interface ListItemsOptions {
+  includeArchived?: boolean;
+}
+
+export interface FieldValidationIssue {
+  field: string;
+  message: string;
+}
+
+export interface ItemRepository {
+  create(input: CreateItemInput): Promise<StoredItem>;
+  get(id: string): Promise<StoredItem | null>;
+  list(options?: ListItemsOptions): Promise<StoredItem[]>;
+  update(id: string, patch: UpdateItemPatch): Promise<StoredItem>;
+  archive(id: string): Promise<void>;
+  unarchive(id: string): Promise<void>;
+  delete(id: string): Promise<void>;
 }
