@@ -30,7 +30,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T2.6 Restart-persistence integration test
 
 ## Phase 3 — UI (`apps/desktop`) — spec: `tasks/phase-3-ui.md`
-- [ ] T3.0 Scaffold and decisions
+- [x] T3.0 Scaffold and decisions
 - [x] T3.1 Rust SQLite pipe (`src-tauri`)
 - [x] T3.2a TypeScript bridge, contract fixtures, and `@jobfollo/data/testing`
 - [x] T3.2b App services, bootstrap, and boot screens
@@ -44,7 +44,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 
 ## Phase 4 — Reminders and tools
 - [ ] Scheduler spike: hidden-window reliability on Windows, macOS, Linux
-- [ ] SMTP settings, keychain storage, test email
+- [x] SMTP settings, keychain storage, test email
 - [ ] Daily digest sender with reminder log and catch-up on launch
 - [ ] Tray, minimize-on-close, launch at login
 - [ ] Excel/CSV import and export

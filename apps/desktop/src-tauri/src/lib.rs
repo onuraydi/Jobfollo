@@ -1,5 +1,6 @@
 pub mod commands;
 pub mod db;
+pub mod mail;
 
 use crate::commands::DbState;
 use crate::db::error::DbError;
@@ -33,7 +34,11 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::db_select,
             commands::db_batch,
-            commands::data_location
+            commands::data_location,
+            commands::smtp_set_password,
+            commands::smtp_has_password,
+            commands::smtp_delete_password,
+            commands::send_email
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

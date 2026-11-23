@@ -61,3 +61,8 @@ Format: context, decision, consequences. Append new entries; do not rewrite old 
 **Context:** Built-in step titles and workflow names are English strings in the template JSON, so a Turkish UI or Turkish email digest would show English.
 **Decision:** Workflow templates carry optional `titles` / `names` maps (`{ en, tr }`); UI and `renderDigest` read the same source and fall back to the plain string. Implemented as `T1.9` in `@jobfollo/core` before `T3.5`.
 **Consequences:** Built-in workflows stay localized consistently across both the desktop UI and email digests while custom workflows continue working without translation maps.
+
+## ADR-013 — Rust keychain and SMTP commands
+**Context:** Phase 4 email reminders require storing the SMTP password exclusively in the OS keychain and sending digests over user-configured SMTP without ever exposing the stored secret back to the webview, SQLite, or logs.
+**Decision:** Add four capability-only Rust commands in `apps/desktop/src-tauri`: `smtp_set_password(password)`, `smtp_has_password() -> boolean`, `smtp_delete_password()`, and `send_email(request)`. Rust reads the password directly from the OS keychain (`keyring` crate, service `io.github.onuraydi.jobfollo`, account `smtp_password`), sends the email via `lettre` (`STARTTLS` or `TLS`), and scrubs the password from any error text before returning a typed `MailError`.
+**Consequences:** Secrets never leave Rust/keychain once saved, error strings safe for `reminder_log` never contain credentials, and all digest scheduling/rendering logic remains in `@jobfollo/core`.

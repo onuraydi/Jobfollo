@@ -9,6 +9,7 @@ import type {
   SqlExecutor,
   WorkflowRepository,
 } from "@jobfollo/data";
+import type { MailClient } from "../mail/index.js";
 
 export interface CryptoLike {
   getRandomValues?: <T extends ArrayBufferView>(array: T) => T;
@@ -27,6 +28,7 @@ export interface AppServices {
   idGenerator: IdGenerator;
   localToday: (now?: Date) => ISODate;
   dataLocation: string | null;
+  mail?: MailClient;
 }
 
 export interface BootstrapDeps {
@@ -35,6 +37,7 @@ export interface BootstrapDeps {
   env: CryptoLike | undefined;
   clock: Clock;
   getDataLocation?: () => Promise<string>;
+  mail?: MailClient;
 }
 
 export type BootError =

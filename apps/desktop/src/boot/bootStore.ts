@@ -1,5 +1,6 @@
 import { builtInMigrations, systemClock } from "@jobfollo/data";
 import { defaultSqlExecutor, getDefaultDataLocation } from "../db/default.js";
+import { defaultMailClient } from "../mail/index.js";
 import { bootstrap } from "./bootstrap.js";
 import type { BootResult, BootSnapshot } from "./types.js";
 
@@ -78,6 +79,7 @@ const defaultController = createBootController(() =>
     env: globalThis.crypto,
     clock: systemClock,
     getDataLocation: getDefaultDataLocation,
+    mail: defaultMailClient,
   }),
 );
 

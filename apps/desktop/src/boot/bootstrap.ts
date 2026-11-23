@@ -5,6 +5,7 @@ import {
   createWorkflowRepository,
   runMigrations,
 } from "@jobfollo/data";
+import { createUnavailableMailClient } from "../mail/index.js";
 import { localToday } from "../time/index.js";
 import { classifyBootError } from "./classifyBootError.js";
 import { createCryptoIdGenerator } from "./idGenerator.js";
@@ -103,6 +104,7 @@ export async function bootstrap(deps: BootstrapDeps): Promise<BootResult> {
     idGenerator,
     localToday,
     dataLocation,
+    mail: deps.mail ?? createUnavailableMailClient(),
   };
 
   return { status: "ready", services };

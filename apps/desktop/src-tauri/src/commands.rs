@@ -1,5 +1,8 @@
 use crate::db::{BatchResult, Database, SqlStatement};
 use crate::db::error::DbError;
+use crate::mail::keychain::{OsKeychainStore, SecretStore};
+use crate::mail::smtp::{send_email_with_store, SendEmailRequest};
+use crate::mail::MailError;
 use serde_json::{Map as JsonMap, Value as JsonValue};
 use std::sync::Arc;
 use tauri::State;
@@ -38,4 +41,32 @@ pub async fn db_batch(
 #[tauri::command]
 pub async fn data_location(state: State<'_, DbState>) -> Result<String, DbError> {
     Ok(state.data_dir.clone())
+}
+
+#[tauri::command]
+pub async fn smtp_set_password(password: String) -> Result<(), MailError> {
+    tauri::async_runtime::spawn_blocking(move || OsKeychainStore.set_password(&password))
+        .await
+        .map_err(|_| MailError::keychain("Keychain worker task failed"))?
+}
+
+#[tauri::command]
+pub async fn smtp_has_password() -> Result<bool, MailError> {
+    tauri::async_runtime::spawn_blocking(move || OsKeychainStore.has_password())
+        .await
+        .map_err(|_| MailError::keychain("Keychain worker task failed"))?
+}
+
+#[tauri::command]
+pub async fn smtp_delete_password() -> Result<(), MailError> {
+    tauri::async_runtime::spawn_blocking(move || OsKeychainStore.delete_password())
+        .await
+        .map_err(|_| MailError::keychain("Keychain worker task failed"))?
+}
+
+#[tauri::command]
+pub async fn send_email(request: SendEmailRequest) -> Result<(), MailError> {
+    tauri::async_runtime::spawn_blocking(move || send_email_with_store(&request, &OsKeychainStore))
+        .await
+        .map_err(|_| MailError::smtp("SMTP worker task failed"))?
 }

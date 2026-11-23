@@ -93,6 +93,12 @@ The Rust shell (`apps/desktop/src-tauri`) registers only three commands for data
 - `db_batch(statements: Array<{ sql: string; params?: value[] }>) -> Array<{ rowsAffected: number }>` — write-only batch executed in one `BEGIN IMMEDIATE` transaction; any failing statement rolls back all statements and reports the 0-based statement index. Rejects row-returning statements.
 - `data_location() -> string` — absolute path of the folder containing `jobfollo.db`.
 
+For email reminders (see ADR-013), Rust also exposes four capability-only mail commands:
+- `smtp_set_password(password: string)` — stores the SMTP password in the OS keychain (`io.github.onuraydi.jobfollo` / `smtp_password`).
+- `smtp_has_password() -> boolean` — reports whether an SMTP password is present in the OS keychain without returning the secret.
+- `smtp_delete_password()` — removes the stored SMTP password from the OS keychain.
+- `send_email(request)` — reads the password from the OS keychain in Rust, sends the email over `STARTTLS` or `TLS` via `lettre`, and scrubs any credential text from errors before returning `{ kind, message }`.
+
 Rules and limits:
 - Parameters accept JSON `null`, `i64` integer, finite `f64` real, and `string` (booleans, arrays, objects, and out-of-range integers fail with `invalid_argument`).
 - Result values convert `INTEGER` (within ±2^53), finite `REAL`, valid UTF-8 `TEXT`, and `NULL`; `BLOB` and out-of-range integers fail.
