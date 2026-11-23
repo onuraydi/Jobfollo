@@ -12,7 +12,7 @@ import {
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ServicesProvider, type AppServices } from "../src/boot/index.js";
-import { AppShell, PreferencesProvider, usePreferences } from "../src/shell/index.js";
+import { AppShell, DataRevisionProvider, PreferencesProvider, usePreferences } from "../src/shell/index.js";
 import { localToday } from "../src/time/index.js";
 
 function createInMemorySettings(): SettingsRepository {
@@ -121,9 +121,11 @@ describe("AppShell & PreferencesProvider", () => {
     render(
       <MemoryRouter initialEntries={["/"]}>
         <ServicesProvider services={services}>
-          <PreferencesProvider>
-            <AppShell />
-          </PreferencesProvider>
+          <DataRevisionProvider>
+            <PreferencesProvider>
+              <AppShell />
+            </PreferencesProvider>
+          </DataRevisionProvider>
         </ServicesProvider>
       </MemoryRouter>,
     );
@@ -152,10 +154,12 @@ describe("AppShell & PreferencesProvider", () => {
     render(
       <MemoryRouter initialEntries={["/"]}>
         <ServicesProvider services={services}>
-          <PreferencesProvider>
-            <PreferenceControls />
-            <AppShell />
-          </PreferencesProvider>
+          <DataRevisionProvider>
+            <PreferencesProvider>
+              <PreferenceControls />
+              <AppShell />
+            </PreferencesProvider>
+          </DataRevisionProvider>
         </ServicesProvider>
       </MemoryRouter>,
     );

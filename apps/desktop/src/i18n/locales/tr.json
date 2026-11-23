@@ -12,11 +12,44 @@
   "pages": {
     "today": {
       "title": "Bugün",
-      "subtitle": "Bugün yapılacak ve geciken takipleriniz."
+      "subtitle": "Bugün yapılacak ve geciken takipleriniz.",
+      "emptyNoItemsTitle": "Henüz kayıt yok",
+      "emptyNoItemsBody": "Takiplerinizi planlamak için ilk başvurunuzu, teklifinizi veya kaydınızı ekleyin.",
+      "emptyNoItemsCta": "Kayıtlara git",
+      "emptyCaughtUpTitle": "Bugün için her şey tamam",
+      "emptyCaughtUpBody": "Geciken veya önümüzdeki 7 gün içinde yapılacak bir adım yok.",
+      "unschedulableBanner": "{{count}} kayıt zamanlanamadı.",
+      "viewItems": "Kayıtları gör",
+      "groupOverdue": "Geciken",
+      "groupToday": "Bugün",
+      "groupUpcoming": "Yaklaşan (7 gün)",
+      "daysOverdue_one": "1 gün gecikti",
+      "daysOverdue_other": "{{count}} gün gecikti",
+      "dueToday": "Bugün",
+      "inDays_one": "1 gün sonra",
+      "inDays_other": "{{count}} gün sonra",
+      "openItem": "Aç",
+      "customDateLabel": "Tamamlanma tarihi",
+      "markAsOutcome": "{{outcome}} olarak işaretle",
+      "toastDone": "Adım tamamlandı. Geri al kişi durumlarını değiştirmez.",
+      "toastSkipped": "Adım atlandı. Geri al kişi durumlarını değiştirmez.",
+      "contactDialogTitle": "Bağlantı sonucunu kaydet",
+      "contactDialogBody": "Bu adımı tamamlamadan önce her kişi için durumu seçin.",
+      "contactDialogNoContacts": "Bu kayıtta henüz kişi yok. Önce bir kişi ekleyebilir veya kişi güncellemeden tamamlayabilirsiniz.",
+      "contactNamePlaceholder": "Kişi adı",
+      "addContact": "Kişi ekle",
+      "contactAccepted": "Kabul edildi",
+      "contactNotAccepted": "Kabul edilmedi",
+      "contactPending": "Beklemede",
+      "confirmComplete": "Adımı tamamla"
     },
     "items": {
       "title": "Tüm kayıtlar",
       "subtitle": "Tüm başvuru, teklif ve takiplerinizi yönetin."
+    },
+    "itemDetail": {
+      "title": "Kayıt detayı",
+      "subtitle": "Adım zaman çizelgesi, kişiler, notlar ve sonuç."
     },
     "settings": {
       "title": "Ayarlar",

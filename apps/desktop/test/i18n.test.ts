@@ -63,8 +63,12 @@ describe("i18n resources and locale resolution", () => {
       const content = readFileSync(file, "utf8");
       for (const match of content.matchAll(keyUsageRe)) {
         const usedKey = match[1]!;
-        expect(usedKey in enFlat, `Missing EN i18n key "${usedKey}" used in ${file}`).toBe(true);
-        expect(usedKey in trFlat, `Missing TR i18n key "${usedKey}" used in ${file}`).toBe(true);
+        const existsEn =
+          usedKey in enFlat || (`${usedKey}_one` in enFlat && `${usedKey}_other` in enFlat);
+        const existsTr =
+          usedKey in trFlat || (`${usedKey}_one` in trFlat && `${usedKey}_other` in trFlat);
+        expect(existsEn, `Missing EN i18n key "${usedKey}" used in ${file}`).toBe(true);
+        expect(existsTr, `Missing TR i18n key "${usedKey}" used in ${file}`).toBe(true);
       }
     }
   });

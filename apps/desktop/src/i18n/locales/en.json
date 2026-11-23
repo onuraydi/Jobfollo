@@ -12,11 +12,44 @@
   "pages": {
     "today": {
       "title": "Today",
-      "subtitle": "Your follow-ups due today and overdue."
+      "subtitle": "Your follow-ups due today and overdue.",
+      "emptyNoItemsTitle": "No items yet",
+      "emptyNoItemsBody": "Create your first application, proposal, or outreach to start tracking follow-ups.",
+      "emptyNoItemsCta": "Go to Items",
+      "emptyCaughtUpTitle": "You're all caught up",
+      "emptyCaughtUpBody": "Nothing is overdue or due in the next 7 days.",
+      "unschedulableBanner": "{{count}} item(s) could not be scheduled.",
+      "viewItems": "View items",
+      "groupOverdue": "Overdue",
+      "groupToday": "Due today",
+      "groupUpcoming": "Upcoming (next 7 days)",
+      "daysOverdue_one": "1 day overdue",
+      "daysOverdue_other": "{{count}} days overdue",
+      "dueToday": "Due today",
+      "inDays_one": "In 1 day",
+      "inDays_other": "In {{count}} days",
+      "openItem": "Open",
+      "customDateLabel": "Completion date",
+      "markAsOutcome": "Mark as {{outcome}}",
+      "toastDone": "Step completed. Undo will not revert contact statuses.",
+      "toastSkipped": "Step skipped. Undo will not revert contact statuses.",
+      "contactDialogTitle": "Record connection result",
+      "contactDialogBody": "Choose the status for each contact before completing this step.",
+      "contactDialogNoContacts": "This item has no contacts yet. Add one first or complete without updating contacts.",
+      "contactNamePlaceholder": "Contact name",
+      "addContact": "Add contact",
+      "contactAccepted": "Accepted",
+      "contactNotAccepted": "Not accepted",
+      "contactPending": "Pending",
+      "confirmComplete": "Complete step"
     },
     "items": {
       "title": "All items",
       "subtitle": "Track all applications, proposals, and outreach."
+    },
+    "itemDetail": {
+      "title": "Item detail",
+      "subtitle": "Step timeline, contacts, notes, and outcome."
     },
     "settings": {
       "title": "Settings",
