@@ -1,13 +1,15 @@
-import {
-  isValidISODate,
-  type Contact,
-  type ContactStatus,
-  type StepRecord,
-} from "@jobfollo/core";
+import { isValidISODate, type ContactStatus, type ISODate, type StepRecord } from "@jobfollo/core";
 import { randomIdGenerator, systemClock } from "./defaults.js";
-import { ItemNotFoundError, ItemValidationError } from "./errors.js";
+import {
+  ContactNotFoundError,
+  ItemNotFoundError,
+  ItemValidationError,
+  StepNotInWorkflowError,
+} from "./errors.js";
 import type {
+  AddContactInput,
   Clock,
+  CompleteStepOptions,
   CreateItemInput,
   FieldValidationIssue,
   IdGenerator,
@@ -18,91 +20,21 @@ import type {
   SqlValue,
   StoredContact,
   StoredItem,
+  UpdateContactPatch,
   UpdateItemPatch,
   WorkflowRepository,
 } from "./types.js";
-
-const VALID_CONTACT_STATUSES: ReadonlySet<string> = new Set<ContactStatus>([
-  "pending",
-  "accepted",
-  "not_accepted",
-]);
-
-const MAX_SHORT_TEXT = 200;
-const MAX_NOTES = 20_000;
-
-export function isValidProfileUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-export function validateContactFields(
-  contact: Contact,
-  prefix: string,
-  issues: FieldValidationIssue[],
-): void {
-  if (typeof contact.name !== "string" || contact.name.trim().length === 0) {
-    issues.push({ field: `${prefix}.name`, message: "Contact name is required." });
-  } else if (contact.name.trim().length > MAX_SHORT_TEXT) {
-    issues.push({
-      field: `${prefix}.name`,
-      message: `Contact name must be at most ${MAX_SHORT_TEXT} characters.`,
-    });
-  }
-
-  if (typeof contact.status !== "string" || !VALID_CONTACT_STATUSES.has(contact.status)) {
-    issues.push({
-      field: `${prefix}.status`,
-      message: `Invalid contact status "${String(contact.status)}".`,
-    });
-  }
-
-  if (contact.profileUrl !== undefined) {
-    if (typeof contact.profileUrl !== "string" || !isValidProfileUrl(contact.profileUrl)) {
-      issues.push({
-        field: `${prefix}.profileUrl`,
-        message: "Profile URL must be an absolute http:// or https:// URL.",
-      });
-    }
-  }
-}
-
-function validateTitle(title: unknown, issues: FieldValidationIssue[]): string {
-  if (typeof title !== "string") {
-    issues.push({ field: "title", message: "Title must be a string." });
-    return "";
-  }
-  const trimmed = title.trim();
-  if (trimmed.length < 1 || trimmed.length > MAX_SHORT_TEXT) {
-    issues.push({
-      field: "title",
-      message: `Title must be between 1 and ${MAX_SHORT_TEXT} characters.`,
-    });
-  }
-  return trimmed;
-}
-
-function validateOptionalText(
-  value: unknown,
-  field: string,
-  maxLength: number,
-  issues: FieldValidationIssue[],
-): void {
-  if (value === undefined || value === null) {
-    return;
-  }
-  if (typeof value !== "string") {
-    issues.push({ field, message: `${field} must be a string.` });
-    return;
-  }
-  if (value.length > maxLength) {
-    issues.push({ field, message: `${field} must be at most ${maxLength} characters.` });
-  }
-}
+import {
+  MAX_NOTES,
+  MAX_SHORT_TEXT,
+  validateContactFields,
+  validateContactName,
+  validateContactStatus,
+  validateOptionalText,
+  validateOutcome,
+  validateProfileUrl,
+  validateTitle,
+} from "./validation.js";
 
 interface ItemRow {
   id: string;
@@ -203,6 +135,26 @@ export function createItemRepository(
 ): ItemRepository {
   const clock = deps.clock ?? systemClock;
   const idGenerator = deps.idGenerator ?? randomIdGenerator;
+
+  async function requireItemWorkflowId(itemId: string): Promise<string> {
+    const rows = await executor.select<{ workflow_id: string }>(
+      "SELECT workflow_id FROM item WHERE id = ?",
+      [itemId],
+    );
+    const row = rows[0];
+    if (!row) {
+      throw new ItemNotFoundError(itemId);
+    }
+    return row.workflow_id;
+  }
+
+  async function requireStepInCurrentWorkflow(itemId: string, stepKey: string): Promise<void> {
+    const workflowId = await requireItemWorkflowId(itemId);
+    const workflow = await workflowRepo.get(workflowId);
+    if (!workflow || !workflow.steps.some((step) => step.key === stepKey)) {
+      throw new StepNotInWorkflowError(itemId, workflowId, stepKey);
+    }
+  }
 
   async function create(input: CreateItemInput): Promise<StoredItem> {
     const issues: FieldValidationIssue[] = [];
@@ -323,7 +275,6 @@ export function createItemRepository(
 
     await executor.batch(statements);
 
-    // Match SQLite ORDER BY step_key ASC returned by get() / list()
     storedSteps.sort((a, b) => (a.stepKey < b.stepKey ? -1 : a.stepKey > b.stepKey ? 1 : 0));
 
     const item: StoredItem = {
@@ -581,6 +532,244 @@ export function createItemRepository(
     }
   }
 
+  async function completeStep(
+    itemId: string,
+    stepKey: string,
+    completedOn: ISODate,
+    options?: CompleteStepOptions,
+  ): Promise<void> {
+    const issues: FieldValidationIssue[] = [];
+    if (typeof completedOn !== "string" || !isValidISODate(completedOn)) {
+      issues.push({
+        field: "completedOn",
+        message: "completedOn must be a valid YYYY-MM-DD date.",
+      });
+    }
+
+    const contactStatuses = options?.contactStatuses ?? [];
+    for (let i = 0; i < contactStatuses.length; i++) {
+      validateContactStatus(contactStatuses[i]!.status, `contactStatuses[${i}].status`, issues);
+    }
+
+    if (issues.length > 0) {
+      throw new ItemValidationError(issues);
+    }
+
+    await requireStepInCurrentWorkflow(itemId, stepKey);
+
+    if (contactStatuses.length > 0) {
+      const ownedRows = await executor.select<{ id: string }>(
+        "SELECT id FROM contact WHERE item_id = ?",
+        [itemId],
+      );
+      const ownedIds = new Set(ownedRows.map((row) => row.id));
+      for (const entry of contactStatuses) {
+        if (!ownedIds.has(entry.contactId)) {
+          throw new ContactNotFoundError(itemId, entry.contactId);
+        }
+      }
+    }
+
+    const now = clock.nowIso();
+    const statements: SqlStatement[] = [
+      {
+        sql: `INSERT INTO step_record (item_id, step_key, completed_on, skipped)
+              VALUES (?, ?, ?, 0)
+              ON CONFLICT(item_id, step_key) DO UPDATE SET
+                completed_on = excluded.completed_on,
+                skipped = 0`,
+        params: [itemId, stepKey, completedOn],
+      },
+    ];
+
+    for (const entry of contactStatuses) {
+      statements.push({
+        sql: "UPDATE contact SET status = ? WHERE id = ? AND item_id = ?",
+        params: [entry.status, entry.contactId, itemId],
+      });
+    }
+
+    statements.push({
+      sql: "UPDATE item SET updated_at = ? WHERE id = ?",
+      params: [now, itemId],
+    });
+
+    await executor.batch(statements);
+  }
+
+  async function skipStep(itemId: string, stepKey: string): Promise<void> {
+    await requireStepInCurrentWorkflow(itemId, stepKey);
+
+    const now = clock.nowIso();
+    await executor.batch([
+      {
+        sql: `INSERT INTO step_record (item_id, step_key, completed_on, skipped)
+              VALUES (?, ?, NULL, 1)
+              ON CONFLICT(item_id, step_key) DO UPDATE SET
+                completed_on = NULL,
+                skipped = 1`,
+        params: [itemId, stepKey],
+      },
+      {
+        sql: "UPDATE item SET updated_at = ? WHERE id = ?",
+        params: [now, itemId],
+      },
+    ]);
+  }
+
+  async function undoStep(itemId: string, stepKey: string): Promise<boolean> {
+    await requireItemWorkflowId(itemId);
+
+    const now = clock.nowIso();
+    const results = await executor.batch([
+      {
+        sql: "DELETE FROM step_record WHERE item_id = ? AND step_key = ?",
+        params: [itemId, stepKey],
+      },
+      {
+        sql: "UPDATE item SET updated_at = ? WHERE id = ? AND changes() > 0",
+        params: [now, itemId],
+      },
+    ]);
+
+    return (results[0]?.rowsAffected ?? 0) > 0;
+  }
+
+  async function setOutcome(itemId: string, outcome: string | null): Promise<void> {
+    const issues: FieldValidationIssue[] = [];
+    validateOutcome(outcome, issues);
+    if (issues.length > 0) {
+      throw new ItemValidationError(issues);
+    }
+
+    const results = await executor.batch([
+      {
+        sql: "UPDATE item SET outcome = ?, updated_at = ? WHERE id = ?",
+        params: [outcome, clock.nowIso(), itemId],
+      },
+    ]);
+
+    if ((results[0]?.rowsAffected ?? 0) === 0) {
+      throw new ItemNotFoundError(itemId);
+    }
+  }
+
+  async function addContact(itemId: string, input: AddContactInput): Promise<StoredContact> {
+    const status: ContactStatus = input.status ?? "pending";
+    const issues: FieldValidationIssue[] = [];
+    const name = validateContactName(input.name, "name", issues);
+    validateContactStatus(status, "status", issues);
+    validateProfileUrl(input.profileUrl, "profileUrl", issues);
+    if (issues.length > 0) {
+      throw new ItemValidationError(issues);
+    }
+
+    await requireItemWorkflowId(itemId);
+
+    const contactId = idGenerator.newId();
+    const now = clock.nowIso();
+
+    await executor.batch([
+      {
+        sql: `INSERT INTO contact (id, item_id, name, profile_url, status, created_at)
+              VALUES (?, ?, ?, ?, ?, ?)`,
+        params: [contactId, itemId, name, input.profileUrl ?? null, status, now],
+      },
+      {
+        sql: "UPDATE item SET updated_at = ? WHERE id = ?",
+        params: [now, itemId],
+      },
+    ]);
+
+    const stored: StoredContact = {
+      id: contactId,
+      name,
+      status,
+    };
+    if (input.profileUrl !== undefined) {
+      stored.profileUrl = input.profileUrl;
+    }
+    return stored;
+  }
+
+  async function updateContact(
+    itemId: string,
+    contactId: string,
+    patch: UpdateContactPatch,
+  ): Promise<void> {
+    const issues: FieldValidationIssue[] = [];
+    const setClauses: string[] = [];
+    const params: SqlValue[] = [];
+
+    if (patch.name !== undefined) {
+      const trimmed = validateContactName(patch.name, "name", issues);
+      setClauses.push("name = ?");
+      params.push(trimmed);
+    }
+
+    if (patch.profileUrl !== undefined) {
+      validateProfileUrl(patch.profileUrl, "profileUrl", issues);
+      setClauses.push("profile_url = ?");
+      params.push(patch.profileUrl);
+    }
+
+    if (patch.status !== undefined) {
+      validateContactStatus(patch.status, "status", issues);
+      setClauses.push("status = ?");
+      params.push(patch.status);
+    }
+
+    if (issues.length > 0) {
+      throw new ItemValidationError(issues);
+    }
+
+    if (setClauses.length === 0) {
+      await requireItemWorkflowId(itemId);
+      const found = await executor.select<{ id: string }>(
+        "SELECT id FROM contact WHERE id = ? AND item_id = ?",
+        [contactId, itemId],
+      );
+      if (found.length === 0) {
+        throw new ContactNotFoundError(itemId, contactId);
+      }
+      return;
+    }
+
+    params.push(contactId, itemId);
+    const results = await executor.batch([
+      {
+        sql: `UPDATE contact SET ${setClauses.join(", ")} WHERE id = ? AND item_id = ?`,
+        params,
+      },
+      {
+        sql: "UPDATE item SET updated_at = ? WHERE id = ? AND changes() > 0",
+        params: [clock.nowIso(), itemId],
+      },
+    ]);
+
+    if ((results[0]?.rowsAffected ?? 0) === 0) {
+      await requireItemWorkflowId(itemId);
+      throw new ContactNotFoundError(itemId, contactId);
+    }
+  }
+
+  async function removeContact(itemId: string, contactId: string): Promise<boolean> {
+    await requireItemWorkflowId(itemId);
+
+    const results = await executor.batch([
+      {
+        sql: "DELETE FROM contact WHERE id = ? AND item_id = ?",
+        params: [contactId, itemId],
+      },
+      {
+        sql: "UPDATE item SET updated_at = ? WHERE id = ? AND changes() > 0",
+        params: [clock.nowIso(), itemId],
+      },
+    ]);
+
+    return (results[0]?.rowsAffected ?? 0) > 0;
+  }
+
   return {
     create,
     get,
@@ -589,5 +778,12 @@ export function createItemRepository(
     archive,
     unarchive,
     delete: remove,
+    completeStep,
+    skipStep,
+    undoStep,
+    setOutcome,
+    addContact,
+    updateContact,
+    removeContact,
   };
 }

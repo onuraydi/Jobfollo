@@ -72,3 +72,29 @@ export class ItemValidationError extends Error {
     this.issues = issues;
   }
 }
+
+export class StepNotInWorkflowError extends Error {
+  readonly itemId: string;
+  readonly workflowId: string;
+  readonly stepKey: string;
+
+  constructor(itemId: string, workflowId: string, stepKey: string) {
+    super(`Step "${stepKey}" does not exist in workflow "${workflowId}" for item "${itemId}".`);
+    this.name = "StepNotInWorkflowError";
+    this.itemId = itemId;
+    this.workflowId = workflowId;
+    this.stepKey = stepKey;
+  }
+}
+
+export class ContactNotFoundError extends Error {
+  readonly itemId: string;
+  readonly contactId: string;
+
+  constructor(itemId: string, contactId: string) {
+    super(`Contact "${contactId}" was not found on item "${itemId}".`);
+    this.name = "ContactNotFoundError";
+    this.itemId = itemId;
+    this.contactId = contactId;
+  }
+}

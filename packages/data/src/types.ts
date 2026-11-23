@@ -1,4 +1,11 @@
-import type { Contact, ISODate, Item, StepRecord, Workflow } from "@jobfollo/core";
+import type {
+  Contact,
+  ContactStatus,
+  ISODate,
+  Item,
+  StepRecord,
+  Workflow,
+} from "@jobfollo/core";
 
 export type SqlValue = string | number | null;
 
@@ -103,6 +110,27 @@ export interface FieldValidationIssue {
   message: string;
 }
 
+export interface ContactStatusUpdate {
+  contactId: string;
+  status: ContactStatus;
+}
+
+export interface CompleteStepOptions {
+  contactStatuses?: ContactStatusUpdate[];
+}
+
+export interface AddContactInput {
+  name: string;
+  profileUrl?: string;
+  status?: ContactStatus;
+}
+
+export interface UpdateContactPatch {
+  name?: string;
+  profileUrl?: string | null;
+  status?: ContactStatus;
+}
+
 export interface ItemRepository {
   create(input: CreateItemInput): Promise<StoredItem>;
   get(id: string): Promise<StoredItem | null>;
@@ -111,4 +139,16 @@ export interface ItemRepository {
   archive(id: string): Promise<void>;
   unarchive(id: string): Promise<void>;
   delete(id: string): Promise<void>;
+  completeStep(
+    itemId: string,
+    stepKey: string,
+    completedOn: ISODate,
+    options?: CompleteStepOptions,
+  ): Promise<void>;
+  skipStep(itemId: string, stepKey: string): Promise<void>;
+  undoStep(itemId: string, stepKey: string): Promise<boolean>;
+  setOutcome(itemId: string, outcome: string | null): Promise<void>;
+  addContact(itemId: string, input: AddContactInput): Promise<StoredContact>;
+  updateContact(itemId: string, contactId: string, patch: UpdateContactPatch): Promise<void>;
+  removeContact(itemId: string, contactId: string): Promise<boolean>;
 }
