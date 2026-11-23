@@ -1,0 +1,11 @@
+{
+  "name": "jobfollo",
+  "private": true,
+  "version": "0.0.0",
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck"
+  }
+}

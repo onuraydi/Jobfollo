@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+target/
+*.log
+.env
+.env.*
+*.db
+*.sqlite
+.DS_Store
+.idea/
+.vscode/
