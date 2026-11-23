@@ -75,6 +75,7 @@ export interface NextStep {
   dueDate: ISODate;
   /** Negative when overdue, 0 when due today. */
   daysLeft: number;
+  suggestsOutcome?: string;
 }
 
 export type ValidationErrorCode =

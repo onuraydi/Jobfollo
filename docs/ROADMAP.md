@@ -12,7 +12,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T1.1 Types and template validation
 - [x] T1.2 Calendar date utilities
 - [x] T1.3 `computeSchedule`
-- [ ] T1.4 `computeNextStep`
+- [x] T1.4 `computeNextStep`
 - [ ] T1.5 Outcomes stop the flow
 - [ ] T1.6 `buildDigest`
 - [ ] T1.7 `renderDigest` (TR + EN, text + HTML)
