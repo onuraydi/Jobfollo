@@ -2,6 +2,7 @@ import { CalendarCheck2, FolderKanban, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink, Route, Routes } from "react-router";
 import { cn } from "../lib/cn.js";
+import { ItemDetailPage } from "../pages/ItemDetailPage.js";
 import { ItemsPage } from "../pages/ItemsPage.js";
 import { TodayPage } from "../pages/TodayPage.js";
 
@@ -64,15 +65,7 @@ export function AppShell() {
         <Routes>
           <Route path="/" element={<TodayPage />} />
           <Route path="/items" element={<ItemsPage />} />
-          <Route
-            path="/items/:id"
-            element={
-              <PlaceholderPage
-                titleKey="pages.itemDetail.title"
-                subtitleKey="pages.itemDetail.subtitle"
-              />
-            }
-          />
+          <Route path="/items/:id" element={<ItemDetailPage />} />
           <Route
             path="/settings"
             element={
