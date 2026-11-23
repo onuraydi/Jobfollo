@@ -76,7 +76,12 @@
       "fieldContactSection": "İlk kişi (isteğe bağlı)",
       "fieldContactName": "Kişi adı",
       "fieldContactUrl": "Profil bağlantısı",
-      "createSubmit": "Kaydı oluştur"
+      "createSubmit": "Kaydı oluştur",
+      "viewTable": "Tablo",
+      "viewBoard": "Pano",
+      "boardEmptyColumn": "Kayıt yok",
+      "moveOutcomeLabel": "{{title}} sonucunu değiştir",
+      "dragCardLabel": "{{title}} kartını sürükle"
     },
     "itemDetail": {
       "title": "Kayıt detayı",

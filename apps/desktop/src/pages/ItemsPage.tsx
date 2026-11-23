@@ -7,15 +7,26 @@ import {
   type Workflow,
 } from "@jobfollo/core";
 import { ItemValidationError, type CreateItemInput, type StoredItem } from "@jobfollo/data";
-import { AlertCircle, Calendar, CheckCircle2, Clock, PauseCircle, Plus } from "lucide-react";
+import {
+  AlertCircle,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Kanban,
+  LayoutList,
+  PauseCircle,
+  Plus,
+} from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useServices } from "../boot/index.js";
 import { useDataRevision, usePreferences } from "../shell/index.js";
 import { formatDisplayDate, useLocalToday } from "../time/index.js";
+import { KanbanBoard } from "./KanbanBoard.js";
 
 type SortMode = "dueDate" | "created" | "title";
+type ViewMode = "table" | "board";
 
 interface ItemRowView {
   item: StoredItem;
@@ -48,6 +59,7 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
   const today = todayOverride ?? hookToday;
 
   const [items, setItems] = useState<StoredItem[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [search, setSearch] = useState("");
   const [workflowFilter, setWorkflowFilter] = useState("all");
@@ -264,21 +276,56 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
     );
   }
 
+  const handleKanbanOutcomeChange = async (itemId: string, outcome: string | null) => {
+    await services.items.setOutcome(itemId, outcome);
+    bumpRevision();
+  };
+
   return (
-    <div className="mx-auto max-w-5xl space-y-5">
+    <div className="mx-auto max-w-6xl space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{t("pages.items.title")}</h1>
           <p className="text-sm text-[var(--fg-muted)]">{t("pages.items.subtitle")}</p>
         </div>
-        <button
-          type="button"
-          onClick={openCreateDialog}
-          className="inline-flex items-center gap-1.5 rounded-md bg-[var(--primary)] px-3.5 py-2 text-sm font-medium text-[var(--primary-fg)] hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          <span>{t("pages.items.newItem")}</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex rounded-md border border-[var(--border)] bg-[var(--surface)] p-0.5">
+            <button
+              type="button"
+              aria-pressed={viewMode === "table"}
+              onClick={() => setViewMode("table")}
+              className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                viewMode === "table"
+                  ? "bg-[var(--primary)] text-[var(--primary-fg)]"
+                  : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+              }`}
+            >
+              <LayoutList className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{t("pages.items.viewTable")}</span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={viewMode === "board"}
+              onClick={() => setViewMode("board")}
+              className={`inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                viewMode === "board"
+                  ? "bg-[var(--primary)] text-[var(--primary-fg)]"
+                  : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+              }`}
+            >
+              <Kanban className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{t("pages.items.viewBoard")}</span>
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={openCreateDialog}
+            className="inline-flex items-center gap-1.5 rounded-md bg-[var(--primary)] px-3.5 py-2 text-sm font-medium text-[var(--primary-fg)] hover:opacity-90"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            <span>{t("pages.items.newItem")}</span>
+          </button>
+        </div>
       </header>
 
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
@@ -340,7 +387,14 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
         </label>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+      {viewMode === "board" ? (
+        <KanbanBoard
+          rows={rows}
+          locale={resolvedLocale}
+          onChangeOutcome={handleKanbanOutcomeChange}
+        />
+      ) : (
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
         <table className="w-full border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-xs font-semibold text-[var(--fg-muted)]">
@@ -408,6 +462,7 @@ export function ItemsPage({ todayOverride }: ItemsPageProps = {}) {
           </tbody>
         </table>
       </div>
+      )}
 
       {createOpen && (
         <div

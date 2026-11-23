@@ -76,7 +76,12 @@
       "fieldContactSection": "First contact (optional)",
       "fieldContactName": "Contact name",
       "fieldContactUrl": "Profile URL",
-      "createSubmit": "Create item"
+      "createSubmit": "Create item",
+      "viewTable": "Table",
+      "viewBoard": "Board",
+      "boardEmptyColumn": "No items",
+      "moveOutcomeLabel": "Move {{title}} to outcome",
+      "dragCardLabel": "Drag {{title}}"
     },
     "itemDetail": {
       "title": "Item detail",
