@@ -4,17 +4,8 @@ import { NavLink, Route, Routes } from "react-router";
 import { cn } from "../lib/cn.js";
 import { ItemDetailPage } from "../pages/ItemDetailPage.js";
 import { ItemsPage } from "../pages/ItemsPage.js";
+import { SettingsPage } from "../pages/SettingsPage.js";
 import { TodayPage } from "../pages/TodayPage.js";
-
-function PlaceholderPage({ titleKey, subtitleKey }: { titleKey: string; subtitleKey: string }) {
-  const { t } = useTranslation();
-  return (
-    <section className="mx-auto max-w-4xl space-y-2">
-      <h1 className="text-2xl font-semibold tracking-tight">{t(titleKey)}</h1>
-      <p className="text-sm text-[var(--fg-muted)]">{t(subtitleKey)}</p>
-    </section>
-  );
-}
 
 export function AppShell() {
   const { t } = useTranslation();
@@ -66,15 +57,7 @@ export function AppShell() {
           <Route path="/" element={<TodayPage />} />
           <Route path="/items" element={<ItemsPage />} />
           <Route path="/items/:id" element={<ItemDetailPage />} />
-          <Route
-            path="/settings"
-            element={
-              <PlaceholderPage
-                titleKey="pages.settings.title"
-                subtitleKey="pages.settings.subtitle"
-              />
-            }
-          />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </main>
     </div>

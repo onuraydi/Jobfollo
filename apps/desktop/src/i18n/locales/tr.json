@@ -114,7 +114,13 @@
     },
     "settings": {
       "title": "Ayarlar",
-      "subtitle": "Dil, tema ve yerel depolama."
+      "subtitle": "Dil, tema ve yerel depolama.",
+      "appearanceHeading": "Görünüm ve dil",
+      "languageDescription": "Arayüz dilini seçin veya işletim sistemini takip edin.",
+      "themeDescription": "Açık, koyu veya işletim sistemi temasını seçin.",
+      "storageHeading": "Yerel veri",
+      "dataLocationLabel": "Veritabanı konumu",
+      "dataLocationDescription": "Tüm kayıtlarınız, iş akışlarınız ve ayarlarınız yalnızca bu cihazda yerel olarak saklanır."
     }
   },
   "theme": {

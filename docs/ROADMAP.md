@@ -40,7 +40,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] T3.6 Items list and create/edit form
 - [x] T3.7 Item detail
 - [ ] T3.8 Kanban view (optional)
-- [ ] T3.9 Settings, test support, CI, smoke tests
+- [x] T3.9 Settings, test support, CI, smoke tests
 
 ## Phase 4 — Reminders and tools
 - [ ] Scheduler spike: hidden-window reliability on Windows, macOS, Linux

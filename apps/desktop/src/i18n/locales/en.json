@@ -114,7 +114,13 @@
     },
     "settings": {
       "title": "Settings",
-      "subtitle": "Language, theme, and local storage."
+      "subtitle": "Language, theme, and local storage.",
+      "appearanceHeading": "Appearance & language",
+      "languageDescription": "Choose the interface language or follow your operating system.",
+      "themeDescription": "Choose light, dark, or match your operating system.",
+      "storageHeading": "Local data",
+      "dataLocationLabel": "Database location",
+      "dataLocationDescription": "All your items, workflows, and settings are stored locally on this device."
     }
   },
   "theme": {
