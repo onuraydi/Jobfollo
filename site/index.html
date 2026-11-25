@@ -1,147 +1,283 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jobfollo — Local-First Job Application & Follow-Up Tracker</title>
+    <title>Jobfollo — Local-First Job Application &amp; Follow-Up Tracker</title>
     <meta
       name="description"
-      content="Keep your job postings, general applications, and follow-ups on schedule. 100% local-first, open-source desktop app for Windows, macOS, and Linux."
+      content="Track job postings, spontaneous general applications, follow-up cadences, calendars, and message templates locally on Windows, macOS, and Linux. 100% free and open source."
     />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="dark light" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-aurora" aria-hidden="true"></div>
+
     <header class="topbar">
       <div class="container topbar-inner">
         <a href="#top" class="brand">
-          <span class="brand-mark" aria-hidden="true">✦</span>
-          <span>Jobfollo</span>
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3l1.9 5.8L20 10.7l-5.2 3.3L16.5 20 12 16.4 7.5 20l1.7-6L4 10.7l6.1-1.9L12 3z" />
+            </svg>
+          </span>
+          <span class="brand-name">Jobfollo</span>
         </a>
 
-        <nav class="topbar-nav" aria-label="Main">
+        <nav class="topbar-nav" aria-label="Primary">
           <a href="#features" data-i18n="nav.features">Özellikler</a>
+          <a href="#workflow" data-i18n="nav.workflow">Nasıl Çalışır</a>
           <a href="#download" data-i18n="nav.download">İndir</a>
           <a href="#privacy" data-i18n="nav.privacy">Gizlilik</a>
+        </nav>
+
+        <div class="topbar-actions">
           <a
             href="https://github.com/onuraydi/Jobfollo"
             target="_blank"
             rel="noopener noreferrer"
+            class="ghost-link"
+            aria-label="GitHub"
           >
-            GitHub
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.54 2.87 8.39 6.84 9.75.5.09.68-.22.68-.49 0-.24-.01-.88-.01-1.72-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.66.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.08 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.64 1.03 2.76 0 3.95-2.34 4.82-4.57 5.07.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.59.69.49A10.27 10.27 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z" />
+            </svg>
+            <span>GitHub</span>
           </a>
-        </nav>
-
-        <div class="topbar-controls">
           <button type="button" id="lang-toggle" class="icon-btn" aria-label="Switch language">
             EN
           </button>
           <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
-            ☀
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+            </svg>
           </button>
         </div>
       </div>
     </header>
 
     <main id="top">
+      <!-- Hero -->
       <section class="hero">
         <div class="container hero-inner">
-          <div class="hero-badge">
-            <span class="badge-dot" aria-hidden="true"></span>
+          <a
+            href="https://github.com/onuraydi/Jobfollo/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hero-pill"
+          >
+            <span class="pulse-dot" aria-hidden="true"></span>
             <span data-i18n="hero.badge">Açık Kaynak · %100 Yerel · Ücretsiz</span>
-            <span id="release-version" class="badge-version">v0.1.0</span>
-          </div>
+            <span id="release-version" class="pill-tag">v0.1.0</span>
+          </a>
 
-          <h1 data-i18n="hero.title">
-            İş başvurularını ve takiplerini tek yerden, zamanında yönet.
+          <h1>
+            <span data-i18n="hero.titleLine1">İş başvurularını unutma,</span>
+            <span class="gradient-text" data-i18n="hero.titleLine2">takiplerini zamanında yönet.</span>
           </h1>
 
-          <p class="hero-subtitle" data-i18n="hero.subtitle">
-            Açık ilan başvuruların, genel başvuruların, takip adımların, takvimin ve mesaj
-            şablonların tamamen kendi bilgisayarında. Hesap yok, bulut yok, izleme yok.
+          <p class="hero-lead" data-i18n="hero.subtitle">
+            Açık ilan başvuruları, genel başvurular, otomatik takip adımları, aylık takvim ve
+            hazır mail/mesaj şablonları — hepsi tek bir hızlı, gizlilik odaklı masaüstü
+            uygulamasında.
           </p>
 
-          <div class="hero-actions">
+          <div class="hero-cta">
             <a
               id="primary-download-btn"
-              href="https://github.com/onuraydi/Jobfollo/releases/latest"
-              class="btn btn-primary"
+              href="#download"
+              class="btn btn-primary btn-lg"
             >
-              <span id="primary-download-label" data-i18n="hero.downloadCta">
-                Ücretsiz İndir
-              </span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span id="primary-download-label" data-i18n="hero.downloadCta">Ücretsiz İndir</span>
             </a>
             <a
               href="https://github.com/onuraydi/Jobfollo"
               target="_blank"
               rel="noopener noreferrer"
-              class="btn btn-secondary"
-              data-i18n="hero.githubCta"
+              class="btn btn-secondary btn-lg"
             >
-              GitHub'da İncele
+              <span data-i18n="hero.githubCta">Kaynak Kodu İncele</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M7 17L17 7M7 7h10v10" />
+              </svg>
             </a>
           </div>
 
-          <p class="hero-meta" data-i18n="hero.platforms">
-            Windows (.exe / .msi) · macOS Apple Silicon &amp; Intel (.dmg) · Linux (.AppImage / .deb)
-          </p>
+          <div class="trust-strip">
+            <span data-i18n="trust.local">Tek SQLite dosyası</span>
+            <span class="sep" aria-hidden="true">•</span>
+            <span data-i18n="trust.noAccount">Hesap gerektirmez</span>
+            <span class="sep" aria-hidden="true">•</span>
+            <span data-i18n="trust.os">Windows · macOS · Linux</span>
+            <span class="sep" aria-hidden="true">•</span>
+            <span data-i18n="trust.license">MIT Lisansı</span>
+          </div>
 
-          <div class="preview-frame" aria-hidden="true">
-            <div class="preview-bar">
-              <span class="dot red"></span>
-              <span class="dot yellow"></span>
-              <span class="dot green"></span>
-              <span class="preview-title">Jobfollo — Desktop</span>
-            </div>
-            <div class="preview-body">
-              <div class="preview-sidebar">
-                <div class="preview-nav-item active" data-i18n="mock.today">Bugün</div>
-                <div class="preview-nav-item" data-i18n="mock.jobPostings">Açık ilanlar</div>
-                <div class="preview-nav-item" data-i18n="mock.general">Genel başvurular</div>
-                <div class="preview-nav-item" data-i18n="mock.calendar">Takvim</div>
-                <div class="preview-nav-item" data-i18n="mock.stats">İstatistikler</div>
-                <div class="preview-nav-item" data-i18n="mock.templates">Şablonlar</div>
+          <!-- Interactive App Window Preview -->
+          <div class="showcase-shell">
+            <div class="showcase-chrome">
+              <div class="window-dots" aria-hidden="true">
+                <span></span><span></span><span></span>
               </div>
-              <div class="preview-content">
-                <div class="preview-kpis">
-                  <div class="kpi-card">
-                    <span class="kpi-label" data-i18n="mock.kpiActive">Aktif başvuru</span>
-                    <strong class="kpi-value">14</strong>
+              <div class="chrome-title">Jobfollo — Desktop</div>
+              <div class="chrome-kbd">Ctrl+K</div>
+            </div>
+
+            <div class="showcase-app">
+              <aside class="app-sidebar" role="tablist" aria-label="Preview screens">
+                <div class="sidebar-group-label" data-i18n="mock.groupTracking">Takip</div>
+                <button type="button" role="tab" aria-selected="true" data-screen="today" class="app-nav active">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg>
+                  <span data-i18n="mock.today">Bugün</span>
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-screen="postings" class="app-nav">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                  <span data-i18n="mock.jobPostings">Açık ilanlar</span>
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-screen="templates" class="app-nav">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  <span data-i18n="mock.templates">Şablonlar</span>
+                </button>
+                <button type="button" role="tab" aria-selected="false" data-screen="stats" class="app-nav">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  <span data-i18n="mock.stats">İstatistikler</span>
+                </button>
+              </aside>
+
+              <div class="app-stage">
+                <!-- Screen 1: Today -->
+                <div class="stage-panel active" data-panel="today">
+                  <div class="stage-head">
+                    <div>
+                      <strong data-i18n="mock.todayTitle">Bugün</strong>
+                      <span data-i18n="mock.todaySub">Bugün yapılacak ve geciken takiplerin</span>
+                    </div>
+                    <div class="mini-pills">
+                      <span class="chip danger">1 <em data-i18n="mock.overdue">Geciken</em></span>
+                      <span class="chip warning">2 <em data-i18n="mock.dueToday">Bugün</em></span>
+                    </div>
                   </div>
-                  <div class="kpi-card">
-                    <span class="kpi-label" data-i18n="mock.kpiToday">Bugün takip</span>
-                    <strong class="kpi-value accent">3</strong>
-                  </div>
-                  <div class="kpi-card">
-                    <span class="kpi-label" data-i18n="mock.kpiInterview">Mülakat</span>
-                    <strong class="kpi-value">4</strong>
-                  </div>
-                  <div class="kpi-card">
-                    <span class="kpi-label" data-i18n="mock.kpiOffer">Teklif</span>
-                    <strong class="kpi-value success">1</strong>
+                  <div class="stage-list">
+                    <div class="stage-row">
+                      <div>
+                        <div class="row-title">Nova Labs · Senior Backend Engineer</div>
+                        <div class="row-sub" data-i18n="mock.step1">7. gün takip e-postası gönder</div>
+                      </div>
+                      <div class="row-right">
+                        <span class="chip danger" data-i18n="mock.overdue1">1 gün gecikti</span>
+                        <span class="mock-btn primary" data-i18n="mock.done">Tamamla</span>
+                      </div>
+                    </div>
+                    <div class="stage-row">
+                      <div>
+                        <div class="row-title">Atlas Cloud · Platform Developer</div>
+                        <div class="row-sub" data-i18n="mock.step2">LinkedIn bağlantı isteği ve kısa not</div>
+                      </div>
+                      <div class="row-right">
+                        <span class="chip warning" data-i18n="mock.dueToday">Bugün</span>
+                        <span class="mock-btn" data-i18n="mock.snooze">Ertele</span>
+                      </div>
+                    </div>
+                    <div class="stage-row">
+                      <div>
+                        <div class="row-title">Kuzey Tech · Genel Başvuru</div>
+                        <div class="row-sub" data-i18n="mock.step3">Mülakat sonrası teşekkür maili</div>
+                      </div>
+                      <div class="row-right">
+                        <span class="chip success" data-i18n="mock.interview">Mülakat</span>
+                        <span class="mock-btn primary" data-i18n="mock.done">Tamamla</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="preview-list">
-                  <div class="preview-row">
+
+                <!-- Screen 2: Job Postings -->
+                <div class="stage-panel" data-panel="postings">
+                  <div class="stage-head">
                     <div>
-                      <strong>Nova Labs · Backend Engineer</strong>
-                      <span data-i18n="mock.step1">7. gün takip e-postası gönder</span>
+                      <strong data-i18n="mock.postingsTitle">Açık ilan başvuruları</strong>
+                      <span data-i18n="mock.postingsSub">Tablo ve Kanban görünümüyle tüm ilanlar</span>
                     </div>
-                    <span class="pill warning" data-i18n="mock.dueToday">Bugün</span>
+                    <span class="mock-btn primary" data-i18n="mock.newPosting">+ Yeni ilan başvurusu</span>
                   </div>
-                  <div class="preview-row">
-                    <div>
-                      <strong>Atlas Cloud · Platform Developer</strong>
-                      <span data-i18n="mock.step2">LinkedIn bağlantı isteği ve kısa not</span>
-                    </div>
-                    <span class="pill primary" data-i18n="mock.upcoming">2 gün sonra</span>
+                  <div class="kpi-strip">
+                    <div class="kpi"><span>Toplam</span><strong>18</strong></div>
+                    <div class="kpi"><span>Geciken / Bugün</span><strong class="t-warn">3</strong></div>
+                    <div class="kpi"><span>Mülakat</span><strong class="t-accent">5</strong></div>
+                    <div class="kpi"><span>Teklif</span><strong class="t-success">1</strong></div>
                   </div>
-                  <div class="preview-row">
-                    <div>
-                      <strong>Kuzey Tech · Genel Başvuru</strong>
-                      <span data-i18n="mock.step3">Mülakat sonrası teşekkür maili</span>
+                  <div class="stage-list">
+                    <div class="stage-row">
+                      <div>
+                        <div class="row-title">CloudScale · Distributed Systems</div>
+                        <div class="row-sub">Berlin · Remote · High Priority</div>
+                      </div>
+                      <span class="chip primary">Mülakat</span>
                     </div>
-                    <span class="pill success" data-i18n="mock.interview">Mülakat</span>
+                    <div class="stage-row">
+                      <div>
+                        <div class="row-title">FinCore · TypeScript Engineer</div>
+                        <div class="row-sub">İstanbul · Hibrit</div>
+                      </div>
+                      <span class="chip warning">Bugün</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Screen 3: Templates -->
+                <div class="stage-panel" data-panel="templates">
+                  <div class="stage-head">
+                    <div>
+                      <strong data-i18n="mock.templatesTitle">Mail ve mesaj şablonları</strong>
+                      <span data-i18n="mock.templatesSub">Değişkenlerle canlı önizleme ve tek tıkla kopyala</span>
+                    </div>
+                    <span class="mock-btn primary" data-i18n="mock.copyBtn">Metni kopyala</span>
+                  </div>
+                  <div class="template-preview-box">
+                    <div class="tpl-subject">
+                      <span class="tpl-label">Konu:</span>
+                      <strong>Takip: Backend Engineer Başvurusu — Nova Labs</strong>
+                    </div>
+                    <p class="tpl-body">
+                      Merhaba Ayşe,<br /><br />
+                      Geçtiğimiz hafta <strong>Nova Labs</strong> bünyesindeki <strong>Backend Engineer</strong>
+                      pozisyonu için ilettiğim başvurum hakkında kısa bir takip mesajı yazmak istedim.
+                      Süreçle ilgili paylaşabileceğiniz bir güncelleme olursa memnuniyetle dinlemek isterim.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Screen 4: Stats -->
+                <div class="stage-panel" data-panel="stats">
+                  <div class="stage-head">
+                    <div>
+                      <strong data-i18n="mock.statsTitle">Yerel istatistikler</strong>
+                      <span data-i18n="mock.statsSub">Dönüşüm hunisi ve haftalık başvuru hedefi</span>
+                    </div>
+                    <span class="chip success">7 / 10 hedef</span>
+                  </div>
+                  <div class="kpi-strip">
+                    <div class="kpi"><span>Yanıt oranı</span><strong class="t-accent">44%</strong></div>
+                    <div class="kpi"><span>Mülakat</span><strong>28%</strong></div>
+                    <div class="kpi"><span>Teklif</span><strong class="t-success">11%</strong></div>
+                    <div class="kpi"><span>Aktif</span><strong>12</strong></div>
+                  </div>
+                  <div class="funnel-bars">
+                    <div class="f-row"><span>Başvuruldu</span><div class="bar"><i style="width:100%"></i></div><strong>18</strong></div>
+                    <div class="f-row"><span>Yanıt geldi</span><div class="bar"><i style="width:44%"></i></div><strong>8</strong></div>
+                    <div class="f-row"><span>Mülakat</span><div class="bar"><i style="width:28%"></i></div><strong>5</strong></div>
+                    <div class="f-row"><span>Teklif</span><div class="bar"><i style="width:11%"></i></div><strong>2</strong></div>
                   </div>
                 </div>
               </div>
@@ -150,209 +286,270 @@
         </div>
       </section>
 
+      <!-- Features Bento Grid -->
       <section id="features" class="section">
         <div class="container">
-          <div class="section-header">
-            <h2 data-i18n="features.heading">Sürecini düzenli tutan her şey bir arada</h2>
+          <div class="section-head">
+            <span class="eyebrow" data-i18n="features.eyebrow">Özellikler</span>
+            <h2 data-i18n="features.heading">Karmaşık tablolar yerine net bir takip sistemi</h2>
             <p data-i18n="features.subheading">
-              Excel tablolarında kaybolmak yerine net takip adımları, hazır şablonlar ve akıllı
-              hatırlatıcılarla ilerle.
+              Her başvuru için bir sonraki adımın ne olduğunu ve tarihini her sabah hazır gör.
             </p>
           </div>
 
-          <div class="feature-grid">
-            <article class="card">
-              <div class="card-icon">📋</div>
-              <h3 data-i18n="features.f1Title">Açık İlanlar &amp; Genel Başvurular</h3>
+          <div class="bento-grid">
+            <article class="bento-card span-2">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+              </div>
+              <h3 data-i18n="features.f1Title">Açık İlanlar &amp; Genel Başvurular Ayrı Sekmelerde</h3>
               <p data-i18n="features.f1Body">
-                İlan başvurularını ve şirketlere yaptığın genel başvuruları ayrı sekmelerde, Tablo
-                veya Kanban panosu görünümüyle yönet.
+                İlan başvurularını ve şirketlere doğrudan yaptığın genel başvuruları ayrı sekmelerde,
+                hem Tablo hem sürükle-bırak Kanban panosuyla yönet. Şirket, konum, çalışma şekli,
+                maaş aralığı, öncelik ve CV sürümünü tek kartta tut.
               </p>
             </article>
 
-            <article class="card">
-              <div class="card-icon">🗓️</div>
-              <h3 data-i18n="features.f2Title">Bugün Paneli &amp; Aylık Takvim</h3>
+            <article class="bento-card">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              </div>
+              <h3 data-i18n="features.f2Title">Aylık Takvim &amp; .ics</h3>
               <p data-i18n="features.f2Body">
-                Geciken, bugün yapılacak ve yaklaşan takip adımlarını tek ekranda gör; hafta
-                sonlarını atla, adımları ertele veya .ics olarak takvimine aktar.
+                Tüm takip tarihlerini aylık takvimde gör, hafta sonlarını otomatik Pazartesi'ye
+                kaydır ve istediğin adımı .ics olarak dışa aktar.
               </p>
             </article>
 
-            <article class="card">
-              <div class="card-icon">✉️</div>
-              <h3 data-i18n="features.f3Title">Mail ve Mesaj Şablonları</h3>
+            <article class="bento-card">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <h3 data-i18n="features.f3Title">Mail &amp; Mesaj Şablonları</h3>
               <p data-i18n="features.f3Body">
-                Başvuru, takip, teşekkür ve LinkedIn mesajlarını dinamik değişkenlerle
-                (&#123;&#123;company&#125;&#125;, &#123;&#123;role&#125;&#125;) hazırla ve tek
-                tıkla kopyala.
+                6 hazır TR/EN şablon + kendi özel şablonların. Kayıttan canlı değişken doldurma,
+                tek tıkla kopyalama ve doğrudan e-posta uygulamasında açma.
               </p>
             </article>
 
-            <article class="card">
-              <div class="card-icon">🔔</div>
-              <h3 data-i18n="features.f4Title">Masaüstü &amp; E-posta Hatırlatıcıları</h3>
+            <article class="bento-card span-2">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              </div>
+              <h3 data-i18n="features.f4Title">Masaüstü Bildirimleri, Sistem Tepsisi &amp; Günlük Özet Maili</h3>
               <p data-i18n="features.f4Body">
-                Yerel işletim sistemi bildirimleri veya kendi SMTP hesabın üzerinden günlük özet
-                e-postası al; sistem tepsisinde sessizce çalışır.
+                SMTP kurmadan yerel işletim sistemi bildirimleri al veya kendi SMTP sunucunla
+                günlük özet e-postası gönder. Bilgisayar açılışında sessizce tepside başlar.
               </p>
             </article>
 
-            <article class="card">
-              <div class="card-icon">📊</div>
-              <h3 data-i18n="features.f5Title">Yerel İstatistikler &amp; Haftalık Hedef</h3>
+            <article class="bento-card">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              </div>
+              <h3 data-i18n="features.f5Title">Yerel Analitik &amp; Hedef</h3>
               <p data-i18n="features.f5Body">
-                Yanıt, mülakat ve teklif dönüşüm oranlarını, çalışma şekli dağılımını ve haftalık
-                başvuru hedefini canlı takip et.
+                Yanıt, mülakat ve teklif oranları, sonuç hunisi ve haftalık başvuru hedefin her
+                zaman gözünün önünde.
               </p>
             </article>
 
-            <article class="card">
-              <div class="card-icon">🎨</div>
-              <h3 data-i18n="features.f6Title">Kişiselleştirme, CSV &amp; Yedekleme</h3>
+            <article class="bento-card">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </div>
+              <h3 data-i18n="features.f6Title">Özelleştirilebilir İş Akışları</h3>
               <p data-i18n="features.f6Body">
-                Türkçe &amp; İngilizce arayüz, Açık/Koyu mod, 5 renk paleti, CSV içe/dışa aktarma
-                ve tek tıkla JSON yedekleme.
+                Yerleşik takip akışlarını kopyalayıp kendi gün aralıklarını, adımlarını ve mesaj
+                şablonlarını oluştur.
+              </p>
+            </article>
+
+            <article class="bento-card">
+              <div class="icon-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+              </div>
+              <h3 data-i18n="features.f7Title">5 Renk Paleti, CSV &amp; Yedek</h3>
+              <p data-i18n="features.f7Body">
+                TR/EN dil, Açık/Koyu tema, 5 özel renk teması, CSV içe/dışa aktarma ve tek tıkla
+                JSON yedekleme.
               </p>
             </article>
           </div>
         </div>
       </section>
 
-      <section id="download" class="section section-alt">
+      <!-- How it works -->
+      <section id="workflow" class="section section-tinted">
         <div class="container">
-          <div class="section-header">
-            <h2 data-i18n="download.heading">Jobfollo'yu İndir</h2>
+          <div class="section-head">
+            <span class="eyebrow" data-i18n="workflow.eyebrow">Nasıl Çalışır</span>
+            <h2 data-i18n="workflow.heading">Üç adımda düzenli başvuru takibi</h2>
+          </div>
+
+          <div class="steps-grid">
+            <div class="step-card">
+              <span class="step-num">01</span>
+              <h3 data-i18n="workflow.s1Title">Başvurunu ekle</h3>
+              <p data-i18n="workflow.s1Body">
+                Açık ilan veya genel başvuru olarak kaydet, iş akışını ve başlangıç tarihini seç.
+              </p>
+            </div>
+            <div class="step-card">
+              <span class="step-num">02</span>
+              <h3 data-i18n="workflow.s2Title">Adımlar otomatik planlansın</h3>
+              <p data-i18n="workflow.s2Body">
+                Bağlantı, ilk mesaj, 7. gün ve 14. gün takipleri hafta sonları atlanarak otomatik
+                hesaplanır.
+              </p>
+            </div>
+            <div class="step-card">
+              <span class="step-num">03</span>
+              <h3 data-i18n="workflow.s3Title">Bugün panelinden tamamla</h3>
+              <p data-i18n="workflow.s3Body">
+                Hazır şablonu tek tıkla kopyala, adımı tamamla veya ertele; yanıt gelince akış
+                otomatik durur.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Download -->
+      <section id="download" class="section">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow" data-i18n="download.eyebrow">İndir</span>
+            <h2 data-i18n="download.heading">İşletim sistemine uygun sürümü seç</h2>
             <p data-i18n="download.subheading">
-              Tüm kurulum dosyaları doğrudan GitHub Releases üzerinden ücretsiz sunulur.
+              Tüm kurulum dosyaları GitHub Actions üzerinde açık kaynak koddan otomatik derlenir.
             </p>
           </div>
 
           <div class="download-grid">
-            <article class="card download-card" data-os="windows">
-              <div class="download-os">Windows</div>
-              <p class="download-desc" data-i18n="download.winDesc">Windows 10 / 11 (64-bit)</p>
-              <div class="download-links">
-                <a
-                  id="dl-win-exe"
-                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
-                  class="btn btn-primary btn-sm"
-                >
-                  .exe (Setup)
+            <article class="dl-card" data-os="windows">
+              <div class="dl-head">
+                <span class="os-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.55 10.35 4.5v7.1H3V5.55Zm0 12.9 7.35 1.05v-7.05H3v6Zm8.25 1.17L21 21v-8.55h-9.75v7.17Zm0-15.24v7.22H21V3l-9.75 1.38Z"/></svg>
+                </span>
+                <div>
+                  <h3>Windows</h3>
+                  <p data-i18n="download.winDesc">Windows 10 / 11 (64-bit)</p>
+                </div>
+              </div>
+              <div class="dl-buttons">
+                <a id="dl-win-exe" href="https://github.com/onuraydi/Jobfollo/releases/latest" class="btn btn-primary btn-sm">
+                  .exe Setup
                 </a>
-                <a
-                  id="dl-win-msi"
-                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
-                  class="btn btn-secondary btn-sm"
-                >
+                <a id="dl-win-msi" href="https://github.com/onuraydi/Jobfollo/releases/latest" class="btn btn-secondary btn-sm">
                   .msi
                 </a>
               </div>
             </article>
 
-            <article class="card download-card" data-os="macos">
-              <div class="download-os">macOS</div>
-              <p class="download-desc" data-i18n="download.macDesc">Apple Silicon &amp; Intel</p>
-              <div class="download-links">
-                <a
-                  id="dl-mac-arm"
-                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
-                  class="btn btn-primary btn-sm"
-                >
+            <article class="dl-card" data-os="macos">
+              <div class="dl-head">
+                <span class="os-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.36 12.76c-.02-2.16 1.77-3.2 1.85-3.25-1.01-1.48-2.58-1.68-3.14-1.7-1.33-.14-2.61.79-3.29.79-.68 0-1.72-.77-2.83-.75-1.45.02-2.8.85-3.55 2.15-1.52 2.64-.39 6.54 1.08 8.68.72 1.04 1.58 2.21 2.71 2.17 1.09-.04 1.5-.7 2.82-.7 1.31 0 1.69.7 2.84.68 1.17-.02 1.91-1.06 2.63-2.11.83-1.21 1.17-2.38 1.19-2.44-.03-.01-2.29-.88-2.31-3.52ZM14.2 6.38c.6-.73 1-1.74.89-2.75-.86.03-1.91.57-2.52 1.3-.55.64-1.04 1.67-.91 2.66.96.07 1.94-.49 2.54-1.21Z"/></svg>
+                </span>
+                <div>
+                  <h3>macOS</h3>
+                  <p data-i18n="download.macDesc">Apple Silicon &amp; Intel</p>
+                </div>
+              </div>
+              <div class="dl-buttons">
+                <a id="dl-mac-arm" href="https://github.com/onuraydi/Jobfollo/releases/latest" class="btn btn-primary btn-sm">
                   Apple Silicon (.dmg)
                 </a>
-                <a
-                  id="dl-mac-x64"
-                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
-                  class="btn btn-secondary btn-sm"
-                >
+                <a id="dl-mac-x64" href="https://github.com/onuraydi/Jobfollo/releases/latest" class="btn btn-secondary btn-sm">
                   Intel (.dmg)
                 </a>
               </div>
             </article>
 
-            <article class="card download-card" data-os="linux">
-              <div class="download-os">Linux</div>
-              <p class="download-desc" data-i18n="download.linuxDesc">Ubuntu, Debian, Fedora vb.</p>
-              <div class="download-links">
-                <a
-                  id="dl-linux-appimage"
-                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
-                  class="btn btn-primary btn-sm"
-                >
+            <article class="dl-card" data-os="linux">
+              <div class="dl-head">
+                <span class="os-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 20h10M12 18v2M7 9l3 2.5L7 14M12 14h4"/></svg>
+                </span>
+                <div>
+                  <h3>Linux</h3>
+                  <p data-i18n="download.linuxDesc">Ubuntu, Debian, Fedora vb.</p>
+                </div>
+              </div>
+              <div class="dl-buttons">
+                <a id="dl-linux-appimage" href="https://github.com/onuraydi/Jobfollo/releases/latest" class="btn btn-primary btn-sm">
                   .AppImage
                 </a>
-                <a
-                  id="dl-linux-deb"
-                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
-                  class="btn btn-secondary btn-sm"
-                >
+                <a id="dl-linux-deb" href="https://github.com/onuraydi/Jobfollo/releases/latest" class="btn btn-secondary btn-sm">
                   .deb
                 </a>
               </div>
             </article>
           </div>
 
-          <div class="callout">
-            <strong data-i18n="download.noteTitle">İlk kurulum notu (imzasız açık kaynak derleme):</strong>
+          <details class="install-note">
+            <summary data-i18n="download.noteTitle">
+              İlk açılışta güvenlik uyarısı görürseniz (imzasız açık kaynak derleme)
+            </summary>
             <p data-i18n="download.noteBody">
-              Windows SmartScreen uyarısında "Ek bilgi → Yine de çalıştır" seçeneğini kullanın.
-              macOS'ta ilk açılışta uygulamaya sağ tıklayıp "Aç" deyin veya terminalde
-              <code>xattr -cr /Applications/Jobfollo.app</code> çalıştırın.
+              Windows SmartScreen penceresinde "Ek bilgi → Yine de çalıştır" seçeneğini kullanın.
+              macOS'ta uygulamaya sağ tıklayıp "Aç" deyin veya Terminal'de
+              <code>xattr -cr /Applications/Jobfollo.app</code> komutunu çalıştırın.
             </p>
-          </div>
+          </details>
         </div>
       </section>
 
-      <section id="privacy" class="section">
-        <div class="container privacy-box">
-          <div>
-            <h2 data-i18n="privacy.heading">Gizlilik öncelikli mimari</h2>
-            <p data-i18n="privacy.body">
-              Jobfollo verilerini yalnızca kendi cihazındaki tek bir SQLite dosyasında saklar.
-              Telemetri, analitik veya üçüncü taraf sunucu yoktur. SMTP şifren yalnızca işletim
-              sisteminin güvenli anahtarlığında (OS Keychain) tutulur ve dışa aktarımlara asla
-              eklenmez.
-            </p>
+      <!-- Privacy -->
+      <section id="privacy" class="section section-tinted">
+        <div class="container">
+          <div class="privacy-panel">
+            <div class="privacy-copy">
+              <span class="eyebrow" data-i18n="privacy.eyebrow">Gizlilik &amp; Güvenlik</span>
+              <h2 data-i18n="privacy.heading">Verilerin yalnızca senin cihazında kalır</h2>
+              <p data-i18n="privacy.body">
+                Jobfollo tüm kayıtlarını yerel bir SQLite dosyasında tutar. Hesap, bulut senkronizasyonu
+                veya telemetri yoktur. SMTP şifren yalnızca işletim sisteminin güvenli anahtarlığında
+                (OS Keychain) saklanır ve yedeklere asla dahil edilmez.
+              </p>
+            </div>
+            <div class="privacy-actions">
+              <a
+                href="https://github.com/onuraydi/Jobfollo/blob/master/SECURITY.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-secondary"
+                data-i18n="privacy.ctaSecurity"
+              >
+                Güvenlik Politikası
+              </a>
+              <a
+                href="https://github.com/onuraydi/Jobfollo/blob/master/docs/ARCHITECTURE.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-secondary"
+                data-i18n="privacy.ctaArch"
+              >
+                Mimari
+              </a>
+            </div>
           </div>
-          <a
-            href="https://github.com/onuraydi/Jobfollo/blob/master/docs/ARCHITECTURE.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-secondary"
-            data-i18n="privacy.cta"
-          >
-            Mimariyi İncele
-          </a>
         </div>
       </section>
     </main>
 
     <footer class="footer">
       <div class="container footer-inner">
-        <span>© 2026 Jobfollo · MIT License</span>
+        <div class="footer-brand">
+          <strong>Jobfollo</strong>
+          <span>· MIT License · © 2026 Onur Aydi</span>
+        </div>
         <div class="footer-links">
-          <a
-            href="https://github.com/onuraydi/Jobfollo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            GitHub
-          </a>
-          <a
-            href="https://github.com/onuraydi/Jobfollo/releases"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Releases
-          </a>
-          <a
-            href="https://github.com/onuraydi/Jobfollo/issues"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Issues
-          </a>
+          <a href="https://github.com/onuraydi/Jobfollo" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://github.com/onuraydi/Jobfollo/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+          <a href="https://github.com/onuraydi/Jobfollo/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a>
+          <a href="https://github.com/onuraydi/Jobfollo/blob/master/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contributing</a>
         </div>
       </div>
     </footer>
