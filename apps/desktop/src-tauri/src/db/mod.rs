@@ -10,7 +10,7 @@ mod tests;
 use crate::db::authorizer::install_authorizer;
 use crate::db::error::DbError;
 use crate::db::value::{json_to_sql_value, sql_value_to_json};
-use rusqlite::{params_from_iter, Connection, OpenFlags, TransactionBehavior};
+use rusqlite::{Connection, OpenFlags, TransactionBehavior, params_from_iter};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map as JsonMap, Value as JsonValue};
 use std::collections::HashSet;

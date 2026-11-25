@@ -2,10 +2,10 @@
 
 use crate::db::error::DbErrorKind;
 use crate::db::{
-    BatchResult, Database, SqlStatement, MAX_BATCH_STATEMENTS, MAX_SELECT_ROWS, MAX_SQL_BYTES,
+    BatchResult, Database, MAX_BATCH_STATEMENTS, MAX_SELECT_ROWS, MAX_SQL_BYTES, SqlStatement,
 };
 use rusqlite::Connection;
-use serde_json::{json, Value as JsonValue};
+use serde_json::{Value as JsonValue, json};
 use tempfile::tempdir;
 
 fn stmt(sql: &str, params: Vec<JsonValue>) -> SqlStatement {
@@ -46,7 +46,13 @@ fn binds_all_supported_param_types_and_preserves_turkish_emoji_and_sql_injection
         ),
         stmt(
             "INSERT INTO sample (id, n_int, n_real, txt, opt) VALUES (?, ?, ?, ?, ?)",
-            vec![json!(2), json!(0), json!(0.25), json!(injection), json!("ok")],
+            vec![
+                json!(2),
+                json!(0),
+                json!(0.25),
+                json!(injection),
+                json!("ok"),
+            ],
         ),
     ])
     .unwrap();
@@ -92,7 +98,9 @@ fn rejects_unsafe_result_values_and_duplicate_column_names() {
     let db = Database::open_in_memory().unwrap();
 
     // Integer outside ±2^53
-    let too_big = db.select("SELECT 9007199254740993 AS big", &[]).unwrap_err();
+    let too_big = db
+        .select("SELECT 9007199254740993 AS big", &[])
+        .unwrap_err();
     assert_eq!(too_big.kind, DbErrorKind::Sql);
 
     // BLOB
@@ -177,9 +185,7 @@ fn enforces_readonly_in_select_and_rejects_multi_statements() {
     db.batch(&[stmt("CREATE TABLE t (id INTEGER PRIMARY KEY)", vec![])])
         .unwrap();
 
-    let write_in_select = db
-        .select("INSERT INTO t (id) VALUES (1)", &[])
-        .unwrap_err();
+    let write_in_select = db.select("INSERT INTO t (id) VALUES (1)", &[]).unwrap_err();
     assert_eq!(write_in_select.kind, DbErrorKind::Forbidden);
 
     let multi_select = db.select("SELECT 1; SELECT 2", &[]).unwrap_err();
@@ -374,10 +380,7 @@ fn matches_exact_camel_case_json_ipc_contract() {
     assert_eq!(batch_json, expected_batch_json);
 
     let select_sql = fixtures["select"]["sql"].as_str().unwrap();
-    let select_params: Vec<JsonValue> = fixtures["select"]["params"]
-        .as_array()
-        .unwrap()
-        .clone();
+    let select_params: Vec<JsonValue> = fixtures["select"]["params"].as_array().unwrap().clone();
     let expected_select_json = fixtures["select"]["expectedResponseJson"].as_str().unwrap();
 
     let rows = db.select(select_sql, &select_params).unwrap();
@@ -393,5 +396,10 @@ fn matches_exact_camel_case_json_ipc_contract() {
         .unwrap_err();
     let err_value: JsonValue = serde_json::to_value(&err).unwrap();
     assert_eq!(err_value["kind"], fixtures["errors"]["constraint"]["kind"]);
-    assert!(err_value["message"].as_str().unwrap().contains("Statement 0"));
+    assert!(
+        err_value["message"]
+            .as_str()
+            .unwrap()
+            .contains("Statement 0")
+    );
 }

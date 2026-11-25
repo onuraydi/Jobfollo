@@ -65,9 +65,7 @@ impl DbError {
                 | ErrorCode::DatabaseCorrupt
                 | ErrorCode::NotADatabase => DbErrorKind::Io,
                 ErrorCode::CannotOpen => DbErrorKind::Open,
-                _ if msg.is_some_and(|m| m.starts_with("not authorized")) => {
-                    DbErrorKind::Forbidden
-                }
+                _ if msg.is_some_and(|m| m.starts_with("not authorized")) => DbErrorKind::Forbidden,
                 _ => DbErrorKind::Sql,
             };
             let text = msg
@@ -79,9 +77,7 @@ impl DbError {
 
         let (kind, detail) = match err {
             rusqlite::Error::SqliteFailure(ffi_err, msg) => map_ffi(ffi_err, msg.as_deref()),
-            rusqlite::Error::SqlInputError { error, msg, .. } => {
-                map_ffi(error, Some(msg.as_str()))
-            }
+            rusqlite::Error::SqlInputError { error, msg, .. } => map_ffi(error, Some(msg.as_str())),
             rusqlite::Error::MultipleStatement => (
                 DbErrorKind::InvalidArgument,
                 "Multiple SQL statements in a single string are not allowed".to_owned(),

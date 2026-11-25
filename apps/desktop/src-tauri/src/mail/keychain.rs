@@ -9,10 +9,7 @@ pub trait SecretStore: Send + Sync {
     fn delete_password(&self) -> Result<(), MailError>;
 
     fn has_password(&self) -> Result<bool, MailError> {
-        Ok(self
-            .get_password()?
-            .map(|p| !p.is_empty())
-            .unwrap_or(false))
+        Ok(self.get_password()?.map(|p| !p.is_empty()).unwrap_or(false))
     }
 }
 
@@ -29,9 +26,7 @@ impl OsKeychainStore {
 impl SecretStore for OsKeychainStore {
     fn set_password(&self, password: &str) -> Result<(), MailError> {
         if password.is_empty() {
-            return Err(MailError::invalid_argument(
-                "SMTP password cannot be empty",
-            ));
+            return Err(MailError::invalid_argument("SMTP password cannot be empty"));
         }
         let entry = Self::entry()?;
         entry

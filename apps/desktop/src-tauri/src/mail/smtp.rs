@@ -1,5 +1,5 @@
-use crate::mail::keychain::SecretStore;
 use crate::mail::MailError;
+use crate::mail::keychain::SecretStore;
 use lettre::message::{Mailbox, MultiPart, SinglePart};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
@@ -69,7 +69,9 @@ pub fn send_email_with_store(
     let password = store
         .get_password()?
         .filter(|p| !p.is_empty())
-        .ok_or_else(|| MailError::missing_password("SMTP password is not configured in keychain"))?;
+        .ok_or_else(|| {
+            MailError::missing_password("SMTP password is not configured in keychain")
+        })?;
 
     let email = Message::builder()
         .from(from)
@@ -81,7 +83,10 @@ pub fn send_email_with_store(
                 .singlepart(SinglePart::html(req.html.clone())),
         )
         .map_err(|err| {
-            MailError::invalid_argument(scrub_secret(&format!("Failed to build email: {err}"), &password))
+            MailError::invalid_argument(scrub_secret(
+                &format!("Failed to build email: {err}"),
+                &password,
+            ))
         })?;
 
     let creds = Credentials::new(req.username.trim().to_owned(), password.clone());
@@ -105,10 +110,7 @@ pub fn send_email_with_store(
         .build();
 
     mailer.send(&email).map(|_| ()).map_err(|err| {
-        MailError::smtp(scrub_secret(
-            &format!("SMTP send failed: {err}"),
-            &password,
-        ))
+        MailError::smtp(scrub_secret(&format!("SMTP send failed: {err}"), &password))
     })
 }
 

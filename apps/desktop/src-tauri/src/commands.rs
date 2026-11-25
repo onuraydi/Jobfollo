@@ -1,8 +1,8 @@
-use crate::db::{BatchResult, Database, SqlStatement};
 use crate::db::error::DbError;
-use crate::mail::keychain::{OsKeychainStore, SecretStore};
-use crate::mail::smtp::{send_email_with_store, SendEmailRequest};
+use crate::db::{BatchResult, Database, SqlStatement};
 use crate::mail::MailError;
+use crate::mail::keychain::{OsKeychainStore, SecretStore};
+use crate::mail::smtp::{SendEmailRequest, send_email_with_store};
 use serde_json::{Map as JsonMap, Value as JsonValue};
 use std::sync::Arc;
 use tauri::State;

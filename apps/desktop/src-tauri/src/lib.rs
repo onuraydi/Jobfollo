@@ -3,8 +3,8 @@ pub mod db;
 pub mod mail;
 
 use crate::commands::DbState;
-use crate::db::error::DbError;
 use crate::db::Database;
+use crate::db::error::DbError;
 use std::sync::Arc;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};

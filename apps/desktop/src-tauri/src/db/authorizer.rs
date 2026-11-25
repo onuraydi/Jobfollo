@@ -1,6 +1,6 @@
 use crate::db::error::DbError;
-use rusqlite::hooks::{AuthAction, AuthContext, Authorization};
 use rusqlite::Connection;
+use rusqlite::hooks::{AuthAction, AuthContext, Authorization};
 
 pub fn install_authorizer(conn: &Connection) -> Result<(), DbError> {
     conn.authorizer(Some(|ctx: AuthContext<'_>| match ctx.action {
