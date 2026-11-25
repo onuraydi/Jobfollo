@@ -1,7 +1,8 @@
-import { addDays, diffDays, isValidISODate } from "./date.js";
+import { addDays, adjustForWeekend, diffDays, isValidISODate } from "./date.js";
 import type {
   ISODate,
   Item,
+  ScheduleOptions,
   StepInstance,
   StepRecord,
   StepStatus,
@@ -49,6 +50,7 @@ export function computeSchedule(
   item: Item,
   workflow: Workflow,
   today: ISODate,
+  options: ScheduleOptions = {},
 ): StepInstance[] {
   if (!isValidISODate(today)) {
     throw new RangeError(`Invalid today ISO date: "${today}"`);
@@ -64,6 +66,11 @@ export function computeSchedule(
         `Invalid completedOn ISO date for step "${record.stepKey}": "${record.completedOn}"`,
       );
     }
+    if (record.snoozedUntil !== undefined && !isValidISODate(record.snoozedUntil)) {
+      throw new RangeError(
+        `Invalid snoozedUntil ISO date for step "${record.stepKey}": "${record.snoozedUntil}"`,
+      );
+    }
     recordsByKey.set(record.stepKey, record);
   }
 
@@ -73,7 +80,17 @@ export function computeSchedule(
   return workflow.steps.map((step): StepInstance => {
     const record = recordsByKey.get(step.key);
     const anchorDate = resolveAnchorDate(step, item, recordsByKey);
-    const dueDate = anchorDate !== undefined ? addDays(anchorDate, step.offsetDays) : undefined;
+    let dueDate = anchorDate !== undefined ? addDays(anchorDate, step.offsetDays) : undefined;
+    if (dueDate !== undefined && options.skipWeekends) {
+      dueDate = adjustForWeekend(dueDate);
+    }
+    if (
+      dueDate !== undefined &&
+      record?.snoozedUntil !== undefined &&
+      diffDays(dueDate, record.snoozedUntil) > 0
+    ) {
+      dueDate = record.snoozedUntil;
+    }
 
     let status: StepStatus;
     if (record?.completedOn !== undefined) {

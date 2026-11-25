@@ -6,7 +6,7 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] PRD, ARCHITECTURE, AGENTS written
 - [x] Repo scaffold, workflows, CI skeleton
 - [ ] GitHub repo created, first commit pushed
-- [ ] License holder name set in `LICENSE`
+- [x] License holder name set in `LICENSE`
 
 ## Phase 1 — Core (`packages/core`) — spec: `tasks/phase-1-core.md`
 - [x] T1.1 Types and template validation
@@ -52,9 +52,9 @@ Task specs live in `docs/tasks/`. Tick a box only when the Definition of Done in
 - [x] Backup and restore
 
 ## Phase 5 — Packaging
-- [ ] GitHub Actions release builds for Windows, macOS, Linux
+- [x] GitHub Actions release builds for Windows, macOS, Linux
 - [ ] Signed installers where possible
 
 ## Phase 6 — Public release
 - [ ] README with screenshots
-- [ ] CONTRIBUTING, issue labels, `good first issue`s
+- [x] CONTRIBUTING, issue labels, `good first issue`s

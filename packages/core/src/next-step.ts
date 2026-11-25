@@ -1,6 +1,13 @@
 import { diffDays } from "./date.js";
 import { computeSchedule } from "./schedule.js";
-import type { ISODate, Item, NextStep, StepInstance, Workflow } from "./types.js";
+import type {
+  ISODate,
+  Item,
+  NextStep,
+  ScheduleOptions,
+  StepInstance,
+  Workflow,
+} from "./types.js";
 
 function isActionable(
   instance: StepInstance,
@@ -17,8 +24,9 @@ export function computeNextStep(
   item: Item,
   workflow: Workflow,
   today: ISODate,
+  options: ScheduleOptions = {},
 ): NextStep | null {
-  const schedule = computeSchedule(item, workflow, today);
+  const schedule = computeSchedule(item, workflow, today, options);
 
   let earliest: (StepInstance & { dueDate: ISODate }) | undefined;
   for (const instance of schedule) {

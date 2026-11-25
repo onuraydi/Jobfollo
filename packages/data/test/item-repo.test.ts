@@ -39,7 +39,8 @@ describe("ItemRepository", () => {
     db = createSqliteExecutor();
     const clock = opts?.clock ?? makeSequenceClock(["2026-03-10T09:00:00.000Z"]);
     const idGenerator = opts?.idGenerator ?? makeSequenceIds();
-    await runMigrations(db, builtInMigrations, clock);
+    const migrationTs = clock.nowIso();
+    await runMigrations(db, builtInMigrations, { nowIso: () => migrationTs });
     const workflowRepo = createWorkflowRepository(db, { clock, idGenerator });
     const itemRepo = createItemRepository(db, workflowRepo, { clock, idGenerator });
     return { db, workflowRepo, itemRepo };
@@ -416,6 +417,53 @@ describe("ItemRepository", () => {
       expect(
         await conn.select("SELECT step_key FROM step_record WHERE item_id = ?", [created.id]),
       ).toEqual([]);
+    });
+
+    it("persists rich company/item detail fields and snoozeStep cleanly", async () => {
+      const { itemRepo } = await setup();
+      const created = await itemRepo.create({
+        title: "Senior Backend Engineer",
+        company: "Acme Türkiye",
+        role: "Backend Engineer",
+        channel: "LinkedIn",
+        jobUrl: "https://careers.acme.example/jobs/123",
+        location: "İstanbul",
+        workMode: "hybrid",
+        salaryRange: "120k-150k TRY",
+        priority: "high",
+        tags: ["Referanslı", "Favori", "favori"],
+        cvVersion: "CV_Backend_2026.pdf",
+        workflowId: jobApplicationNetworking.id,
+        startDate: "2026-03-10",
+      });
+
+      expect(created.company).toBe("Acme Türkiye");
+      expect(created.tags).toEqual(["Referanslı", "Favori"]);
+
+      await itemRepo.snoozeStep(created.id, "apply", "2026-03-15");
+
+      const loaded = await itemRepo.get(created.id);
+      expect(loaded?.company).toBe("Acme Türkiye");
+      expect(loaded?.jobUrl).toBe("https://careers.acme.example/jobs/123");
+      expect(loaded?.location).toBe("İstanbul");
+      expect(loaded?.workMode).toBe("hybrid");
+      expect(loaded?.salaryRange).toBe("120k-150k TRY");
+      expect(loaded?.priority).toBe("high");
+      expect(loaded?.tags).toEqual(["Referanslı", "Favori"]);
+      expect(loaded?.cvVersion).toBe("CV_Backend_2026.pdf");
+      expect(loaded?.steps).toEqual([{ stepKey: "apply", snoozedUntil: "2026-03-15" }]);
+
+      // Updating fields + clearing tags works
+      const updated = await itemRepo.update(created.id, {
+        company: "Acme Global",
+        workMode: "remote",
+        priority: "low",
+        tags: null,
+      });
+      expect(updated.company).toBe("Acme Global");
+      expect(updated.workMode).toBe("remote");
+      expect(updated.priority).toBe("low");
+      expect(updated.tags).toBeUndefined();
     });
   });
 });

@@ -1,10 +1,13 @@
 import {
   isValidISODate,
   validateWorkflow,
+  type ApplicationType,
   type Contact,
   type ContactStatus,
   type ISODate,
+  type ItemPriority,
   type StepRecord,
+  type WorkMode,
   type Workflow,
 } from "@jobfollo/core";
 import type { AppServices } from "../boot/index.js";
@@ -12,8 +15,17 @@ import { isSafeHttpUrl } from "../lib/externalUrl.js";
 
 export interface BackupItem {
   title: string;
+  company?: string;
+  applicationType?: ApplicationType;
   role?: string;
   channel?: string;
+  jobUrl?: string;
+  location?: string;
+  workMode?: WorkMode;
+  salaryRange?: string;
+  priority?: ItemPriority;
+  tags?: string[];
+  cvVersion?: string;
   workflowId: string;
   startDate: ISODate;
   outcome?: string;
@@ -59,8 +71,17 @@ export async function createBackupPayload(
 
   const items: BackupItem[] = allItems.map((item) => ({
     title: item.title,
+    company: item.company,
+    applicationType: item.applicationType,
     role: item.role,
     channel: item.channel,
+    jobUrl: item.jobUrl,
+    location: item.location,
+    workMode: item.workMode,
+    salaryRange: item.salaryRange,
+    priority: item.priority,
+    tags: item.tags,
+    cvVersion: item.cvVersion,
     workflowId: item.workflowId,
     startDate: item.startDate,
     outcome: item.outcome,
@@ -75,6 +96,7 @@ export async function createBackupPayload(
       stepKey: s.stepKey,
       completedOn: s.completedOn,
       skipped: s.skipped,
+      snoozedUntil: s.snoozedUntil,
     })),
   }));
 
@@ -170,15 +192,58 @@ export function parseBackupJson(rawText: string): ParseBackupResult {
             ? sRec.completedOn
             : undefined;
         const skipped = sRec.skipped === true ? true : undefined;
-        steps.push({ stepKey: sRec.stepKey, completedOn, skipped });
+        const snoozedUntil =
+          typeof sRec.snoozedUntil === "string" && isValidISODate(sRec.snoozedUntil)
+            ? sRec.snoozedUntil
+            : undefined;
+        steps.push({ stepKey: sRec.stepKey, completedOn, skipped, snoozedUntil });
       }
     }
 
+    const jobUrl =
+      typeof rec.jobUrl === "string" && rec.jobUrl.trim() ? rec.jobUrl.trim() : undefined;
+    if (jobUrl && !isSafeHttpUrl(jobUrl)) {
+      return { ok: false, error: `Item at index ${i} contains an unsafe jobUrl.` };
+    }
+
+    const appType =
+      rec.applicationType === "job_posting" || rec.applicationType === "general"
+        ? rec.applicationType
+        : undefined;
+    const workMode =
+      rec.workMode === "remote" || rec.workMode === "hybrid" || rec.workMode === "onsite"
+        ? rec.workMode
+        : undefined;
+    const priority =
+      rec.priority === "high" || rec.priority === "normal" || rec.priority === "low"
+        ? rec.priority
+        : undefined;
+    const tags = Array.isArray(rec.tags)
+      ? rec.tags.filter((t): t is string => typeof t === "string" && t.trim().length > 0)
+      : undefined;
+
     items.push({
       title: rec.title.trim(),
+      company:
+        typeof rec.company === "string" && rec.company.trim() ? rec.company.trim() : undefined,
+      applicationType: appType,
       role: typeof rec.role === "string" && rec.role.trim() ? rec.role.trim() : undefined,
       channel:
         typeof rec.channel === "string" && rec.channel.trim() ? rec.channel.trim() : undefined,
+      jobUrl,
+      location:
+        typeof rec.location === "string" && rec.location.trim() ? rec.location.trim() : undefined,
+      workMode,
+      salaryRange:
+        typeof rec.salaryRange === "string" && rec.salaryRange.trim()
+          ? rec.salaryRange.trim()
+          : undefined,
+      priority,
+      tags: tags && tags.length > 0 ? tags : undefined,
+      cvVersion:
+        typeof rec.cvVersion === "string" && rec.cvVersion.trim()
+          ? rec.cvVersion.trim()
+          : undefined,
       workflowId: rec.workflowId.trim(),
       startDate: rec.startDate,
       outcome:
@@ -215,8 +280,17 @@ export async function restoreBackup(
   for (const item of payload.items) {
     const created = await services.items.create({
       title: item.title,
+      company: item.company,
+      applicationType: item.applicationType,
       role: item.role,
       channel: item.channel,
+      jobUrl: item.jobUrl,
+      location: item.location,
+      workMode: item.workMode,
+      salaryRange: item.salaryRange,
+      priority: item.priority,
+      tags: item.tags,
+      cvVersion: item.cvVersion,
       workflowId: item.workflowId,
       startDate: item.startDate,
       notes: item.notes,

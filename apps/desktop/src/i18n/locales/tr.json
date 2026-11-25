@@ -1,12 +1,19 @@
 {
   "app": {
     "name": "Jobfollo",
+    "tagline": "Başvuru takipçisi",
     "skipToContent": "Ana içeriğe geç"
   },
   "nav": {
     "label": "Ana gezinme",
+    "sectionTracking": "Takip",
+    "sectionTools": "Planlama",
     "today": "Bugün",
-    "items": "Kayıtlar",
+    "jobPostings": "Açık ilanlar",
+    "generalApplications": "Genel başvurular",
+    "items": "Tüm kayıtlar",
+    "calendar": "Takvim",
+    "stats": "İstatistikler",
     "workflows": "İş akışları",
     "settings": "Ayarlar"
   },
@@ -42,11 +49,27 @@
       "contactAccepted": "Kabul edildi",
       "contactNotAccepted": "Kabul edilmedi",
       "contactPending": "Beklemede",
-      "confirmComplete": "Adımı tamamla"
+      "confirmComplete": "Adımı tamamla",
+      "snoozeLabel": "Ertele",
+      "snoozeTomorrow": "Yarına (+1g)",
+      "snooze3Days": "3 gün sonra (+3g)",
+      "snoozeNextMonday": "Gelecek Pazartesi",
+      "copyMessage": "Mesajı kopyala",
+      "copiedMessage": "Kopyalandı!"
     },
     "items": {
       "title": "Tüm kayıtlar",
       "subtitle": "Tüm başvuru, teklif ve takiplerinizi yönetin.",
+      "titleJobPostings": "Açık ilan başvuruları",
+      "subtitleJobPostings": "Belirli bir iş ilanına yaptığınız başvuruları takip edin.",
+      "newJobPosting": "Yeni ilan başvurusu",
+      "titleGeneral": "Genel başvurular",
+      "subtitleGeneral": "Açık ilan olmadan şirketlere yaptığınız genel başvuruları yönetin.",
+      "newGeneralApplication": "Yeni genel başvuru",
+      "kpiTotal": "Toplam kayıt",
+      "kpiNeedsAction": "Geciken / Bugün",
+      "kpiInterviews": "Mülakat",
+      "kpiOffers": "Teklif",
       "newItem": "Yeni kayıt",
       "searchPlaceholder": "Başlığa göre ara…",
       "searchLabel": "Kayıtlarda ara",
@@ -60,6 +83,7 @@
       "sortCreated": "Oluşturulma",
       "sortTitle": "Başlık",
       "colTitle": "Başlık",
+      "colCompany": "Şirket & Konum",
       "colRole": "Rol",
       "colWorkflow": "İş akışı",
       "colNextStep": "Sonraki adım",
@@ -70,8 +94,25 @@
       "emptyTable": "Eşleşen kayıt yok.",
       "createDialogTitle": "Yeni kayıt",
       "fieldTitle": "Başlık",
-      "fieldRole": "Rol",
+      "fieldCompany": "Şirket / Kurum adı",
+      "fieldApplicationType": "Başvuru türü",
+      "tabAll": "Tümü ({{count}})",
+      "tabJobPostings": "İlan başvuruları ({{count}})",
+      "tabGeneral": "Genel başvurular ({{count}})",
+      "filterPriority": "Öncelik",
+      "allPriorities": "Tüm öncelikler",
+      "filterWorkMode": "Çalışma şekli",
+      "allWorkModes": "Tüm çalışma şekilleri",
+      "loadSampleData": "Örnek kayıtlarla dene",
+      "fieldRole": "Rol / Pozisyon",
       "fieldChannel": "Kanal",
+      "fieldJobUrl": "İlan bağlantısı",
+      "fieldLocation": "Konum / Şehir",
+      "fieldWorkMode": "Çalışma şekli",
+      "fieldSalaryRange": "Maaş / Bütçe aralığı",
+      "fieldPriority": "Öncelik",
+      "fieldTags": "Etiketler (virgülle ayırın)",
+      "fieldCvVersion": "Gönderilen CV / Belge",
       "fieldWorkflow": "İş akışı",
       "fieldStartDate": "Başlangıç tarihi",
       "fieldContactSection": "İlk kişi (isteğe bağlı)",
@@ -91,7 +132,15 @@
       "importPreviewValid": "İçe aktarılmaya hazır {{count}} geçerli satır.",
       "importPreviewErrors": "Hata nedeniyle atlanan {{count}} satır:",
       "importConfirm": "{{count}} kaydı içe aktar",
-      "importDone": "{{count}} kayıt içe aktarıldı."
+      "importDone": "{{count}} kayıt içe aktarıldı.",
+      "selectAllItems": "Görünen tüm kayıtları seç",
+      "selectItem": "{{title}} kaydını seç",
+      "bulkSelectedCount": "{{count}} seçili",
+      "bulkSetOutcome": "Sonuç ata…",
+      "bulkArchive": "Seçilenleri arşivle",
+      "bulkDelete": "Seçilenleri sil",
+      "bulkDeleteConfirm": "Seçili {{count}} kayıt kalıcı olarak silinsin mi?",
+      "bulkClear": "Temizle"
     },
     "itemDetail": {
       "title": "Kayıt detayı",
@@ -124,8 +173,14 @@
       "notesSaved": "Kaydedildi",
       "unsavedLeaveConfirm": "Kaydedilmemiş not değişiklikleriniz var. Kaydetmeden ayrılmak istiyor musunuz?",
       "startDateLabel": "Başlangıç: {{date}}",
+      "companyLabel": "Şirket",
       "channelLabel": "Kanal",
-      "roleLabel": "Rol"
+      "roleLabel": "Rol",
+      "locationLabel": "Konum",
+      "salaryLabel": "Maaş",
+      "cvLabel": "CV",
+      "openJobPosting": "İlanı aç",
+      "exportIcs": "Takvime ekle (.ics)"
     },
     "workflows": {
       "title": "İş akışları",
@@ -151,11 +206,41 @@
       "offsetDaysLabel": "Gün aralığı",
       "suggestsOutcomeLabel": "Sonuç önerisi",
       "suggestsOutcomeNone": "Yok",
+      "messageTemplateLabel": "Mesaj şablonu (isteğe bağlı)",
+      "messageTemplatePlaceholder": "Merhaba {{contact}}, {{company}} {{role}} başvurusu hakkında…",
       "moveUp": "Yukarı taşı",
       "moveDown": "Aşağı taşı",
       "removeStep": "Adımı sil",
       "savedMessage": "İş akışı kaydedildi.",
       "inUseError": "Bir veya daha fazla kayıt bu iş akışını kullandığı için silinemiyor."
+    },
+    "stats": {
+      "title": "İstatistikler",
+      "subtitle": "Başvurularınızdan hesaplanan yerel analizler.",
+      "includeArchived": "Arşivlenenleri dahil et",
+      "totalItems": "Toplam başvuru",
+      "responseRate": "Yanıt oranı",
+      "interviewRate": "Mülakat oranı",
+      "offerRate": "Teklif oranı",
+      "funnelHeading": "Sonuç hunisi",
+      "byChannelHeading": "Kanala göre",
+      "byWorkModeHeading": "Çalışma şekline göre",
+      "byPriorityHeading": "Önceliğe göre",
+      "byApplicationTypeHeading": "Başvuru türüne göre",
+      "weeklyGoalHeading": "Haftalık başvuru hedefi (son 7 gün)",
+      "weeklyGoalLabel": "Haftalık hedef",
+      "weeklyGoalProgress": "{{done}} / {{target}} başvuru",
+      "noChannels": "Henüz kanal bilgisi girilmedi.",
+      "emptyState": "Huni ve dönüşüm oranlarını görmek için birkaç başvuru ekleyin."
+    },
+    "calendar": {
+      "title": "Takvim",
+      "subtitle": "Yaklaşan ve geciken takip adımlarının aylık görünümü.",
+      "prevMonth": "Önceki ay",
+      "nextMonth": "Sonraki ay",
+      "goToday": "Bugün",
+      "selectedDayEmpty": "Bu tarih için planlanmış bir takip adımı yok.",
+      "moreSteps": "+{{count}} adım daha"
     },
     "settings": {
       "title": "Ayarlar",
@@ -163,8 +248,22 @@
       "appearanceHeading": "Görünüm ve dil",
       "languageDescription": "Arayüz dilini seçin veya işletim sistemini takip edin.",
       "themeDescription": "Açık, koyu veya işletim sistemi temasını seçin.",
+      "paletteLabel": "Renk teması",
+      "paletteDescription": "Hem açık hem koyu mod için özel tasarlanmış bir palet seçin.",
+      "fontLabel": "Yazı tipi",
+      "fontDescription": "Uygulama genelinde kullanılacak yazı stilini seçin (%100 çevrimdışı).",
+      "fontPreviewSample": "Aa Bb Çç Ğğ 123",
+      "densityLabel": "Görünüm yoğunluğu",
+      "densityDescription": "Boşlukları ve metin ölçeğini çalışma tarzınıza göre ayarlayın.",
       "autostartLabel": "Bilgisayar açıldığında başlat",
       "autostartDescription": "Günlük hatırlatıcıların tepside çalışması için oturum açtığınızda Jobfollo'yu otomatik başlatın.",
+      "skipWeekendsLabel": "Yalnızca iş günleri (hafta sonlarını atla)",
+      "skipWeekendsDescription": "Cumartesi ve Pazar'a denk gelen takip tarihlerini otomatik olarak Pazartesi'ye kaydırır.",
+      "desktopNotificationsLabel": "Masaüstü bildirimleri",
+      "desktopNotificationsDescription": "Bugün yapılacak takip adımları olduğunda yerel işletim sistemi bildirimi gösterir (SMTP gerektirmez).",
+      "testNotification": "Bildirimi test et",
+      "testNotificationTitle": "Jobfollo",
+      "testNotificationBody": "Yerel masaüstü bildirimleri sorunsuz çalışıyor!",
       "storageHeading": "Yerel veri",
       "dataLocationLabel": "Veritabanı konumu",
       "dataLocationDescription": "Tüm kayıtlarınız, iş akışlarınız ve ayarlarınız yalnızca bu cihazda yerel olarak saklanır.",
@@ -212,6 +311,39 @@
     "light": "Açık",
     "dark": "Koyu"
   },
+  "palette": {
+    "ocean": "Okyanus",
+    "forest": "Orman",
+    "sunset": "Gün Batımı",
+    "rose": "Gül",
+    "nord": "Nord"
+  },
+  "font": {
+    "system": "Modern Sans",
+    "editorial": "Editoryal Serif",
+    "humanist": "Hümanist Sans",
+    "mono": "Teknik Mono"
+  },
+  "density": {
+    "comfortable": "Rahat",
+    "compact": "Kompakt"
+  },
+  "workMode": {
+    "unspecified": "Belirtilmedi",
+    "remote": "Uzaktan",
+    "hybrid": "Hibrit",
+    "onsite": "Ofisten"
+  },
+  "priority": {
+    "high": "Yüksek",
+    "normal": "Normal",
+    "low": "Düşük"
+  },
+  "applicationType": {
+    "job_posting": "İlana başvuru",
+    "general": "Genel başvuru",
+    "unspecified": "Belirtilmedi"
+  },
   "language": {
     "label": "Dil",
     "system": "Sistem",
@@ -241,5 +373,16 @@
     "save": "Kaydet",
     "cancel": "İptal",
     "delete": "Sil"
+  },
+  "commandPalette": {
+    "openButton": "Hızlı git…",
+    "placeholder": "Kayıt, ekran veya komut ara…",
+    "empty": "Eşleşen komut veya kayıt bulunamadı.",
+    "groupNavigation": "Ekranlar",
+    "groupItems": "Kayıtlar",
+    "groupActions": "Hızlı işlemler",
+    "actionLightTheme": "Açık temaya geç",
+    "actionDarkTheme": "Koyu temaya geç",
+    "actionSystemTheme": "Sistem temasına geç"
   }
 }

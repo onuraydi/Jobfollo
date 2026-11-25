@@ -82,7 +82,7 @@ A step is due `offsetDays` after its anchor. `runIf` is limited to a small fixed
 
 ## Data model
 
-`schema_migrations`, `workflow` (custom workflows only; built-ins resolve from `core`), `item`, `contact`, `step_record`, `app_setting` (no secrets), `reminder_log` (date, status, attempt, error, unique partial index for at most one `sent` per `date`).
+`schema_migrations`, `workflow` (custom workflows only; built-ins resolve from `core`), `item` (core fields plus `0002_item_details.sql` columns: `company`, `job_url`, `location`, `work_mode`, `salary_range`, `priority`, `tags_json`, `cv_version`), `contact`, `step_record` (including `snoozed_until`), `app_setting` (no secrets), `reminder_log` (date, status, attempt, error, unique partial index for at most one `sent` per `date`).
 Dates are stored as `YYYY-MM-DD` local calendar dates (no timezone math for due dates); timestamps are ISO-8601 UTC text. Outcomes are plain text ids on `item.outcome` (no `outcome_definition` table in MVP; see ADR-008).
 
 ## Rust IPC contract

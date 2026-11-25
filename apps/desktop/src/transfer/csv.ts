@@ -1,4 +1,11 @@
-import { isValidISODate, type ContactStatus, type ISODate } from "@jobfollo/core";
+import {
+  isValidISODate,
+  type ApplicationType,
+  type ContactStatus,
+  type ISODate,
+  type ItemPriority,
+  type WorkMode,
+} from "@jobfollo/core";
 import type { CreateItemInput, StoredItem } from "@jobfollo/data";
 import { isSafeHttpUrl } from "../lib/externalUrl.js";
 
@@ -6,8 +13,17 @@ const UTF8_BOM = "\uFEFF";
 
 export const CSV_HEADERS = [
   "title",
+  "company",
+  "applicationType",
   "role",
   "channel",
+  "jobUrl",
+  "location",
+  "workMode",
+  "salaryRange",
+  "priority",
+  "tags",
+  "cvVersion",
   "workflowId",
   "startDate",
   "outcome",
@@ -46,8 +62,17 @@ export function exportItemsToCsv(items: readonly StoredItem[]): string {
     const firstContact = item.contacts[0];
     const cells = [
       item.title,
+      item.company ?? "",
+      item.applicationType ?? "",
       item.role ?? "",
       item.channel ?? "",
+      item.jobUrl ?? "",
+      item.location ?? "",
+      item.workMode ?? "",
+      item.salaryRange ?? "",
+      item.priority ?? "",
+      item.tags?.join(", ") ?? "",
+      item.cvVersion ?? "",
       item.workflowId,
       item.startDate,
       item.outcome ?? "",
@@ -168,11 +193,15 @@ type CanonicalColumn = (typeof CSV_HEADERS)[number];
 const HEADER_ALIASES: Record<string, CanonicalColumn> = {
   title: "title",
   name: "title",
-  company: "title",
   "başlık": "title",
   baslik: "title",
-  "şirket": "title",
-  sirket: "title",
+  company: "company",
+  "şirket": "company",
+  sirket: "company",
+  kurum: "company",
+  applicationtype: "applicationType",
+  application_type: "applicationType",
+  "başvuru türü": "applicationType",
   role: "role",
   position: "role",
   rol: "role",
@@ -180,6 +209,25 @@ const HEADER_ALIASES: Record<string, CanonicalColumn> = {
   channel: "channel",
   source: "channel",
   kanal: "channel",
+  joburl: "jobUrl",
+  job_url: "jobUrl",
+  "ilan linki": "jobUrl",
+  location: "location",
+  konum: "location",
+  "şehir": "location",
+  workmode: "workMode",
+  work_mode: "workMode",
+  "çalışma şekli": "workMode",
+  salaryrange: "salaryRange",
+  salary_range: "salaryRange",
+  "maaş": "salaryRange",
+  priority: "priority",
+  "öncelik": "priority",
+  tags: "tags",
+  etiketler: "tags",
+  cvversion: "cvVersion",
+  cv_version: "cvVersion",
+  cv: "cvVersion",
   workflowid: "workflowId",
   workflow: "workflowId",
   "iş akışı": "workflowId",
@@ -245,7 +293,7 @@ export function parseItemsFromCsv(
     }
   });
 
-  if (!columnMap.has("title")) {
+  if (!columnMap.has("title") && !columnMap.has("company")) {
     return {
       rows: [],
       errors: [{ rowNumber: 1, message: "Missing required column: title" }],
@@ -263,7 +311,8 @@ export function parseItemsFromCsv(
       return idx === undefined ? "" : (cells[idx] ?? "").trim();
     };
 
-    const title = get("title");
+    const company = get("company") || undefined;
+    const title = get("title") || company || "";
     if (!title) {
       errors.push({ rowNumber, message: "Title is required" });
       continue;
@@ -282,8 +331,33 @@ export function parseItemsFromCsv(
         ? rawWorkflowId
         : options.defaultWorkflowId;
 
+    const rawAppType = get("applicationType");
+    const applicationType: ApplicationType | undefined =
+      rawAppType === "job_posting" || rawAppType === "general" ? rawAppType : undefined;
     const role = get("role") || undefined;
     const channel = get("channel") || undefined;
+    const jobUrl = get("jobUrl") || undefined;
+    if (jobUrl && !isSafeHttpUrl(jobUrl)) {
+      errors.push({ rowNumber, message: `Unsupported job URL: ${jobUrl}` });
+      continue;
+    }
+    const location = get("location") || undefined;
+    const rawWorkMode = get("workMode");
+    const workMode: WorkMode | undefined =
+      rawWorkMode === "remote" || rawWorkMode === "hybrid" || rawWorkMode === "onsite"
+        ? rawWorkMode
+        : undefined;
+    const salaryRange = get("salaryRange") || undefined;
+    const rawPriority = get("priority");
+    const priority: ItemPriority | undefined =
+      rawPriority === "high" || rawPriority === "normal" || rawPriority === "low"
+        ? rawPriority
+        : undefined;
+    const tags = get("tags")
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    const cvVersion = get("cvVersion") || undefined;
     const notes = get("notes") || undefined;
     const outcome = get("outcome") || undefined;
     const archivedRaw = get("archived").toLowerCase();
@@ -303,8 +377,17 @@ export function parseItemsFromCsv(
 
     const input: CreateItemInput = {
       title,
+      company,
+      applicationType,
       role,
       channel,
+      jobUrl,
+      location,
+      workMode,
+      salaryRange,
+      priority,
+      tags: tags.length > 0 ? tags : undefined,
+      cvVersion,
       workflowId,
       startDate,
       notes,

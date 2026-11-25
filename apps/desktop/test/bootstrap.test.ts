@@ -153,12 +153,13 @@ describe("bootstrap & services", () => {
   it("reports database_newer when the database has a newer migration version without touching data", async () => {
     const sqlite = openInMemory();
     const clock = createAdvancingClock();
-    const v2: Migration = {
-      version: 2,
-      name: "0002_future",
+    const nextVersion = builtInMigrations.length + 1;
+    const vNext: Migration = {
+      version: nextVersion,
+      name: `000${nextVersion}_future`,
       sql: "CREATE TABLE future_tbl (id TEXT PRIMARY KEY)",
     };
-    await runMigrations(sqlite, [...builtInMigrations, v2], clock);
+    await runMigrations(sqlite, [...builtInMigrations, vNext], clock);
 
     const result = await bootstrap({
       executor: sqlite,
@@ -178,7 +179,9 @@ describe("bootstrap & services", () => {
     const rows = await sqlite.select<{ version: number }>(
       "SELECT version FROM schema_migrations ORDER BY version",
     );
-    expect(rows.map((r) => r.version)).toEqual([1, 2]);
+    expect(rows.map((r) => r.version)).toEqual(
+      Array.from({ length: nextVersion }, (_, i) => i + 1),
+    );
   });
 });
 

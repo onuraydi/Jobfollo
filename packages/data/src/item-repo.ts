@@ -1,4 +1,12 @@
-import { isValidISODate, type ContactStatus, type ISODate, type StepRecord } from "@jobfollo/core";
+import {
+  isValidISODate,
+  type ApplicationType,
+  type ContactStatus,
+  type ISODate,
+  type ItemPriority,
+  type StepRecord,
+  type WorkMode,
+} from "@jobfollo/core";
 import { randomIdGenerator, systemClock } from "./defaults.js";
 import {
   ContactNotFoundError,
@@ -39,8 +47,17 @@ import {
 interface ItemRow {
   id: string;
   title: string;
+  company: string | null;
+  application_type: ApplicationType | null;
   role: string | null;
   channel: string | null;
+  job_url: string | null;
+  location: string | null;
+  work_mode: WorkMode | null;
+  salary_range: string | null;
+  priority: ItemPriority | null;
+  tags_json: string | null;
+  cv_version: string | null;
   workflow_id: string;
   start_date: string;
   outcome: string | null;
@@ -63,7 +80,104 @@ interface StepRecordRow {
   step_key: string;
   completed_on: string | null;
   skipped: number;
+  snoozed_until: string | null;
 }
+
+const VALID_WORK_MODES = new Set<WorkMode>(["remote", "hybrid", "onsite"]);
+const VALID_PRIORITIES = new Set<ItemPriority>(["high", "normal", "low"]);
+const VALID_APP_TYPES = new Set<ApplicationType>(["job_posting", "general"]);
+
+function validateApplicationType(
+  value: ApplicationType | null | undefined,
+  issues: FieldValidationIssue[],
+): void {
+  if (value === undefined || value === null) return;
+  if (!VALID_APP_TYPES.has(value)) {
+    issues.push({
+      field: "applicationType",
+      message: "applicationType must be one of: job_posting, general.",
+    });
+  }
+}
+
+function validateWorkMode(
+  value: WorkMode | null | undefined,
+  issues: FieldValidationIssue[],
+): void {
+  if (value === undefined || value === null) return;
+  if (!VALID_WORK_MODES.has(value)) {
+    issues.push({
+      field: "workMode",
+      message: `workMode must be one of: remote, hybrid, onsite.`,
+    });
+  }
+}
+
+function validatePriority(
+  value: ItemPriority | null | undefined,
+  issues: FieldValidationIssue[],
+): void {
+  if (value === undefined || value === null) return;
+  if (!VALID_PRIORITIES.has(value)) {
+    issues.push({
+      field: "priority",
+      message: `priority must be one of: high, normal, low.`,
+    });
+  }
+}
+
+function normalizeAndValidateTags(
+  value: string[] | null | undefined,
+  issues: FieldValidationIssue[],
+): string[] | null {
+  if (value === undefined || value === null) return null;
+  if (!Array.isArray(value)) {
+    issues.push({ field: "tags", message: "tags must be an array of strings." });
+    return null;
+  }
+  const cleaned: string[] = [];
+  const seen = new Set<string>();
+  for (const raw of value) {
+    if (typeof raw !== "string") {
+      issues.push({ field: "tags", message: "Each tag must be a string." });
+      return null;
+    }
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    if (trimmed.length > 50) {
+      issues.push({ field: "tags", message: "Each tag must be at most 50 characters." });
+      return null;
+    }
+    const key = trimmed.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      cleaned.push(trimmed);
+    }
+  }
+  if (cleaned.length > 20) {
+    issues.push({ field: "tags", message: "At most 20 tags are allowed." });
+    return null;
+  }
+  return cleaned.length > 0 ? cleaned : null;
+}
+
+function parseTagsJson(raw: string | null): string[] | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const strs = parsed.filter((t): t is string => typeof t === "string" && t.trim().length > 0);
+      return strs.length > 0 ? strs : undefined;
+    }
+  } catch {
+    // Ignore corrupt JSON
+  }
+  return undefined;
+}
+
+const ITEM_SELECT_COLUMNS = `id, title, company, application_type, role, channel, job_url, location, work_mode,
+  salary_range, priority, tags_json, cv_version, workflow_id, start_date,
+  outcome, notes, archived_at, created_at, updated_at`;
 
 function mapContactRow(row: ContactRow): StoredContact {
   const contact: StoredContact = {
@@ -87,6 +201,9 @@ function mapStepRow(row: StepRecordRow): StepRecord {
   if (row.skipped === 1) {
     record.skipped = true;
   }
+  if (row.snoozed_until !== null) {
+    record.snoozedUntil = row.snoozed_until;
+  }
   return record;
 }
 
@@ -105,11 +222,39 @@ function mapItemRow(
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+  if (row.company !== null) {
+    item.company = row.company;
+  }
+  if (row.application_type !== null) {
+    item.applicationType = row.application_type;
+  }
   if (row.role !== null) {
     item.role = row.role;
   }
   if (row.channel !== null) {
     item.channel = row.channel;
+  }
+  if (row.job_url !== null) {
+    item.jobUrl = row.job_url;
+  }
+  if (row.location !== null) {
+    item.location = row.location;
+  }
+  if (row.work_mode !== null) {
+    item.workMode = row.work_mode;
+  }
+  if (row.salary_range !== null) {
+    item.salaryRange = row.salary_range;
+  }
+  if (row.priority !== null) {
+    item.priority = row.priority;
+  }
+  const tags = parseTagsJson(row.tags_json);
+  if (tags !== undefined) {
+    item.tags = tags;
+  }
+  if (row.cv_version !== null) {
+    item.cvVersion = row.cv_version;
   }
   if (row.outcome !== null) {
     item.outcome = row.outcome;
@@ -160,8 +305,17 @@ export function createItemRepository(
     const issues: FieldValidationIssue[] = [];
 
     const title = validateTitle(input.title, issues);
+    validateOptionalText(input.company, "company", MAX_SHORT_TEXT, issues);
+    validateApplicationType(input.applicationType, issues);
     validateOptionalText(input.role, "role", MAX_SHORT_TEXT, issues);
     validateOptionalText(input.channel, "channel", MAX_SHORT_TEXT, issues);
+    validateProfileUrl(input.jobUrl, "jobUrl", issues);
+    validateOptionalText(input.location, "location", MAX_SHORT_TEXT, issues);
+    validateWorkMode(input.workMode, issues);
+    validateOptionalText(input.salaryRange, "salaryRange", MAX_SHORT_TEXT, issues);
+    validatePriority(input.priority, issues);
+    const normalizedTags = normalizeAndValidateTags(input.tags, issues);
+    validateOptionalText(input.cvVersion, "cvVersion", MAX_SHORT_TEXT, issues);
     validateOptionalText(input.notes, "notes", MAX_NOTES, issues);
 
     if (typeof input.startDate !== "string" || !isValidISODate(input.startDate)) {
@@ -206,6 +360,12 @@ export function createItemRepository(
           message: "completedOn must be a valid YYYY-MM-DD date.",
         });
       }
+      if (step.snoozedUntil !== undefined && !isValidISODate(step.snoozedUntil)) {
+        issues.push({
+          field: `steps[${i}].snoozedUntil`,
+          message: "snoozedUntil must be a valid YYYY-MM-DD date.",
+        });
+      }
     }
 
     if (issues.length > 0) {
@@ -218,14 +378,24 @@ export function createItemRepository(
     const statements: SqlStatement[] = [
       {
         sql: `INSERT INTO item (
-                id, title, role, channel, workflow_id, start_date,
+                id, title, company, application_type, role, channel, job_url, location, work_mode,
+                salary_range, priority, tags_json, cv_version, workflow_id, start_date,
                 outcome, notes, archived_at, created_at, updated_at
-              ) VALUES (?, ?, ?, ?, ?, ?, NULL, ?, NULL, ?, ?)`,
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL, ?, ?)`,
         params: [
           itemId,
           title,
+          input.company ?? null,
+          input.applicationType ?? null,
           input.role ?? null,
           input.channel ?? null,
+          input.jobUrl ?? null,
+          input.location ?? null,
+          input.workMode ?? null,
+          input.salaryRange ?? null,
+          input.priority ?? null,
+          normalizedTags ? JSON.stringify(normalizedTags) : null,
+          input.cvVersion ?? null,
           input.workflowId,
           input.startDate,
           input.notes ?? null,
@@ -259,9 +429,9 @@ export function createItemRepository(
     for (const s of inputSteps) {
       const skippedFlag = s.skipped === true ? 1 : 0;
       statements.push({
-        sql: `INSERT INTO step_record (item_id, step_key, completed_on, skipped)
-              VALUES (?, ?, ?, ?)`,
-        params: [itemId, s.stepKey, s.completedOn ?? null, skippedFlag],
+        sql: `INSERT INTO step_record (item_id, step_key, completed_on, skipped, snoozed_until)
+              VALUES (?, ?, ?, ?, ?)`,
+        params: [itemId, s.stepKey, s.completedOn ?? null, skippedFlag, s.snoozedUntil ?? null],
       });
       const storedStep: StepRecord = { stepKey: s.stepKey };
       if (s.completedOn !== undefined) {
@@ -269,6 +439,9 @@ export function createItemRepository(
       }
       if (skippedFlag === 1) {
         storedStep.skipped = true;
+      }
+      if (s.snoozedUntil !== undefined) {
+        storedStep.snoozedUntil = s.snoozedUntil;
       }
       storedSteps.push(storedStep);
     }
@@ -287,22 +460,24 @@ export function createItemRepository(
       createdAt: now,
       updatedAt: now,
     };
-    if (input.role !== undefined) {
-      item.role = input.role;
-    }
-    if (input.channel !== undefined) {
-      item.channel = input.channel;
-    }
-    if (input.notes !== undefined) {
-      item.notes = input.notes;
-    }
+    if (input.company !== undefined) item.company = input.company;
+    if (input.applicationType !== undefined) item.applicationType = input.applicationType;
+    if (input.role !== undefined) item.role = input.role;
+    if (input.channel !== undefined) item.channel = input.channel;
+    if (input.jobUrl !== undefined) item.jobUrl = input.jobUrl;
+    if (input.location !== undefined) item.location = input.location;
+    if (input.workMode !== undefined) item.workMode = input.workMode;
+    if (input.salaryRange !== undefined) item.salaryRange = input.salaryRange;
+    if (input.priority !== undefined) item.priority = input.priority;
+    if (normalizedTags !== null) item.tags = normalizedTags;
+    if (input.cvVersion !== undefined) item.cvVersion = input.cvVersion;
+    if (input.notes !== undefined) item.notes = input.notes;
     return item;
   }
 
   async function get(id: string): Promise<StoredItem | null> {
     const itemRows = await executor.select<ItemRow>(
-      `SELECT id, title, role, channel, workflow_id, start_date,
-              outcome, notes, archived_at, created_at, updated_at
+      `SELECT ${ITEM_SELECT_COLUMNS}
        FROM item WHERE id = ?`,
       [id],
     );
@@ -318,7 +493,7 @@ export function createItemRepository(
       [id],
     );
     const stepRows = await executor.select<StepRecordRow>(
-      `SELECT item_id, step_key, completed_on, skipped
+      `SELECT item_id, step_key, completed_on, skipped, snoozed_until
        FROM step_record WHERE item_id = ?
        ORDER BY step_key ASC`,
       [id],
@@ -332,12 +507,10 @@ export function createItemRepository(
 
     const itemRows = await executor.select<ItemRow>(
       includeArchived
-        ? `SELECT id, title, role, channel, workflow_id, start_date,
-                  outcome, notes, archived_at, created_at, updated_at
+        ? `SELECT ${ITEM_SELECT_COLUMNS}
            FROM item
            ORDER BY created_at DESC, rowid DESC`
-        : `SELECT id, title, role, channel, workflow_id, start_date,
-                  outcome, notes, archived_at, created_at, updated_at
+        : `SELECT ${ITEM_SELECT_COLUMNS}
            FROM item
            WHERE archived_at IS NULL
            ORDER BY created_at DESC, rowid DESC`,
@@ -361,10 +534,10 @@ export function createItemRepository(
 
     const stepRows = await executor.select<StepRecordRow>(
       includeArchived
-        ? `SELECT item_id, step_key, completed_on, skipped
+        ? `SELECT item_id, step_key, completed_on, skipped, snoozed_until
            FROM step_record
            ORDER BY step_key ASC`
-        : `SELECT s.item_id, s.step_key, s.completed_on, s.skipped
+        : `SELECT s.item_id, s.step_key, s.completed_on, s.skipped, s.snoozed_until
            FROM step_record s
            INNER JOIN item i ON i.id = s.item_id
            WHERE i.archived_at IS NULL
@@ -409,6 +582,18 @@ export function createItemRepository(
       params.push(trimmed);
     }
 
+    if (patch.company !== undefined) {
+      validateOptionalText(patch.company, "company", MAX_SHORT_TEXT, issues);
+      setClauses.push("company = ?");
+      params.push(patch.company);
+    }
+
+    if (patch.applicationType !== undefined) {
+      validateApplicationType(patch.applicationType, issues);
+      setClauses.push("application_type = ?");
+      params.push(patch.applicationType);
+    }
+
     if (patch.role !== undefined) {
       validateOptionalText(patch.role, "role", MAX_SHORT_TEXT, issues);
       setClauses.push("role = ?");
@@ -419,6 +604,48 @@ export function createItemRepository(
       validateOptionalText(patch.channel, "channel", MAX_SHORT_TEXT, issues);
       setClauses.push("channel = ?");
       params.push(patch.channel);
+    }
+
+    if (patch.jobUrl !== undefined) {
+      validateProfileUrl(patch.jobUrl, "jobUrl", issues);
+      setClauses.push("job_url = ?");
+      params.push(patch.jobUrl);
+    }
+
+    if (patch.location !== undefined) {
+      validateOptionalText(patch.location, "location", MAX_SHORT_TEXT, issues);
+      setClauses.push("location = ?");
+      params.push(patch.location);
+    }
+
+    if (patch.workMode !== undefined) {
+      validateWorkMode(patch.workMode, issues);
+      setClauses.push("work_mode = ?");
+      params.push(patch.workMode);
+    }
+
+    if (patch.salaryRange !== undefined) {
+      validateOptionalText(patch.salaryRange, "salaryRange", MAX_SHORT_TEXT, issues);
+      setClauses.push("salary_range = ?");
+      params.push(patch.salaryRange);
+    }
+
+    if (patch.priority !== undefined) {
+      validatePriority(patch.priority, issues);
+      setClauses.push("priority = ?");
+      params.push(patch.priority);
+    }
+
+    if (patch.tags !== undefined) {
+      const normalized = normalizeAndValidateTags(patch.tags, issues);
+      setClauses.push("tags_json = ?");
+      params.push(normalized ? JSON.stringify(normalized) : null);
+    }
+
+    if (patch.cvVersion !== undefined) {
+      validateOptionalText(patch.cvVersion, "cvVersion", MAX_SHORT_TEXT, issues);
+      setClauses.push("cv_version = ?");
+      params.push(patch.cvVersion);
     }
 
     if (patch.notes !== undefined) {
@@ -577,7 +804,8 @@ export function createItemRepository(
               VALUES (?, ?, ?, 0)
               ON CONFLICT(item_id, step_key) DO UPDATE SET
                 completed_on = excluded.completed_on,
-                skipped = 0`,
+                skipped = 0,
+                snoozed_until = NULL`,
         params: [itemId, stepKey, completedOn],
       },
     ];
@@ -603,12 +831,41 @@ export function createItemRepository(
     const now = clock.nowIso();
     await executor.batch([
       {
-        sql: `INSERT INTO step_record (item_id, step_key, completed_on, skipped)
-              VALUES (?, ?, NULL, 1)
+        sql: `INSERT INTO step_record (item_id, step_key, completed_on, skipped, snoozed_until)
+              VALUES (?, ?, NULL, 1, NULL)
               ON CONFLICT(item_id, step_key) DO UPDATE SET
                 completed_on = NULL,
-                skipped = 1`,
+                skipped = 1,
+                snoozed_until = NULL`,
         params: [itemId, stepKey],
+      },
+      {
+        sql: "UPDATE item SET updated_at = ? WHERE id = ?",
+        params: [now, itemId],
+      },
+    ]);
+  }
+
+  async function snoozeStep(
+    itemId: string,
+    stepKey: string,
+    snoozedUntil: ISODate | null,
+  ): Promise<void> {
+    if (snoozedUntil !== null && !isValidISODate(snoozedUntil)) {
+      throw new ItemValidationError([
+        { field: "snoozedUntil", message: "snoozedUntil must be a valid YYYY-MM-DD date." },
+      ]);
+    }
+    await requireStepInCurrentWorkflow(itemId, stepKey);
+
+    const now = clock.nowIso();
+    await executor.batch([
+      {
+        sql: `INSERT INTO step_record (item_id, step_key, completed_on, skipped, snoozed_until)
+              VALUES (?, ?, NULL, 0, ?)
+              ON CONFLICT(item_id, step_key) DO UPDATE SET
+                snoozed_until = excluded.snoozed_until`,
+        params: [itemId, stepKey, snoozedUntil],
       },
       {
         sql: "UPDATE item SET updated_at = ? WHERE id = ?",
@@ -780,6 +1037,7 @@ export function createItemRepository(
     delete: remove,
     completeStep,
     skipStep,
+    snoozeStep,
     undoStep,
     setOutcome,
     addContact,

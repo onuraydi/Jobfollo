@@ -29,7 +29,7 @@ describe("runMigrations", () => {
     db = createSqliteExecutor();
 
     const result = await runMigrations(db, builtInMigrations, fixedClock);
-    expect(result).toEqual({ applied: [1], currentVersion: 1 });
+    expect(result).toEqual({ applied: [1, 2, 3], currentVersion: 3 });
 
     const rows = await db.select<{
       version: number;
@@ -38,11 +38,23 @@ describe("runMigrations", () => {
       applied_at: string;
     }>("SELECT version, name, checksum, applied_at FROM schema_migrations ORDER BY version");
 
-    expect(rows).toHaveLength(1);
+    expect(rows).toHaveLength(3);
     expect(rows[0]).toEqual({
       version: 1,
       name: "0001_init",
       checksum: await computeChecksum(builtInMigrations[0]!.sql),
+      applied_at: "2026-03-10T09:00:00.000Z",
+    });
+    expect(rows[1]).toEqual({
+      version: 2,
+      name: "0002_item_details",
+      checksum: await computeChecksum(builtInMigrations[1]!.sql),
+      applied_at: "2026-03-10T09:00:00.000Z",
+    });
+    expect(rows[2]).toEqual({
+      version: 3,
+      name: "0003_application_type",
+      checksum: await computeChecksum(builtInMigrations[2]!.sql),
       applied_at: "2026-03-10T09:00:00.000Z",
     });
   });
@@ -55,7 +67,7 @@ describe("runMigrations", () => {
       nowIso: () => "2026-03-11T09:00:00.000Z",
     });
 
-    expect(second).toEqual({ applied: [], currentVersion: 1 });
+    expect(second).toEqual({ applied: [], currentVersion: 3 });
 
     const rows = await db.select<{ applied_at: string }>(
       "SELECT applied_at FROM schema_migrations WHERE version = 1",
@@ -95,6 +107,8 @@ describe("runMigrations", () => {
         ...builtInMigrations[0]!,
         sql: `${builtInMigrations[0]!.sql}\n-- tampered`,
       },
+      builtInMigrations[1]!,
+      builtInMigrations[2]!,
     ];
 
     let caught: unknown;
@@ -111,13 +125,14 @@ describe("runMigrations", () => {
   it("refuses to start when the DB schema version is newer than the app knows", async () => {
     db = createSqliteExecutor();
 
-    const v2: Migration = {
-      version: 2,
-      name: "0002_extra",
+    const nextVersion = builtInMigrations.length + 1;
+    const vNext: Migration = {
+      version: nextVersion,
+      name: `000${nextVersion}_extra`,
       sql: "CREATE TABLE extra (id TEXT PRIMARY KEY)",
     };
 
-    await runMigrations(db, [...builtInMigrations, v2], fixedClock);
+    await runMigrations(db, [...builtInMigrations, vNext], fixedClock);
 
     let caught: unknown;
     try {
@@ -198,14 +213,15 @@ describe("runMigrations", () => {
 
     await runMigrations(db, builtInMigrations, fixedClock);
 
-    const v2: Migration = {
-      version: 2,
-      name: "0002_extra",
+    const nextVersion = builtInMigrations.length + 1;
+    const vNext: Migration = {
+      version: nextVersion,
+      name: `000${nextVersion}_extra`,
       sql: "CREATE TABLE extra (id TEXT PRIMARY KEY)",
     };
 
-    const result = await runMigrations(db, [...builtInMigrations, v2], fixedClock);
-    expect(result).toEqual({ applied: [2], currentVersion: 2 });
+    const result = await runMigrations(db, [...builtInMigrations, vNext], fixedClock);
+    expect(result).toEqual({ applied: [nextVersion], currentVersion: nextVersion });
   });
 });
 

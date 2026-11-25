@@ -308,6 +308,57 @@ fn reports_open_error_without_panicking_when_path_is_a_directory() {
 }
 
 #[test]
+fn applies_all_builtin_sql_migrations_through_locked_down_db() {
+    let db = Database::open_in_memory().unwrap();
+    let migrations = [
+        include_str!("../../../../../packages/data/migrations/0001_init.sql"),
+        include_str!("../../../../../packages/data/migrations/0002_item_details.sql"),
+        include_str!("../../../../../packages/data/migrations/0003_application_type.sql"),
+    ];
+
+    for sql_file in migrations {
+        let statements: Vec<SqlStatement> = sql_file
+            .split("-- statement-break")
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| stmt(s, vec![]))
+            .collect();
+        db.batch(&statements).unwrap();
+    }
+
+    // Verify new columns exist and can be written/read
+    db.batch(&[stmt(
+        "INSERT INTO item (id, title, company, application_type, work_mode, priority, workflow_id, start_date, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        vec![
+            json!("i1"),
+            json!("Backend"),
+            json!("Acme"),
+            json!("general"),
+            json!("remote"),
+            json!("high"),
+            json!("job-application-networking"),
+            json!("2026-03-10"),
+            json!("2026-03-10T09:00:00Z"),
+            json!("2026-03-10T09:00:00Z"),
+        ],
+    )])
+    .unwrap();
+
+    let rows = db
+        .select(
+            "SELECT company, application_type, work_mode, priority FROM item WHERE id = ?",
+            &[json!("i1")],
+        )
+        .unwrap();
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0]["company"], json!("Acme"));
+    assert_eq!(rows[0]["application_type"], json!("general"));
+    assert_eq!(rows[0]["work_mode"], json!("remote"));
+    assert_eq!(rows[0]["priority"], json!("high"));
+}
+
+#[test]
 fn matches_exact_camel_case_json_ipc_contract() {
     let fixtures: JsonValue =
         serde_json::from_str(include_str!("../../../contract/ipc-fixtures.json")).unwrap();

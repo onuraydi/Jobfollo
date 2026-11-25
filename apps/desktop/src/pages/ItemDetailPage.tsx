@@ -1,12 +1,20 @@
 import {
+  addDays,
+  buildTemplateVars,
   computeSchedule,
+  exportEventToIcs,
   isValidISODate,
   localizedText,
+  nextMonday,
+  renderMessageTemplate,
   workflowName,
+  type ApplicationType,
   type ContactStatus,
   type ISODate,
+  type ItemPriority,
   type StepInstance,
   type StepStatus,
+  type WorkMode,
   type Workflow,
 } from "@jobfollo/core";
 import {
@@ -24,6 +32,7 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  Copy,
   ExternalLink,
   Lock,
   Pencil,
@@ -121,7 +130,7 @@ export function ItemDetailPage({
   const navigate = useNavigate();
   const { t } = useTranslation();
   const services = useServices();
-  const { resolvedLocale } = usePreferences();
+  const { resolvedLocale, skipWeekends } = usePreferences();
   const { revision, bumpRevision } = useDataRevision();
   const hookToday = useLocalToday();
   const today = todayOverride ?? hookToday;
@@ -133,14 +142,24 @@ export function ItemDetailPage({
   // Header edit state
   const [editingHeader, setEditingHeader] = useState(false);
   const [editTitle, setEditTitle] = useState("");
+  const [editCompany, setEditCompany] = useState("");
+  const [editAppType, setEditAppType] = useState<ApplicationType | "">("");
   const [editRole, setEditRole] = useState("");
   const [editChannel, setEditChannel] = useState("");
+  const [editJobUrl, setEditJobUrl] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+  const [editWorkMode, setEditWorkMode] = useState<WorkMode | "">("");
+  const [editSalaryRange, setEditSalaryRange] = useState("");
+  const [editPriority, setEditPriority] = useState<ItemPriority>("normal");
+  const [editTags, setEditTags] = useState("");
+  const [editCvVersion, setEditCvVersion] = useState("");
   const [editWorkflowId, setEditWorkflowId] = useState("");
   const [editStartDate, setEditStartDate] = useState<ISODate>(today);
   const [headerErrors, setHeaderErrors] = useState<Record<string, string>>({});
 
   // Timeline state
   const [customDates, setCustomDates] = useState<Record<string, ISODate>>({});
+  const [copiedStepKey, setCopiedStepKey] = useState<string | null>(null);
   const [contactDialog, setContactDialog] = useState<ContactDialogState | null>(null);
   const [dialogNewContactName, setDialogNewContactName] = useState("");
 
@@ -207,14 +226,23 @@ export function ItemDetailPage({
 
   const schedule = useMemo<StepInstance[]>(() => {
     if (!item || !workflow) return [];
-    return computeSchedule(item, workflow, today);
-  }, [item, workflow, today]);
+    return computeSchedule(item, workflow, today, { skipWeekends });
+  }, [item, workflow, today, skipWeekends]);
 
   const openHeaderEditor = useCallback(() => {
     if (!item) return;
     setEditTitle(item.title);
+    setEditCompany(item.company ?? "");
+    setEditAppType(item.applicationType ?? "");
     setEditRole(item.role ?? "");
     setEditChannel(item.channel ?? "");
+    setEditJobUrl(item.jobUrl ?? "");
+    setEditLocation(item.location ?? "");
+    setEditWorkMode(item.workMode ?? "");
+    setEditSalaryRange(item.salaryRange ?? "");
+    setEditPriority(item.priority ?? "normal");
+    setEditTags(item.tags?.join(", ") ?? "");
+    setEditCvVersion(item.cvVersion ?? "");
     setEditWorkflowId(item.workflowId);
     setEditStartDate(item.startDate);
     setHeaderErrors({});
@@ -225,11 +253,24 @@ export function ItemDetailPage({
     e.preventDefault();
     if (!item) return;
     setHeaderErrors({});
+    const parsedTags = editTags
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
     try {
       await services.items.update(item.id, {
         title: editTitle,
+        company: editCompany.trim() ? editCompany.trim() : null,
+        applicationType: editAppType || null,
         role: editRole.trim() ? editRole.trim() : null,
         channel: editChannel.trim() ? editChannel.trim() : null,
+        jobUrl: editJobUrl.trim() ? editJobUrl.trim() : null,
+        location: editLocation.trim() ? editLocation.trim() : null,
+        workMode: editWorkMode || null,
+        salaryRange: editSalaryRange.trim() ? editSalaryRange.trim() : null,
+        priority: editPriority,
+        tags: parsedTags.length > 0 ? parsedTags : null,
+        cvVersion: editCvVersion.trim() ? editCvVersion.trim() : null,
         workflowId: editWorkflowId,
         startDate: editStartDate,
       });
@@ -346,6 +387,51 @@ export function ItemDetailPage({
     bumpRevision();
   };
 
+  const handleStepSnooze = async (stepKey: string, mode: "tomorrow" | "3days" | "nextMonday") => {
+    if (!item) return;
+    const targetDate =
+      mode === "tomorrow"
+        ? addDays(today, 1)
+        : mode === "3days"
+          ? addDays(today, 3)
+          : nextMonday(today);
+    await services.items.snoozeStep(item.id, stepKey, targetDate);
+    bumpRevision();
+  };
+
+  const handleDownloadStepIcs = (step: StepInstance, localizedStepTitle: string) => {
+    if (!item || !step.dueDate) return;
+    const label = item.company ? `${item.company} — ${item.title}` : item.title;
+    const ics = exportEventToIcs({
+      uid: `${item.id}-${step.stepKey}`,
+      date: step.dueDate,
+      summary: `${label}: ${localizedStepTitle}`,
+      description: item.notes,
+      url: isSafeHttpUrl(item.jobUrl) ? item.jobUrl : undefined,
+    });
+    const blob = new Blob([ics], { type: "text/calendar;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `jobfollo-${step.stepKey}-${step.dueDate}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyStepMessage = async (stepKey: string, template: string) => {
+    if (!item) return;
+    const text = renderMessageTemplate(template, buildTemplateVars(item));
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    }
+    setCopiedStepKey(stepKey);
+    window.setTimeout(() => {
+      setCopiedStepKey((prev) => (prev === stepKey ? null : prev));
+    }, 2000);
+  };
+
   const handleAddContact = async (e: FormEvent) => {
     e.preventDefault();
     if (!item) return;
@@ -449,7 +535,7 @@ export function ItemDetailPage({
   }
 
   return (
-    <section className="mx-auto max-w-4xl space-y-6">
+    <section className="w-full space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           type="button"
@@ -511,9 +597,25 @@ export function ItemDetailPage({
       <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
         {!editingHeader ? (
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-semibold tracking-tight">{item.title}</h1>
+                {item.applicationType && (
+                  <span className="rounded bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-medium text-[var(--primary)]">
+                    {t(`applicationType.${item.applicationType}`)}
+                  </span>
+                )}
+                {item.priority && item.priority !== "normal" && (
+                  <span
+                    className={`rounded px-2 py-0.5 text-xs font-medium ${
+                      item.priority === "high"
+                        ? "bg-[var(--danger-bg)] text-[var(--danger)]"
+                        : "bg-[var(--surface-muted)] text-[var(--fg-muted)]"
+                    }`}
+                  >
+                    {t(`priority.${item.priority}`)}
+                  </span>
+                )}
                 {item.archivedAt && (
                   <span className="rounded bg-[var(--surface-muted)] px-2 py-0.5 text-xs font-medium text-[var(--fg-muted)]">
                     {t("pages.items.archivedBadge")}
@@ -521,6 +623,14 @@ export function ItemDetailPage({
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--fg-muted)]">
+                {item.company && (
+                  <span>
+                    <strong className="font-medium text-[var(--fg)]">
+                      {t("pages.itemDetail.companyLabel")}:
+                    </strong>{" "}
+                    {item.company}
+                  </span>
+                )}
                 {item.role && (
                   <span>
                     <strong className="font-medium text-[var(--fg)]">
@@ -537,6 +647,31 @@ export function ItemDetailPage({
                     {item.channel}
                   </span>
                 )}
+                {item.location && (
+                  <span>
+                    <strong className="font-medium text-[var(--fg)]">
+                      {t("pages.itemDetail.locationLabel")}:
+                    </strong>{" "}
+                    {item.location}
+                  </span>
+                )}
+                {item.workMode && <span>{t(`workMode.${item.workMode}`)}</span>}
+                {item.salaryRange && (
+                  <span>
+                    <strong className="font-medium text-[var(--fg)]">
+                      {t("pages.itemDetail.salaryLabel")}:
+                    </strong>{" "}
+                    {item.salaryRange}
+                  </span>
+                )}
+                {item.cvVersion && (
+                  <span>
+                    <strong className="font-medium text-[var(--fg)]">
+                      {t("pages.itemDetail.cvLabel")}:
+                    </strong>{" "}
+                    {item.cvVersion}
+                  </span>
+                )}
                 <span>
                   {workflow ? workflowName(workflow, resolvedLocale) : item.workflowId}
                 </span>
@@ -546,6 +681,28 @@ export function ItemDetailPage({
                   })}
                 </span>
               </div>
+              {(isSafeHttpUrl(item.jobUrl) || (item.tags && item.tags.length > 0)) && (
+                <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                  {isSafeHttpUrl(item.jobUrl) && (
+                    <button
+                      type="button"
+                      onClick={() => void openExternalUrl(item.jobUrl!, externalUrlOpener)}
+                      className="inline-flex items-center gap-1 rounded border border-[var(--border)] bg-[var(--bg)] px-2 py-0.5 text-xs font-medium text-[var(--primary)] hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                      <span>{t("pages.itemDetail.openJobPosting")}</span>
+                    </button>
+                  )}
+                  {item.tags?.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-[var(--accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--primary)]"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <button
@@ -559,22 +716,158 @@ export function ItemDetailPage({
           </div>
         ) : (
           <form onSubmit={(e) => void handleHeaderSubmit(e)} noValidate className="space-y-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="edit-item-title" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldTitle")}
+                </label>
+                <input
+                  id="edit-item-title"
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                />
+                {headerErrors.title && (
+                  <p role="alert" className="mt-1 text-xs text-[var(--danger)]">
+                    {headerErrors.title}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="edit-item-company" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldCompany")}
+                </label>
+                <input
+                  id="edit-item-company"
+                  type="text"
+                  value={editCompany}
+                  onChange={(e) => setEditCompany(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                />
+              </div>
+            </div>
+
             <div>
-              <label htmlFor="edit-item-title" className="block text-xs font-medium text-[var(--fg-muted)]">
-                {t("pages.items.fieldTitle")}
+              <label htmlFor="edit-item-app-type" className="block text-xs font-medium text-[var(--fg-muted)]">
+                {t("pages.items.fieldApplicationType")}
               </label>
-              <input
-                id="edit-item-title"
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
+              <select
+                id="edit-item-app-type"
+                value={editAppType}
+                onChange={(e) => setEditAppType(e.target.value as ApplicationType | "")}
                 className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
-              />
-              {headerErrors.title && (
-                <p role="alert" className="mt-1 text-xs text-[var(--danger)]">
-                  {headerErrors.title}
-                </p>
-              )}
+              >
+                <option value="">{t("applicationType.unspecified")}</option>
+                <option value="job_posting">{t("applicationType.job_posting")}</option>
+                <option value="general">{t("applicationType.general")}</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div>
+                <label htmlFor="edit-item-location" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldLocation")}
+                </label>
+                <input
+                  id="edit-item-location"
+                  type="text"
+                  value={editLocation}
+                  onChange={(e) => setEditLocation(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-item-work-mode" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldWorkMode")}
+                </label>
+                <select
+                  id="edit-item-work-mode"
+                  value={editWorkMode}
+                  onChange={(e) => setEditWorkMode(e.target.value as WorkMode | "")}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                >
+                  <option value="">{t("workMode.unspecified")}</option>
+                  <option value="remote">{t("workMode.remote")}</option>
+                  <option value="hybrid">{t("workMode.hybrid")}</option>
+                  <option value="onsite">{t("workMode.onsite")}</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="edit-item-priority" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldPriority")}
+                </label>
+                <select
+                  id="edit-item-priority"
+                  value={editPriority}
+                  onChange={(e) => setEditPriority(e.target.value as ItemPriority)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                >
+                  <option value="high">{t("priority.high")}</option>
+                  <option value="normal">{t("priority.normal")}</option>
+                  <option value="low">{t("priority.low")}</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="edit-item-job-url" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldJobUrl")}
+                </label>
+                <input
+                  id="edit-item-job-url"
+                  type="url"
+                  value={editJobUrl}
+                  onChange={(e) => setEditJobUrl(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                />
+                {headerErrors.jobUrl && (
+                  <p role="alert" className="mt-1 text-xs text-[var(--danger)]">
+                    {headerErrors.jobUrl}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label htmlFor="edit-item-salary" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldSalaryRange")}
+                </label>
+                <input
+                  id="edit-item-salary"
+                  type="text"
+                  value={editSalaryRange}
+                  onChange={(e) => setEditSalaryRange(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="edit-item-tags" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldTags")}
+                </label>
+                <input
+                  id="edit-item-tags"
+                  type="text"
+                  value={editTags}
+                  onChange={(e) => setEditTags(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-item-cv" className="block text-xs font-medium text-[var(--fg-muted)]">
+                  {t("pages.items.fieldCvVersion")}
+                </label>
+                <input
+                  id="edit-item-cv"
+                  type="text"
+                  value={editCvVersion}
+                  onChange={(e) => setEditCvVersion(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-sm"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -677,8 +970,9 @@ export function ItemDetailPage({
         )}
       </div>
 
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
       {/* Step timeline */}
-      <div className="space-y-3">
+      <div className="space-y-3 lg:col-span-7">
         <h2 className="text-base font-semibold">{t("pages.itemDetail.timelineTitle")}</h2>
         {!workflow ? (
           <div className="rounded-lg border border-[var(--warning)] bg-[var(--warning-bg)] p-4 text-sm text-[var(--warning)]">
@@ -694,6 +988,7 @@ export function ItemDetailPage({
                 step.status === "pending";
               const canUndo = step.status === "done" || step.status === "skipped";
               const dateVal = customDates[step.stepKey] ?? today;
+              const wfStep = workflow.steps.find((s) => s.key === step.stepKey);
 
               return (
                 <li
@@ -728,8 +1023,48 @@ export function ItemDetailPage({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
+                    {step.dueDate && canComplete && (
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadStepIcs(step, title)}
+                        className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs font-medium hover:bg-[var(--surface-muted)]"
+                      >
+                        <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>{t("pages.itemDetail.exportIcs")}</span>
+                      </button>
+                    )}
+                    {wfStep?.messageTemplate && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void handleCopyStepMessage(step.stepKey, wfStep.messageTemplate!)
+                        }
+                        className="inline-flex items-center gap-1 rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-xs font-medium hover:bg-[var(--surface-muted)]"
+                      >
+                        <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>
+                          {copiedStepKey === step.stepKey
+                            ? t("pages.today.copiedMessage")
+                            : t("pages.today.copyMessage")}
+                        </span>
+                      </button>
+                    )}
                     {canComplete && (
                       <>
+                        <select
+                          aria-label={`${t("pages.today.snoozeLabel")} — ${title}`}
+                          value=""
+                          onChange={(e) => {
+                            const val = e.target.value as "tomorrow" | "3days" | "nextMonday" | "";
+                            if (val) void handleStepSnooze(step.stepKey, val);
+                          }}
+                          className="rounded-md border border-[var(--border)] bg-[var(--bg)] px-2 py-1 text-xs"
+                        >
+                          <option value="">{t("pages.today.snoozeLabel")}…</option>
+                          <option value="tomorrow">{t("pages.today.snoozeTomorrow")}</option>
+                          <option value="3days">{t("pages.today.snooze3Days")}</option>
+                          <option value="nextMonday">{t("pages.today.snoozeNextMonday")}</option>
+                        </select>
                         <input
                           type="date"
                           aria-label={`${t("pages.today.customDateLabel")} — ${title}`}
@@ -778,6 +1113,8 @@ export function ItemDetailPage({
         )}
       </div>
 
+      {/* Right column: Contacts + Notes */}
+      <div className="space-y-6 lg:col-span-5">
       {/* Contacts */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -1042,6 +1379,8 @@ export function ItemDetailPage({
           placeholder={t("pages.itemDetail.notesPlaceholder")}
           className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-sm"
         />
+      </div>
+      </div>
       </div>
 
       {/* Contact status dialog for records="contactStatus" steps */}

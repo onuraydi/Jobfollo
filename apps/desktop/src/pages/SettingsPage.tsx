@@ -5,12 +5,18 @@ import {
 } from "@tauri-apps/plugin-autostart";
 import {
   SettingValidationError,
+  type DensitySetting,
+  type FontSetting,
   type LanguageSetting,
+  type PaletteSetting,
   type ReminderLogEntry,
   type SmtpSecuritySetting,
   type ThemeSetting,
 } from "@jobfollo/data";
 import {
+  Bell,
+  Briefcase,
+  Check,
   Database,
   Download,
   Globe,
@@ -20,12 +26,16 @@ import {
   Palette,
   Power,
   Send,
+  SlidersHorizontal,
+  Sparkles,
+  Type,
   Upload,
 } from "lucide-react";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useServices } from "../boot/index.js";
 import { useDataRevision, usePreferences } from "../shell/index.js";
+import { sendDesktopNotification } from "../reminders/index.js";
 import { formatDisplayDate } from "../time/index.js";
 import {
   createBackupPayload,
@@ -35,12 +45,61 @@ import {
 
 const LANGUAGE_OPTIONS: readonly LanguageSetting[] = ["system", "en", "tr"];
 const THEME_OPTIONS: readonly ThemeSetting[] = ["system", "light", "dark"];
+const DENSITY_OPTIONS: readonly DensitySetting[] = ["comfortable", "compact"];
+
+const PALETTE_SWATCHES: ReadonlyArray<{
+  id: PaletteSetting;
+  primary: string;
+  surface: string;
+  accent: string;
+}> = [
+  { id: "ocean", primary: "#2563eb", surface: "#f6f8fc", accent: "#0ea5e9" },
+  { id: "forest", primary: "#059669", surface: "#f4f8f5", accent: "#10b981" },
+  { id: "sunset", primary: "#c2410c", surface: "#fbf8f3", accent: "#f59e0b" },
+  { id: "rose", primary: "#be123c", surface: "#fdf6f8", accent: "#f43f5e" },
+  { id: "nord", primary: "#4c6ef5", surface: "#f1f5f8", accent: "#88c0d0" },
+];
+
+const FONT_PREVIEWS: ReadonlyArray<{ id: FontSetting; family: string }> = [
+  {
+    id: "system",
+    family: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+  {
+    id: "editorial",
+    family: '"Iowan Old Style", "Palatino Linotype", Georgia, Cambria, serif',
+  },
+  {
+    id: "humanist",
+    family: '"Segoe UI Variable", "Segoe UI", Calibri, "Trebuchet MS", sans-serif',
+  },
+  {
+    id: "mono",
+    family: '"Cascadia Code", "JetBrains Mono", "SFMono-Regular", Consolas, monospace',
+  },
+];
 
 export function SettingsPage() {
   const { t } = useTranslation();
   const services = useServices();
   const { settings, reminderLog, dataLocation, mail } = services;
-  const { language, resolvedLocale, theme, setLanguage, setTheme } = usePreferences();
+  const {
+    language,
+    resolvedLocale,
+    theme,
+    palette,
+    font,
+    density,
+    skipWeekends,
+    desktopNotifications,
+    setLanguage,
+    setTheme,
+    setPalette,
+    setFont,
+    setDensity,
+    setSkipWeekends,
+    setDesktopNotifications,
+  } = usePreferences();
   const { bumpRevision } = useDataRevision();
 
   const [remindersEnabled, setRemindersEnabled] = useState(false);
@@ -282,7 +341,7 @@ export function SettingsPage() {
   };
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6">
+    <section className="w-full space-y-5">
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">
           {t("pages.settings.title")}
@@ -292,7 +351,9 @@ export function SettingsPage() {
         </p>
       </header>
 
-      <div className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
+        <div className="space-y-6">
+          <div className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]">
         <h2 className="text-base font-semibold">
           {t("pages.settings.appearanceHeading")}
         </h2>
@@ -351,6 +412,153 @@ export function SettingsPage() {
           </select>
         </div>
 
+        {/* Color palette swatches */}
+        <div className="space-y-3 border-t border-[var(--border)] pt-4">
+          <div className="space-y-0.5">
+            <div className="inline-flex items-center gap-1.5 text-sm font-medium">
+              <Sparkles className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+              <span>{t("pages.settings.paletteLabel")}</span>
+            </div>
+            <p className="text-xs text-[var(--fg-muted)]">
+              {t("pages.settings.paletteDescription")}
+            </p>
+          </div>
+          <div
+            role="group"
+            aria-label={t("pages.settings.paletteLabel")}
+            className="grid grid-cols-2 gap-2.5 sm:grid-cols-5"
+          >
+            {PALETTE_SWATCHES.map((swatch) => {
+              const selected = palette === swatch.id;
+              return (
+                <button
+                  key={swatch.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => void setPalette(swatch.id)}
+                  className={`flex flex-col items-start gap-2 rounded-lg border p-2.5 text-left transition-all ${
+                    selected
+                      ? "border-[var(--primary)] bg-[var(--accent-soft)] ring-1 ring-[var(--primary)]"
+                      : "border-[var(--border)] bg-[var(--bg)] hover:border-[var(--fg-muted)]/40"
+                  }`}
+                >
+                  <div className="flex w-full items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <span
+                        className="h-4 w-4 rounded-full border border-black/10"
+                        style={{ backgroundColor: swatch.primary }}
+                        aria-hidden="true"
+                      />
+                      <span
+                        className="h-3.5 w-3.5 rounded-full border border-black/10"
+                        style={{ backgroundColor: swatch.accent }}
+                        aria-hidden="true"
+                      />
+                      <span
+                        className="h-3.5 w-3.5 rounded-full border border-black/10"
+                        style={{ backgroundColor: swatch.surface }}
+                        aria-hidden="true"
+                      />
+                    </div>
+                    {selected && (
+                      <Check className="h-3.5 w-3.5 text-[var(--primary)]" aria-hidden="true" />
+                    )}
+                  </div>
+                  <span className="text-xs font-medium">{t(`palette.${swatch.id}`)}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Typography cards */}
+        <div className="space-y-3 border-t border-[var(--border)] pt-4">
+          <div className="space-y-0.5">
+            <div className="inline-flex items-center gap-1.5 text-sm font-medium">
+              <Type className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+              <span>{t("pages.settings.fontLabel")}</span>
+            </div>
+            <p className="text-xs text-[var(--fg-muted)]">
+              {t("pages.settings.fontDescription")}
+            </p>
+          </div>
+          <div
+            role="group"
+            aria-label={t("pages.settings.fontLabel")}
+            className="grid grid-cols-1 gap-2.5 sm:grid-cols-2"
+          >
+            {FONT_PREVIEWS.map((preset) => {
+              const selected = font === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => void setFont(preset.id)}
+                  className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-left transition-all ${
+                    selected
+                      ? "border-[var(--primary)] bg-[var(--accent-soft)] ring-1 ring-[var(--primary)]"
+                      : "border-[var(--border)] bg-[var(--bg)] hover:border-[var(--fg-muted)]/40"
+                  }`}
+                >
+                  <div className="min-w-0 space-y-0.5">
+                    <div className="text-xs font-semibold">{t(`font.${preset.id}`)}</div>
+                    <div
+                      className="truncate text-sm text-[var(--fg-muted)]"
+                      style={{ fontFamily: preset.family }}
+                    >
+                      {t("pages.settings.fontPreviewSample")}
+                    </div>
+                  </div>
+                  {selected && (
+                    <Check
+                      className="h-4 w-4 shrink-0 text-[var(--primary)]"
+                      aria-hidden="true"
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Layout density */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
+          <div className="space-y-0.5">
+            <div className="inline-flex items-center gap-1.5 text-sm font-medium">
+              <SlidersHorizontal className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+              <span>{t("pages.settings.densityLabel")}</span>
+            </div>
+            <p className="text-xs text-[var(--fg-muted)]">
+              {t("pages.settings.densityDescription")}
+            </p>
+          </div>
+          <div
+            role="group"
+            aria-label={t("pages.settings.densityLabel")}
+            className="inline-flex rounded-md border border-[var(--border)] bg-[var(--bg)] p-0.5"
+          >
+            {DENSITY_OPTIONS.map((opt) => {
+              const selected = density === opt;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => void setDensity(opt)}
+                  className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
+                    selected
+                      ? "bg-[var(--primary)] text-[var(--primary-fg)]"
+                      : "text-[var(--fg-muted)] hover:text-[var(--fg)]"
+                  }`}
+                >
+                  {t(`density.${opt}`)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
           <div className="space-y-0.5">
             <label
@@ -373,13 +581,73 @@ export function SettingsPage() {
             className="h-4 w-4"
           />
         </div>
-      </div>
 
-      <form
-        onSubmit={(e) => void handleSaveEmailSettings(e)}
-        noValidate
-        className="space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5"
-      >
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
+          <div className="space-y-0.5">
+            <label
+              htmlFor="settings-skip-weekends"
+              className="inline-flex items-center gap-1.5 text-sm font-medium"
+            >
+              <Briefcase className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+              <span>{t("pages.settings.skipWeekendsLabel")}</span>
+            </label>
+            <p className="text-xs text-[var(--fg-muted)]">
+              {t("pages.settings.skipWeekendsDescription")}
+            </p>
+          </div>
+          <input
+            id="settings-skip-weekends"
+            type="checkbox"
+            checked={skipWeekends}
+            onChange={(e) => void setSkipWeekends(e.target.checked)}
+            className="h-4 w-4"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
+          <div className="space-y-0.5">
+            <label
+              htmlFor="settings-desktop-notifications"
+              className="inline-flex items-center gap-1.5 text-sm font-medium"
+            >
+              <Bell className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+              <span>{t("pages.settings.desktopNotificationsLabel")}</span>
+            </label>
+            <p className="text-xs text-[var(--fg-muted)]">
+              {t("pages.settings.desktopNotificationsDescription")}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                void sendDesktopNotification(
+                  t("pages.settings.testNotificationTitle"),
+                  t("pages.settings.testNotificationBody"),
+                )
+              }
+              className="rounded-md border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1 text-xs font-medium hover:bg-[var(--surface-muted)]"
+            >
+              {t("pages.settings.testNotification")}
+            </button>
+            <input
+              id="settings-desktop-notifications"
+              type="checkbox"
+              checked={desktopNotifications}
+              onChange={(e) => void setDesktopNotifications(e.target.checked)}
+              className="h-4 w-4"
+            />
+          </div>
+        </div>
+      </div>
+        </div>
+
+        <div className="space-y-6">
+          <form
+            onSubmit={(e) => void handleSaveEmailSettings(e)}
+            noValidate
+            className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]"
+          >
         <div className="space-y-1">
           <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
             <Mail className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
@@ -606,13 +874,13 @@ export function SettingsPage() {
             </button>
           </div>
         </div>
-      </form>
+          </form>
 
-      <div className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-        <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
-          <History className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
-          <span>{t("pages.settings.reminderHistoryHeading")}</span>
-        </h2>
+          <div className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]">
+            <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
+              <History className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+              <span>{t("pages.settings.reminderHistoryHeading")}</span>
+            </h2>
 
         {recentLogs.length === 0 ? (
           <p className="text-xs text-[var(--fg-muted)]">
@@ -651,11 +919,11 @@ export function SettingsPage() {
         )}
       </div>
 
-      <div className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-5">
-        <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
-          <Database className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
-          <span>{t("pages.settings.storageHeading")}</span>
-        </h2>
+          <div className="space-y-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-card)]">
+            <h2 className="inline-flex items-center gap-1.5 text-base font-semibold">
+              <Database className="h-4 w-4 text-[var(--fg-muted)]" aria-hidden="true" />
+              <span>{t("pages.settings.storageHeading")}</span>
+            </h2>
 
         <div className="space-y-1.5">
           <label
@@ -711,6 +979,8 @@ export function SettingsPage() {
               {backupStatus.message}
             </p>
           )}
+        </div>
+      </div>
         </div>
       </div>
     </section>

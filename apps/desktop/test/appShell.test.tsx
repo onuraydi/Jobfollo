@@ -133,6 +133,20 @@ describe("AppShell & PreferencesProvider", () => {
     const todayLink = await screen.findByRole("link", { name: "Today" });
     expect(todayLink.getAttribute("aria-current")).toBe("page");
 
+    await user.click(screen.getByRole("link", { name: "Job postings" }));
+    expect(
+      screen.getByRole("link", { name: "Job postings" }).getAttribute("aria-current"),
+    ).toBe("page");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe(
+      "Job posting applications",
+    );
+
+    await user.click(screen.getByRole("link", { name: "General applications" }));
+    expect(
+      screen.getByRole("link", { name: "General applications" }).getAttribute("aria-current"),
+    ).toBe("page");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("General applications");
+
     await user.click(screen.getByRole("link", { name: "Items" }));
     expect(screen.getByRole("link", { name: "Items" }).getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("All items");

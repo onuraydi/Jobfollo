@@ -102,7 +102,7 @@ describe("Phase 2 exit test — restart persistence & integration", () => {
     // --- Connection A: migrate and populate ---
     const connA = openDb(dbPath);
     const migrateA = await runMigrations(connA, builtInMigrations, clock);
-    expect(migrateA).toEqual({ applied: [1], currentVersion: 1 });
+    expect(migrateA).toEqual({ applied: [1, 2, 3], currentVersion: 3 });
 
     const wfRepoA = createWorkflowRepository(connA, { clock, idGenerator });
     const itemRepoA = createItemRepository(connA, wfRepoA, { clock, idGenerator });
@@ -236,7 +236,7 @@ describe("Phase 2 exit test — restart persistence & integration", () => {
     // --- Connection B: reopen file database ---
     const connB = openDb(dbPath);
     const migrateB = await runMigrations(connB, builtInMigrations, clock);
-    expect(migrateB).toEqual({ applied: [], currentVersion: 1 });
+    expect(migrateB).toEqual({ applied: [], currentVersion: 3 });
 
     const migrationsRowsB = await connB.select(
       "SELECT version, name, checksum, applied_at FROM schema_migrations ORDER BY version",
@@ -266,6 +266,12 @@ describe("Phase 2 exit test — restart persistence & integration", () => {
     expect((await settingsRepoB.getAll()).values).toStrictEqual({
       language: "tr",
       theme: "dark",
+      "appearance.palette": "ocean",
+      "appearance.font": "system",
+      "appearance.density": "comfortable",
+      "scheduling.skipWeekends": false,
+      "notifications.enabled": false,
+      "goals.weeklyApplications": 5,
       "reminders.enabled": true,
       "reminders.sendTime": "08:30",
       "reminders.recipient": "onur@example.com",
@@ -457,15 +463,16 @@ describe("Phase 2 exit test — restart persistence & integration", () => {
     });
     closeDb(conn1);
 
-    // Step 2: reopen with [0001, fixture 0002]
-    const fixture0002: Migration = {
-      version: 2,
-      name: "0002_add_item_priority",
-      sql: "ALTER TABLE item ADD COLUMN priority TEXT;",
+    // Step 2: reopen with [builtInMigrations, next fixture]
+    const nextVersion = builtInMigrations.length + 1;
+    const fixtureNext: Migration = {
+      version: nextVersion,
+      name: `000${nextVersion}_add_extra_note`,
+      sql: "ALTER TABLE item ADD COLUMN extra_note TEXT;",
     };
     const conn2 = openDb(dbPath);
-    const upgradeResult = await runMigrations(conn2, [...builtInMigrations, fixture0002], clock);
-    expect(upgradeResult).toEqual({ applied: [2], currentVersion: 2 });
+    const upgradeResult = await runMigrations(conn2, [...builtInMigrations, fixtureNext], clock);
+    expect(upgradeResult).toEqual({ applied: [nextVersion], currentVersion: nextVersion });
 
     const wfRepo2 = createWorkflowRepository(conn2, { clock, idGenerator });
     const itemRepo2 = createItemRepository(conn2, wfRepo2, { clock, idGenerator });

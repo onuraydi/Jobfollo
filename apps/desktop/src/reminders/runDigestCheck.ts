@@ -49,6 +49,7 @@ export async function runDigestCheck(
   const workflows = workflowEntries.map((entry) => entry.workflow);
   const digest = buildDigest(items, workflows, today, {
     upcomingDays: v["reminders.upcomingDays"],
+    skipWeekends: v["scheduling.skipWeekends"],
   });
 
   const decision = shouldSendDigest({

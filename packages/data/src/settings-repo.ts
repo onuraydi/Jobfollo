@@ -10,6 +10,9 @@ import {
 
 export type LanguageSetting = "system" | "tr" | "en";
 export type ThemeSetting = "system" | "light" | "dark";
+export type PaletteSetting = "ocean" | "forest" | "sunset" | "rose" | "nord";
+export type FontSetting = "system" | "editorial" | "humanist" | "mono";
+export type DensitySetting = "comfortable" | "compact";
 export type SmtpSecuritySetting = "starttls" | "tls";
 
 interface SettingDefinition<T> {
@@ -29,6 +32,32 @@ export const SETTINGS_REGISTRY = {
   theme: defineSetting<ThemeSetting>({
     default: "system",
     validate: (v): v is ThemeSetting => v === "system" || v === "light" || v === "dark",
+  }),
+  "appearance.palette": defineSetting<PaletteSetting>({
+    default: "ocean",
+    validate: (v): v is PaletteSetting =>
+      v === "ocean" || v === "forest" || v === "sunset" || v === "rose" || v === "nord",
+  }),
+  "appearance.font": defineSetting<FontSetting>({
+    default: "system",
+    validate: (v): v is FontSetting =>
+      v === "system" || v === "editorial" || v === "humanist" || v === "mono",
+  }),
+  "appearance.density": defineSetting<DensitySetting>({
+    default: "comfortable",
+    validate: (v): v is DensitySetting => v === "comfortable" || v === "compact",
+  }),
+  "scheduling.skipWeekends": defineSetting<boolean>({
+    default: false,
+    validate: (v): v is boolean => typeof v === "boolean",
+  }),
+  "notifications.enabled": defineSetting<boolean>({
+    default: false,
+    validate: (v): v is boolean => typeof v === "boolean",
+  }),
+  "goals.weeklyApplications": defineSetting<number>({
+    default: 5,
+    validate: (v): v is number => isValidIntegerInRange(v, 0, 100),
   }),
   "reminders.enabled": defineSetting<boolean>({
     default: false,

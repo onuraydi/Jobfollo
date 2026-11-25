@@ -115,3 +115,31 @@ export function diffDays(a: ISODate, b: ISODate): number {
   const diff = daysFromCivil(partsB[0], partsB[1], partsB[2]) - daysFromCivil(partsA[0], partsA[1], partsA[2]);
   return diff === 0 ? 0 : diff;
 }
+
+/**
+ * Pure integer weekday: 0 = Sunday, 1 = Monday, ..., 6 = Saturday.
+ * 1970-01-01 was a Thursday (4).
+ */
+export function dayOfWeek(date: ISODate): number {
+  const parts = parseISODate(date);
+  if (!parts) {
+    throw new RangeError(`Invalid ISO date: "${date}"`);
+  }
+  const days = daysFromCivil(parts[0], parts[1], parts[2]);
+  return (((days + 4) % 7) + 7) % 7;
+}
+
+/** If `date` falls on Saturday or Sunday, shifts it forward to Monday. */
+export function adjustForWeekend(date: ISODate): ISODate {
+  const dow = dayOfWeek(date);
+  if (dow === 6) return addDays(date, 2);
+  if (dow === 0) return addDays(date, 1);
+  return date;
+}
+
+/** Returns the next Monday strictly after `date`. */
+export function nextMonday(date: ISODate): ISODate {
+  const dow = dayOfWeek(date);
+  const delta = (8 - dow) % 7 || 7;
+  return addDays(date, delta);
+}

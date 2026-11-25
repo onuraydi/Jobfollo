@@ -35,7 +35,8 @@ describe("ReminderLogRepository", () => {
     db = createSqliteExecutor();
     const clock = makeSequenceClock(timestamps);
     const idGenerator = makeSequenceIds();
-    await runMigrations(db, builtInMigrations, clock);
+    const migrationTs = clock.nowIso();
+    await runMigrations(db, builtInMigrations, { nowIso: () => migrationTs });
     const repo = createReminderLogRepository(db, { clock, idGenerator });
     return { db, repo };
   }

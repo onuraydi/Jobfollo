@@ -1,12 +1,19 @@
 {
   "app": {
     "name": "Jobfollo",
+    "tagline": "Follow-up tracker",
     "skipToContent": "Skip to main content"
   },
   "nav": {
     "label": "Main navigation",
+    "sectionTracking": "Tracking",
+    "sectionTools": "Workspace",
     "today": "Today",
+    "jobPostings": "Job postings",
+    "generalApplications": "General applications",
     "items": "Items",
+    "calendar": "Calendar",
+    "stats": "Statistics",
     "workflows": "Workflows",
     "settings": "Settings"
   },
@@ -42,11 +49,27 @@
       "contactAccepted": "Accepted",
       "contactNotAccepted": "Not accepted",
       "contactPending": "Pending",
-      "confirmComplete": "Complete step"
+      "confirmComplete": "Complete step",
+      "snoozeLabel": "Snooze",
+      "snoozeTomorrow": "Tomorrow (+1d)",
+      "snooze3Days": "In 3 days (+3d)",
+      "snoozeNextMonday": "Next Monday",
+      "copyMessage": "Copy message",
+      "copiedMessage": "Copied!"
     },
     "items": {
       "title": "All items",
       "subtitle": "Track all applications, proposals, and outreach.",
+      "titleJobPostings": "Job posting applications",
+      "subtitleJobPostings": "Track applications submitted to open job postings.",
+      "newJobPosting": "New job posting",
+      "titleGeneral": "General applications",
+      "subtitleGeneral": "Manage spontaneous applications sent directly to companies.",
+      "newGeneralApplication": "New general application",
+      "kpiTotal": "Total",
+      "kpiNeedsAction": "Due / Overdue",
+      "kpiInterviews": "Interviews",
+      "kpiOffers": "Offers",
       "newItem": "New item",
       "searchPlaceholder": "Search by title…",
       "searchLabel": "Search items",
@@ -60,6 +83,7 @@
       "sortCreated": "Created",
       "sortTitle": "Title",
       "colTitle": "Title",
+      "colCompany": "Company & Location",
       "colRole": "Role",
       "colWorkflow": "Workflow",
       "colNextStep": "Next step",
@@ -70,8 +94,25 @@
       "emptyTable": "No matching items.",
       "createDialogTitle": "New item",
       "fieldTitle": "Title",
+      "fieldCompany": "Company / Organization",
+      "fieldApplicationType": "Application type",
+      "tabAll": "All ({{count}})",
+      "tabJobPostings": "Job postings ({{count}})",
+      "tabGeneral": "General applications ({{count}})",
+      "filterPriority": "Priority",
+      "allPriorities": "All priorities",
+      "filterWorkMode": "Work mode",
+      "allWorkModes": "All work modes",
+      "loadSampleData": "Try with sample items",
       "fieldRole": "Role",
       "fieldChannel": "Channel",
+      "fieldJobUrl": "Job posting URL",
+      "fieldLocation": "Location",
+      "fieldWorkMode": "Work mode",
+      "fieldSalaryRange": "Salary / budget range",
+      "fieldPriority": "Priority",
+      "fieldTags": "Tags (comma-separated)",
+      "fieldCvVersion": "CV / document version",
       "fieldWorkflow": "Workflow",
       "fieldStartDate": "Start date",
       "fieldContactSection": "First contact (optional)",
@@ -91,7 +132,15 @@
       "importPreviewValid": "{{count}} valid row(s) ready to import.",
       "importPreviewErrors": "{{count}} row(s) skipped due to errors:",
       "importConfirm": "Import {{count}} item(s)",
-      "importDone": "Imported {{count}} item(s)."
+      "importDone": "Imported {{count}} item(s).",
+      "selectAllItems": "Select all visible items",
+      "selectItem": "Select {{title}}",
+      "bulkSelectedCount": "{{count}} selected",
+      "bulkSetOutcome": "Set outcome…",
+      "bulkArchive": "Archive selected",
+      "bulkDelete": "Delete selected",
+      "bulkDeleteConfirm": "Permanently delete {{count}} selected item(s)?",
+      "bulkClear": "Clear"
     },
     "itemDetail": {
       "title": "Item detail",
@@ -124,8 +173,14 @@
       "notesSaved": "Saved",
       "unsavedLeaveConfirm": "You have unsaved note changes. Leave without saving?",
       "startDateLabel": "Started {{date}}",
+      "companyLabel": "Company",
       "channelLabel": "Channel",
-      "roleLabel": "Role"
+      "roleLabel": "Role",
+      "locationLabel": "Location",
+      "salaryLabel": "Salary",
+      "cvLabel": "CV",
+      "openJobPosting": "Open job posting",
+      "exportIcs": "Add to calendar (.ics)"
     },
     "workflows": {
       "title": "Workflows",
@@ -151,11 +206,41 @@
       "offsetDaysLabel": "Offset (days)",
       "suggestsOutcomeLabel": "Suggest outcome",
       "suggestsOutcomeNone": "None",
+      "messageTemplateLabel": "Message template (optional)",
+      "messageTemplatePlaceholder": "Hi {{contact}}, following up on {{role}} at {{company}}…",
       "moveUp": "Move up",
       "moveDown": "Move down",
       "removeStep": "Remove step",
       "savedMessage": "Workflow saved.",
       "inUseError": "Cannot delete this workflow because one or more items still use it."
+    },
+    "stats": {
+      "title": "Statistics",
+      "subtitle": "Local analytics computed from your applications.",
+      "includeArchived": "Include archived",
+      "totalItems": "Total applications",
+      "responseRate": "Response rate",
+      "interviewRate": "Interview rate",
+      "offerRate": "Offer rate",
+      "funnelHeading": "Outcome funnel",
+      "byChannelHeading": "By channel",
+      "byWorkModeHeading": "By work mode",
+      "byPriorityHeading": "By priority",
+      "byApplicationTypeHeading": "By application type",
+      "weeklyGoalHeading": "Weekly application goal (last 7 days)",
+      "weeklyGoalLabel": "Weekly target",
+      "weeklyGoalProgress": "{{done}} / {{target}} applications",
+      "noChannels": "No channels recorded yet.",
+      "emptyState": "Add some applications to see your funnel and conversion rates."
+    },
+    "calendar": {
+      "title": "Calendar",
+      "subtitle": "Monthly view of upcoming and overdue follow-up steps.",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "goToday": "Today",
+      "selectedDayEmpty": "No follow-up steps scheduled for this date.",
+      "moreSteps": "+{{count}} more"
     },
     "settings": {
       "title": "Settings",
@@ -163,8 +248,22 @@
       "appearanceHeading": "Appearance & language",
       "languageDescription": "Choose the interface language or follow your operating system.",
       "themeDescription": "Choose light, dark, or match your operating system.",
+      "paletteLabel": "Color theme",
+      "paletteDescription": "Pick a palette tuned for both light and dark modes.",
+      "fontLabel": "Typography",
+      "fontDescription": "Choose the typeface used across the app (100% offline).",
+      "fontPreviewSample": "Aa Bb Çç Ğğ 123",
+      "densityLabel": "Layout density",
+      "densityDescription": "Adjust spacing and text scale to fit your workflow.",
       "autostartLabel": "Launch at login",
       "autostartDescription": "Start Jobfollo automatically when you sign in so daily reminders run in the tray.",
+      "skipWeekendsLabel": "Business days only (skip weekends)",
+      "skipWeekendsDescription": "Automatically move Saturday and Sunday due dates to Monday.",
+      "desktopNotificationsLabel": "Desktop notifications",
+      "desktopNotificationsDescription": "Show a local OS notification when follow-ups are due today (works without SMTP).",
+      "testNotification": "Test notification",
+      "testNotificationTitle": "Jobfollo",
+      "testNotificationBody": "Local desktop notifications are working!",
       "storageHeading": "Local data",
       "dataLocationLabel": "Database location",
       "dataLocationDescription": "All your items, workflows, and settings are stored locally on this device.",
@@ -212,6 +311,39 @@
     "light": "Light",
     "dark": "Dark"
   },
+  "palette": {
+    "ocean": "Ocean",
+    "forest": "Forest",
+    "sunset": "Sunset",
+    "rose": "Rose",
+    "nord": "Nord"
+  },
+  "font": {
+    "system": "Modern Sans",
+    "editorial": "Editorial Serif",
+    "humanist": "Humanist Sans",
+    "mono": "Technical Mono"
+  },
+  "density": {
+    "comfortable": "Comfortable",
+    "compact": "Compact"
+  },
+  "workMode": {
+    "unspecified": "Not specified",
+    "remote": "Remote",
+    "hybrid": "Hybrid",
+    "onsite": "On-site"
+  },
+  "priority": {
+    "high": "High",
+    "normal": "Normal",
+    "low": "Low"
+  },
+  "applicationType": {
+    "job_posting": "Job posting",
+    "general": "General application",
+    "unspecified": "Unspecified"
+  },
   "language": {
     "label": "Language",
     "system": "System",
@@ -241,5 +373,16 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete"
+  },
+  "commandPalette": {
+    "openButton": "Quick jump…",
+    "placeholder": "Search items, pages, or actions…",
+    "empty": "No matching commands or items.",
+    "groupNavigation": "Navigation",
+    "groupItems": "Items",
+    "groupActions": "Quick actions",
+    "actionLightTheme": "Switch to Light theme",
+    "actionDarkTheme": "Switch to Dark theme",
+    "actionSystemTheme": "Switch to System theme"
   }
 }

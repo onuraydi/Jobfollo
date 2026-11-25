@@ -1,0 +1,98 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  COREPACK_ENABLE_DOWNLOAD_PROMPT: "0"
+
+jobs:
+  publish-tauri:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            args: ""
+          - platform: macos-latest
+            args: "--target aarch64-apple-darwin"
+          - platform: macos-latest
+            args: "--target x86_64-apple-darwin"
+          - platform: ubuntu-22.04
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+
+      - name: Install Tauri Linux prerequisites
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libdbus-1-dev \
+            pkg-config \
+            patchelf \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify typecheck and tests
+        run: |
+          pnpm typecheck
+          pnpm test
+
+      - name: Build Tauri bundle and upload release assets
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/desktop
+          tagName: v__VERSION__
+          releaseName: "Jobfollo v__VERSION__"
+          releaseBody: |
+            ## Download Jobfollo v__VERSION__
+
+            Choose the installer for your operating system from the **Assets** section below:
+
+            - **Windows:** `Jobfollo_..._x64-setup.exe` (recommended) or `.msi`
+            - **macOS (Apple Silicon — M1/M2/M3/M4):** `Jobfollo_..._aarch64.dmg`
+            - **macOS (Intel):** `Jobfollo_..._x64.dmg`
+            - **Linux:** `.AppImage` or `.deb`
+
+            > **Note:** Installers are currently unsigned. On macOS, right-click the app and choose **Open** (or run `xattr -cr /Applications/Jobfollo.app`) on first launch. On Windows SmartScreen, click **More info → Run anyway**.
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}

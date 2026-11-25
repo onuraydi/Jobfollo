@@ -53,7 +53,8 @@ describe("WorkflowRepository", () => {
   async function setup(opts?: { clock?: Clock; idGenerator?: IdGenerator }) {
     db = createSqliteExecutor();
     const clock = opts?.clock ?? makeSequenceClock(["2026-03-10T09:00:00.000Z"]);
-    await runMigrations(db, builtInMigrations, clock);
+    const migrationTs = clock.nowIso();
+    await runMigrations(db, builtInMigrations, { nowIso: () => migrationTs });
     const repo = createWorkflowRepository(db, {
       clock,
       idGenerator: opts?.idGenerator ?? makeSequenceIds(["copy-1", "copy-2"]),

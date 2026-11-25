@@ -198,4 +198,43 @@ describe("SettingsPage (integration with real in-memory SQLite)", () => {
     });
     expect(storedSecret).toBeNull();
   });
+
+  it("applies color palette, typography, and layout density immediately and persists them to SQLite", async () => {
+    const user = userEvent.setup();
+    const services = await setupServices();
+
+    render(
+      <MemoryRouter initialEntries={["/settings"]}>
+        <ServicesProvider services={services}>
+          <DataRevisionProvider>
+            <PreferencesProvider>
+              <SettingsPage />
+            </PreferencesProvider>
+          </DataRevisionProvider>
+        </ServicesProvider>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Settings" })).toBeTruthy();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Forest" }));
+    await waitFor(() => {
+      expect(document.documentElement.dataset.palette).toBe("forest");
+    });
+    expect(await services.settings.get("appearance.palette")).toBe("forest");
+
+    await user.click(screen.getByRole("button", { name: /Editorial Serif/i }));
+    await waitFor(() => {
+      expect(document.documentElement.dataset.font).toBe("editorial");
+    });
+    expect(await services.settings.get("appearance.font")).toBe("editorial");
+
+    await user.click(screen.getByRole("button", { name: "Compact" }));
+    await waitFor(() => {
+      expect(document.documentElement.dataset.density).toBe("compact");
+    });
+    expect(await services.settings.get("appearance.density")).toBe("compact");
+  });
 });

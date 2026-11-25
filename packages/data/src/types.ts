@@ -1,9 +1,12 @@
 import type {
+  ApplicationType,
   Contact,
   ContactStatus,
   ISODate,
   Item,
+  ItemPriority,
   StepRecord,
+  WorkMode,
   Workflow,
 } from "@jobfollo/core";
 
@@ -83,8 +86,17 @@ export interface StoredItem extends Item {
 
 export interface CreateItemInput {
   title: string;
+  company?: string;
+  applicationType?: ApplicationType;
   role?: string;
   channel?: string;
+  jobUrl?: string;
+  location?: string;
+  workMode?: WorkMode;
+  salaryRange?: string;
+  priority?: ItemPriority;
+  tags?: string[];
+  cvVersion?: string;
   workflowId: string;
   startDate: ISODate;
   notes?: string;
@@ -94,8 +106,17 @@ export interface CreateItemInput {
 
 export interface UpdateItemPatch {
   title?: string;
+  company?: string | null;
+  applicationType?: ApplicationType | null;
   role?: string | null;
   channel?: string | null;
+  jobUrl?: string | null;
+  location?: string | null;
+  workMode?: WorkMode | null;
+  salaryRange?: string | null;
+  priority?: ItemPriority | null;
+  tags?: string[] | null;
+  cvVersion?: string | null;
   workflowId?: string;
   startDate?: ISODate;
   notes?: string | null;
@@ -146,6 +167,7 @@ export interface ItemRepository {
     options?: CompleteStepOptions,
   ): Promise<void>;
   skipStep(itemId: string, stepKey: string): Promise<void>;
+  snoozeStep(itemId: string, stepKey: string, snoozedUntil: ISODate | null): Promise<void>;
   undoStep(itemId: string, stepKey: string): Promise<boolean>;
   setOutcome(itemId: string, outcome: string | null): Promise<void>;
   addContact(itemId: string, input: AddContactInput): Promise<StoredContact>;

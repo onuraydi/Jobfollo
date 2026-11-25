@@ -47,7 +47,7 @@ export interface TodayPageProps {
 export function TodayPage({ todayOverride }: TodayPageProps = {}) {
   const { t } = useTranslation();
   const services = useServices();
-  const { resolvedLocale } = usePreferences();
+  const { resolvedLocale, skipWeekends } = usePreferences();
   const { revision, bumpRevision } = useDataRevision();
   const hookToday = useLocalToday();
   const today = todayOverride ?? hookToday;
@@ -99,10 +99,13 @@ export function TodayPage({ todayOverride }: TodayPageProps = {}) {
       }
     }
     return {
-      digest: buildDigest(schedulable, workflows, today, { upcomingDays: 7 }),
+      digest: buildDigest(schedulable, workflows, today, {
+        upcomingDays: 7,
+        skipWeekends,
+      }),
       unschedulableCount: unschedulable,
     };
-  }, [items, workflows, workflowsById, today]);
+  }, [items, workflows, workflowsById, today, skipWeekends]);
 
   const handleDoneClick = useCallback(
     async (row: DigestRow) => {
@@ -320,10 +323,40 @@ export function TodayPage({ todayOverride }: TodayPageProps = {}) {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{t("pages.today.title")}</h1>
-        <p className="text-sm text-[var(--fg-muted)]">{t("pages.today.subtitle")}</p>
+    <div className="w-full space-y-5">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">{t("pages.today.title")}</h1>
+          <p className="text-sm text-[var(--fg-muted)]">{t("pages.today.subtitle")}</p>
+        </div>
+        {loaded && items.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-center shadow-[var(--shadow-card)]">
+              <div className="text-[11px] font-medium text-[var(--fg-muted)]">
+                {t("pages.today.groupOverdue")}
+              </div>
+              <div className="text-lg font-bold text-[var(--overdue-fg)]">
+                {digest.overdue.length}
+              </div>
+            </div>
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-center shadow-[var(--shadow-card)]">
+              <div className="text-[11px] font-medium text-[var(--fg-muted)]">
+                {t("pages.today.groupToday")}
+              </div>
+              <div className="text-lg font-bold text-[var(--today-fg)]">
+                {digest.today.length}
+              </div>
+            </div>
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3.5 py-2 text-center shadow-[var(--shadow-card)]">
+              <div className="text-[11px] font-medium text-[var(--fg-muted)]">
+                {t("pages.today.groupUpcoming")}
+              </div>
+              <div className="text-lg font-bold text-[var(--primary)]">
+                {digest.upcoming.length}
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {unschedulableCount > 0 && (
@@ -339,20 +372,20 @@ export function TodayPage({ todayOverride }: TodayPageProps = {}) {
       )}
 
       {loaded && items.length === 0 ? (
-        <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
+        <section className="mx-auto my-8 max-w-lg rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center shadow-[var(--shadow-card)]">
           <h2 className="text-lg font-medium">{t("pages.today.emptyNoItemsTitle")}</h2>
           <p className="mt-1 text-sm text-[var(--fg-muted)]">
             {t("pages.today.emptyNoItemsBody")}
           </p>
           <Link
             to="/items"
-            className="mt-4 inline-flex items-center rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-fg)]"
+            className="mt-4 inline-flex items-center rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-fg)] shadow-xs hover:opacity-90"
           >
             {t("pages.today.emptyNoItemsCta")}
           </Link>
         </section>
       ) : loaded && digest.isEmpty ? (
-        <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
+        <section className="mx-auto my-8 max-w-lg rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center shadow-[var(--shadow-card)]">
           <CheckCircle2
             className="mx-auto h-8 w-8 text-[var(--done-fg)]"
             aria-hidden="true"

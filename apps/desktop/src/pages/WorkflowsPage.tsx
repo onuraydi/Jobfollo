@@ -164,6 +164,9 @@ export function WorkflowsPage() {
         if (!next.suggestsOutcome) {
           delete next.suggestsOutcome;
         }
+        if (!next.messageTemplate) {
+          delete next.messageTemplate;
+        }
         // Clear localized titles when user edits a custom workflow's step title
         if ("title" in patch) {
           delete next.titles;
@@ -226,7 +229,7 @@ export function WorkflowsPage() {
   };
 
   return (
-    <section className="mx-auto max-w-5xl space-y-5">
+    <section className="w-full space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -255,9 +258,9 @@ export function WorkflowsPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
         {/* Workflow list */}
-        <ul className="space-y-2 lg:col-span-4">
+        <ul className="space-y-2.5 lg:col-span-4">
           {entries.map((entry) => {
             const wf = entry.workflow;
             const isSelected = selectedId === wf.id;
@@ -265,9 +268,9 @@ export function WorkflowsPage() {
               <li
                 key={wf.id}
                 data-testid={`workflow-item-${wf.id}`}
-                className={`rounded-lg border p-3 transition-colors ${
+                className={`rounded-xl border p-3.5 shadow-[var(--shadow-card)] transition-colors ${
                   isSelected
-                    ? "border-[var(--primary)] bg-[var(--surface)]"
+                    ? "border-[var(--primary)] bg-[var(--surface)] ring-1 ring-[var(--primary)]/30"
                     : "border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-muted)]/60"
                 }`}
               >
@@ -492,6 +495,27 @@ export function WorkflowsPage() {
                             ))}
                           </select>
                         </div>
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor={`step-template-${index}`}
+                          className="block text-xs text-[var(--fg-muted)]"
+                        >
+                          {t("pages.workflows.messageTemplateLabel")}
+                        </label>
+                        <textarea
+                          id={`step-template-${index}`}
+                          rows={2}
+                          value={step.messageTemplate ?? ""}
+                          onChange={(e) =>
+                            updateStep(index, {
+                              messageTemplate: e.target.value || undefined,
+                            })
+                          }
+                          placeholder={t("pages.workflows.messageTemplatePlaceholder")}
+                          className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1 text-xs"
+                        />
                       </div>
 
                       <div className="flex justify-end gap-1 pt-1">

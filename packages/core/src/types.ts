@@ -7,6 +7,12 @@ export type LocalizedText = Partial<Record<Locale, string>>;
 
 export type ContactStatus = "pending" | "accepted" | "not_accepted";
 
+export type WorkMode = "remote" | "hybrid" | "onsite";
+
+export type ItemPriority = "high" | "normal" | "low";
+
+export type ApplicationType = "job_posting" | "general";
+
 /** `start` = the item's start date; `step:<key>` = completion date of that step. */
 export type Anchor = "start" | `step:${string}`;
 
@@ -22,6 +28,8 @@ export interface WorkflowStep {
   runIf?: { contactStatus: ContactStatus };
   /** When this step is reached, the app suggests marking this outcome. */
   suggestsOutcome?: string;
+  /** Optional copy-ready message template supporting `{{company}}`, `{{title}}`, `{{role}}`, `{{contact}}`. */
+  messageTemplate?: string;
 }
 
 export interface Workflow {
@@ -43,19 +51,34 @@ export interface StepRecord {
   stepKey: string;
   completedOn?: ISODate;
   skipped?: boolean;
+  snoozedUntil?: ISODate;
 }
 
 export interface Item {
   id: string;
   title: string;
+  company?: string;
+  applicationType?: ApplicationType;
   role?: string;
   channel?: string;
+  jobUrl?: string;
+  location?: string;
+  workMode?: WorkMode;
+  salaryRange?: string;
+  priority?: ItemPriority;
+  tags?: string[];
+  cvVersion?: string;
   workflowId: string;
   startDate: ISODate;
   contacts: Contact[];
   steps: StepRecord[];
   outcome?: string;
   notes?: string;
+}
+
+export interface ScheduleOptions {
+  /** When true, due dates falling on Saturday or Sunday shift to Monday. */
+  skipWeekends?: boolean;
 }
 
 export type StepStatus =
@@ -102,6 +125,8 @@ export interface DigestRow {
 export interface BuildDigestOptions {
   /** Include steps due in the next N days (1..upcomingDays). Default: 0. */
   upcomingDays?: number;
+  /** When true, due dates falling on Saturday or Sunday shift to Monday. */
+  skipWeekends?: boolean;
 }
 
 export interface Digest {

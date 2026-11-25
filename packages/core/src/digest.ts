@@ -58,7 +58,9 @@ export function buildDigest(
       throw new Error(`Unknown workflow "${item.workflowId}" for item "${item.id}"`);
     }
 
-    const next = computeNextStep(item, workflow, today);
+    const next = computeNextStep(item, workflow, today, {
+      skipWeekends: opts.skipWeekends,
+    });
     if (next === null) {
       continue;
     }

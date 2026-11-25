@@ -45,6 +45,9 @@ describe("SettingsRepository", () => {
 
     expect(await repo.get("language")).toBe("system");
     expect(await repo.get("theme")).toBe("system");
+    expect(await repo.get("appearance.palette")).toBe("ocean");
+    expect(await repo.get("appearance.font")).toBe("system");
+    expect(await repo.get("appearance.density")).toBe("comfortable");
     expect(await repo.get("reminders.enabled")).toBe(false);
     expect(await repo.get("reminders.sendTime")).toBe("09:00");
     expect(await repo.get("reminders.recipient")).toBeNull();
@@ -59,6 +62,12 @@ describe("SettingsRepository", () => {
       values: {
         language: "system",
         theme: "system",
+        "appearance.palette": "ocean",
+        "appearance.font": "system",
+        "appearance.density": "comfortable",
+        "scheduling.skipWeekends": false,
+        "notifications.enabled": false,
+        "goals.weeklyApplications": 5,
         "reminders.enabled": false,
         "reminders.sendTime": "09:00",
         "reminders.recipient": null,
@@ -89,6 +98,12 @@ describe("SettingsRepository", () => {
     expect((await repo.getAll()).values).toStrictEqual({
       language: "tr",
       theme: "dark",
+      "appearance.palette": "ocean",
+      "appearance.font": "system",
+      "appearance.density": "comfortable",
+      "scheduling.skipWeekends": false,
+      "notifications.enabled": false,
+      "goals.weeklyApplications": 5,
       "reminders.enabled": true,
       "reminders.sendTime": "23:59",
       "reminders.recipient": "user@example.com",

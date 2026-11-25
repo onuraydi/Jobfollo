@@ -1,5 +1,11 @@
 import type { Locale } from "@jobfollo/core";
-import type { LanguageSetting, ThemeSetting } from "@jobfollo/data";
+import type {
+  DensitySetting,
+  FontSetting,
+  LanguageSetting,
+  PaletteSetting,
+  ThemeSetting,
+} from "@jobfollo/data";
 import {
   createContext,
   useCallback,
@@ -19,8 +25,18 @@ export interface PreferencesContextValue {
   resolvedLocale: Locale;
   theme: ThemeSetting;
   resolvedTheme: ResolvedTheme;
+  palette: PaletteSetting;
+  font: FontSetting;
+  density: DensitySetting;
+  skipWeekends: boolean;
+  desktopNotifications: boolean;
   setLanguage: (next: LanguageSetting) => Promise<void>;
   setTheme: (next: ThemeSetting) => Promise<void>;
+  setPalette: (next: PaletteSetting) => Promise<void>;
+  setFont: (next: FontSetting) => Promise<void>;
+  setDensity: (next: DensitySetting) => Promise<void>;
+  setSkipWeekends: (next: boolean) => Promise<void>;
+  setDesktopNotifications: (next: boolean) => Promise<void>;
 }
 
 const PreferencesContext = createContext<PreferencesContextValue | null>(null);
@@ -40,15 +56,41 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
   const { settings } = useServices();
   const [language, setLanguageState] = useState<LanguageSetting>("system");
   const [theme, setThemeState] = useState<ThemeSetting>("system");
+  const [palette, setPaletteState] = useState<PaletteSetting>("ocean");
+  const [font, setFontState] = useState<FontSetting>("system");
+  const [density, setDensityState] = useState<DensitySetting>("comfortable");
+  const [skipWeekends, setSkipWeekendsState] = useState<boolean>(false);
+  const [desktopNotifications, setDesktopNotificationsState] = useState<boolean>(false);
   const [systemDark, setSystemDark] = useState<boolean>(getSystemDarkPreference);
 
   useEffect(() => {
     let active = true;
-    void Promise.all([settings.get("language"), settings.get("theme")]).then(
-      ([storedLang, storedTheme]) => {
+    void Promise.all([
+      settings.get("language"),
+      settings.get("theme"),
+      settings.get("appearance.palette"),
+      settings.get("appearance.font"),
+      settings.get("appearance.density"),
+      settings.get("scheduling.skipWeekends"),
+      settings.get("notifications.enabled"),
+    ]).then(
+      ([
+        storedLang,
+        storedTheme,
+        storedPalette,
+        storedFont,
+        storedDensity,
+        storedSkipWeekends,
+        storedNotifications,
+      ]) => {
         if (!active) return;
         setLanguageState(storedLang);
         setThemeState(storedTheme);
+        setPaletteState(storedPalette);
+        setFontState(storedFont);
+        setDensityState(storedDensity);
+        setSkipWeekendsState(storedSkipWeekends);
+        setDesktopNotificationsState(storedNotifications);
       },
     );
     return () => {
@@ -98,6 +140,21 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
     document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
   }, [resolvedTheme]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.dataset.palette = palette;
+  }, [palette]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.dataset.font = font;
+  }, [font]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.dataset.density = density;
+  }, [density]);
+
   const setLanguage = useCallback(
     async (next: LanguageSetting) => {
       await settings.set("language", next);
@@ -114,16 +171,83 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
     [settings],
   );
 
+  const setPalette = useCallback(
+    async (next: PaletteSetting) => {
+      await settings.set("appearance.palette", next);
+      setPaletteState(next);
+    },
+    [settings],
+  );
+
+  const setFont = useCallback(
+    async (next: FontSetting) => {
+      await settings.set("appearance.font", next);
+      setFontState(next);
+    },
+    [settings],
+  );
+
+  const setDensity = useCallback(
+    async (next: DensitySetting) => {
+      await settings.set("appearance.density", next);
+      setDensityState(next);
+    },
+    [settings],
+  );
+
+  const setSkipWeekends = useCallback(
+    async (next: boolean) => {
+      await settings.set("scheduling.skipWeekends", next);
+      setSkipWeekendsState(next);
+    },
+    [settings],
+  );
+
+  const setDesktopNotifications = useCallback(
+    async (next: boolean) => {
+      await settings.set("notifications.enabled", next);
+      setDesktopNotificationsState(next);
+    },
+    [settings],
+  );
+
   const value = useMemo<PreferencesContextValue>(
     () => ({
       language,
       resolvedLocale,
       theme,
       resolvedTheme,
+      palette,
+      font,
+      density,
+      skipWeekends,
+      desktopNotifications,
       setLanguage,
       setTheme,
+      setPalette,
+      setFont,
+      setDensity,
+      setSkipWeekends,
+      setDesktopNotifications,
     }),
-    [language, resolvedLocale, theme, resolvedTheme, setLanguage, setTheme],
+    [
+      language,
+      resolvedLocale,
+      theme,
+      resolvedTheme,
+      palette,
+      font,
+      density,
+      skipWeekends,
+      desktopNotifications,
+      setLanguage,
+      setTheme,
+      setPalette,
+      setFont,
+      setDensity,
+      setSkipWeekends,
+      setDesktopNotifications,
+    ],
   );
 
   return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;

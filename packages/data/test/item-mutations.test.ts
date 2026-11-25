@@ -40,7 +40,8 @@ describe("ItemRepository — steps, contacts and outcome", () => {
     db = createSqliteExecutor();
     const clock = makeSequenceClock(timestamps);
     const idGenerator = makeSequenceIds();
-    await runMigrations(db, builtInMigrations, clock);
+    const migrationTs = clock.nowIso();
+    await runMigrations(db, builtInMigrations, { nowIso: () => migrationTs });
     const workflowRepo = createWorkflowRepository(db, { clock, idGenerator });
     const itemRepo = createItemRepository(db, workflowRepo, { clock, idGenerator });
     return { db, workflowRepo, itemRepo };
