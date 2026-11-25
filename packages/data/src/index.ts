@@ -24,3 +24,11 @@ export {
   createReminderLogRepository,
   type ReminderLogRepositoryDeps,
 } from "./reminder-log-repo.js";
+export {
+  createTemplateRepository,
+  type CreateTemplateInput,
+  type StoredMessageTemplate,
+  type TemplateRepository,
+  type TemplateRepositoryDeps,
+  type UpdateTemplateInput,
+} from "./template-repo.js";

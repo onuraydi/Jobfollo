@@ -4,6 +4,7 @@ import {
   Briefcase,
   CalendarCheck2,
   CalendarDays,
+  FileText,
   FolderKanban,
   GitBranch,
   Monitor,
@@ -23,6 +24,7 @@ import { ItemDetailPage } from "../pages/ItemDetailPage.js";
 import { ItemsPage } from "../pages/ItemsPage.js";
 import { SettingsPage } from "../pages/SettingsPage.js";
 import { StatsPage } from "../pages/StatsPage.js";
+import { TemplatesPage } from "../pages/TemplatesPage.js";
 import { TodayPage } from "../pages/TodayPage.js";
 import { WorkflowsPage } from "../pages/WorkflowsPage.js";
 import { useDigestScheduler } from "../reminders/index.js";
@@ -62,6 +64,7 @@ export function AppShell() {
   const workspaceNavItems = [
     { to: "/calendar", label: t("nav.calendar"), icon: CalendarDays, end: false },
     { to: "/stats", label: t("nav.stats"), icon: BarChart3, end: false },
+    { to: "/templates", label: t("nav.templates"), icon: FileText, end: false },
     { to: "/workflows", label: t("nav.workflows"), icon: GitBranch, end: false },
     { to: "/settings", label: t("nav.settings"), icon: Settings, end: false },
   ];
@@ -201,6 +204,7 @@ export function AppShell() {
             <Route path="/items/:id" element={<ItemDetailPage />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/stats" element={<StatsPage />} />
+            <Route path="/templates" element={<TemplatesPage />} />
             <Route path="/workflows" element={<WorkflowsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>

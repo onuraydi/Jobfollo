@@ -59,6 +59,7 @@ describe("@jobfollo/data package boundaries", () => {
       "createItemRepository",
       "createReminderLogRepository",
       "createSettingsRepository",
+      "createTemplateRepository",
       "createWorkflowRepository",
       "randomIdGenerator",
       "runMigrations",

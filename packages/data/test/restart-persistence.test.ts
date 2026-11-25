@@ -102,7 +102,7 @@ describe("Phase 2 exit test — restart persistence & integration", () => {
     // --- Connection A: migrate and populate ---
     const connA = openDb(dbPath);
     const migrateA = await runMigrations(connA, builtInMigrations, clock);
-    expect(migrateA).toEqual({ applied: [1, 2, 3], currentVersion: 3 });
+    expect(migrateA).toEqual({ applied: [1, 2, 3, 4], currentVersion: 4 });
 
     const wfRepoA = createWorkflowRepository(connA, { clock, idGenerator });
     const itemRepoA = createItemRepository(connA, wfRepoA, { clock, idGenerator });
@@ -236,7 +236,7 @@ describe("Phase 2 exit test — restart persistence & integration", () => {
     // --- Connection B: reopen file database ---
     const connB = openDb(dbPath);
     const migrateB = await runMigrations(connB, builtInMigrations, clock);
-    expect(migrateB).toEqual({ applied: [], currentVersion: 3 });
+    expect(migrateB).toEqual({ applied: [], currentVersion: 4 });
 
     const migrationsRowsB = await connB.select(
       "SELECT version, name, checksum, applied_at FROM schema_migrations ORDER BY version",

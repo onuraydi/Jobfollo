@@ -4,6 +4,7 @@ import {
   Briefcase,
   CalendarCheck2,
   CalendarDays,
+  FileText,
   FolderKanban,
   GitBranch,
   Monitor,
@@ -136,6 +137,17 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         icon: BarChart3,
         onSelect: () => {
           navigate("/stats");
+          onClose();
+        },
+      },
+      {
+        id: "nav-templates",
+        group: "navigation",
+        label: t("nav.templates"),
+        keywords: "templates sablonlar mail email message mesaj",
+        icon: FileText,
+        onSelect: () => {
+          navigate("/templates");
           onClose();
         },
       },

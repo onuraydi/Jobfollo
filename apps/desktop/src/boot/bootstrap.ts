@@ -2,6 +2,7 @@ import {
   createItemRepository,
   createReminderLogRepository,
   createSettingsRepository,
+  createTemplateRepository,
   createWorkflowRepository,
   runMigrations,
 } from "@jobfollo/data";
@@ -94,12 +95,17 @@ export async function bootstrap(deps: BootstrapDeps): Promise<BootResult> {
     clock: deps.clock,
     idGenerator,
   });
+  const templates = createTemplateRepository(deps.executor, {
+    clock: deps.clock,
+    idGenerator,
+  });
 
   const services: AppServices = {
     workflows,
     items,
     settings,
     reminderLog,
+    templates,
     clock: deps.clock,
     idGenerator,
     localToday,

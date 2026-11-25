@@ -7,6 +7,7 @@ import type {
   ReminderLogRepository,
   SettingsRepository,
   SqlExecutor,
+  TemplateRepository,
   WorkflowRepository,
 } from "@jobfollo/data";
 import type { MailClient } from "../mail/index.js";
@@ -24,6 +25,7 @@ export interface AppServices {
   items: ItemRepository;
   settings: SettingsRepository;
   reminderLog: ReminderLogRepository;
+  templates?: TemplateRepository;
   clock: Clock;
   idGenerator: IdGenerator;
   localToday: (now?: Date) => ISODate;

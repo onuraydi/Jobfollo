@@ -29,7 +29,7 @@ describe("runMigrations", () => {
     db = createSqliteExecutor();
 
     const result = await runMigrations(db, builtInMigrations, fixedClock);
-    expect(result).toEqual({ applied: [1, 2, 3], currentVersion: 3 });
+    expect(result).toEqual({ applied: [1, 2, 3, 4], currentVersion: 4 });
 
     const rows = await db.select<{
       version: number;
@@ -38,7 +38,7 @@ describe("runMigrations", () => {
       applied_at: string;
     }>("SELECT version, name, checksum, applied_at FROM schema_migrations ORDER BY version");
 
-    expect(rows).toHaveLength(3);
+    expect(rows).toHaveLength(4);
     expect(rows[0]).toEqual({
       version: 1,
       name: "0001_init",
@@ -67,7 +67,7 @@ describe("runMigrations", () => {
       nowIso: () => "2026-03-11T09:00:00.000Z",
     });
 
-    expect(second).toEqual({ applied: [], currentVersion: 3 });
+    expect(second).toEqual({ applied: [], currentVersion: 4 });
 
     const rows = await db.select<{ applied_at: string }>(
       "SELECT applied_at FROM schema_migrations WHERE version = 1",
@@ -107,8 +107,7 @@ describe("runMigrations", () => {
         ...builtInMigrations[0]!,
         sql: `${builtInMigrations[0]!.sql}\n-- tampered`,
       },
-      builtInMigrations[1]!,
-      builtInMigrations[2]!,
+      ...builtInMigrations.slice(1),
     ];
 
     let caught: unknown;

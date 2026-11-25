@@ -40,12 +40,12 @@ pub struct Database {
 
 impl Database {
     pub fn open_file(path: &Path) -> Result<Self, DbError> {
-        if let Some(parent) = path.parent() {
-            if !parent.as_os_str().is_empty() {
-                std::fs::create_dir_all(parent).map_err(|err| {
-                    DbError::open(format!("Failed to create database directory: {err}"))
-                })?;
-            }
+        if let Some(parent) = path.parent()
+            && !parent.as_os_str().is_empty()
+        {
+            std::fs::create_dir_all(parent).map_err(|err| {
+                DbError::open(format!("Failed to create database directory: {err}"))
+            })?;
         }
 
         let flags = OpenFlags::SQLITE_OPEN_READ_WRITE
