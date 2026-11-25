@@ -238,8 +238,8 @@ function applyLang() {
 }
 
 function wireShowcaseTabs() {
-  const tabs = document.querySelectorAll(".app-nav[data-screen]");
-  const panels = document.querySelectorAll(".stage-panel[data-panel]");
+  const tabs = document.querySelectorAll(".mock-nav[data-screen]");
+  const panels = document.querySelectorAll(".mock-panel[data-panel]");
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
       const target = tab.getAttribute("data-screen");
