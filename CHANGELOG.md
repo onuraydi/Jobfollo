@@ -4,6 +4,12 @@ All notable changes to **Jobfollo** will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-11-25
+
+### Changed
+- Replaced default Tauri icons with custom Jobfollo brand icon across Windows (`.ico`), macOS (`.icns`), Linux (`.png`), taskbar, system tray, sidebar, and website.
+- Upgraded landing page design, favicon, Open Graph metadata, `robots.txt`, and `sitemap.xml`.
+
 ## [0.1.0] - 2026-11-25
 
 ### Added

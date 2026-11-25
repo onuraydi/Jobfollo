@@ -1,6 +1,6 @@
 [package]
 name = "jobfollo"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local-first follow-up reminder desktop app"
 authors = ["Onur Aydi"]
 edition = "2024"
