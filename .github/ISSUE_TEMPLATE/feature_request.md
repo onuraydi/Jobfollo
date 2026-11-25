@@ -1,11 +1,15 @@
 ---
 name: Feature request
-about: Suggest an improvement
+about: Suggest an idea or improvement for Jobfollo
+title: "[Feature]: "
 labels: enhancement
 ---
 
-**Problem you want to solve**
+### Problem / Use case
+Describe the problem you are trying to solve.
 
-**Proposed solution**
+### Proposed solution
+Describe how you would like this to work.
 
-**Does it respect the principles?** (local-first, reminds but never acts on third-party platforms)
+### Privacy / Local-first check
+Does this feature stay 100% local-first without third-party automation or cloud accounts?

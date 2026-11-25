@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jobfollo — Local-First Job Application & Follow-Up Tracker</title>
+    <meta
+      name="description"
+      content="Keep your job postings, general applications, and follow-ups on schedule. 100% local-first, open-source desktop app for Windows, macOS, and Linux."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="#top" class="brand">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <span>Jobfollo</span>
+        </a>
+
+        <nav class="topbar-nav" aria-label="Main">
+          <a href="#features" data-i18n="nav.features">Özellikler</a>
+          <a href="#download" data-i18n="nav.download">İndir</a>
+          <a href="#privacy" data-i18n="nav.privacy">Gizlilik</a>
+          <a
+            href="https://github.com/onuraydi/Jobfollo"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
+        </nav>
+
+        <div class="topbar-controls">
+          <button type="button" id="lang-toggle" class="icon-btn" aria-label="Switch language">
+            EN
+          </button>
+          <button type="button" id="theme-toggle" class="icon-btn" aria-label="Toggle theme">
+            ☀
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="container hero-inner">
+          <div class="hero-badge">
+            <span class="badge-dot" aria-hidden="true"></span>
+            <span data-i18n="hero.badge">Açık Kaynak · %100 Yerel · Ücretsiz</span>
+            <span id="release-version" class="badge-version">v0.1.0</span>
+          </div>
+
+          <h1 data-i18n="hero.title">
+            İş başvurularını ve takiplerini tek yerden, zamanında yönet.
+          </h1>
+
+          <p class="hero-subtitle" data-i18n="hero.subtitle">
+            Açık ilan başvuruların, genel başvuruların, takip adımların, takvimin ve mesaj
+            şablonların tamamen kendi bilgisayarında. Hesap yok, bulut yok, izleme yok.
+          </p>
+
+          <div class="hero-actions">
+            <a
+              id="primary-download-btn"
+              href="https://github.com/onuraydi/Jobfollo/releases/latest"
+              class="btn btn-primary"
+            >
+              <span id="primary-download-label" data-i18n="hero.downloadCta">
+                Ücretsiz İndir
+              </span>
+            </a>
+            <a
+              href="https://github.com/onuraydi/Jobfollo"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-secondary"
+              data-i18n="hero.githubCta"
+            >
+              GitHub'da İncele
+            </a>
+          </div>
+
+          <p class="hero-meta" data-i18n="hero.platforms">
+            Windows (.exe / .msi) · macOS Apple Silicon &amp; Intel (.dmg) · Linux (.AppImage / .deb)
+          </p>
+
+          <div class="preview-frame" aria-hidden="true">
+            <div class="preview-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="preview-title">Jobfollo — Desktop</span>
+            </div>
+            <div class="preview-body">
+              <div class="preview-sidebar">
+                <div class="preview-nav-item active" data-i18n="mock.today">Bugün</div>
+                <div class="preview-nav-item" data-i18n="mock.jobPostings">Açık ilanlar</div>
+                <div class="preview-nav-item" data-i18n="mock.general">Genel başvurular</div>
+                <div class="preview-nav-item" data-i18n="mock.calendar">Takvim</div>
+                <div class="preview-nav-item" data-i18n="mock.stats">İstatistikler</div>
+                <div class="preview-nav-item" data-i18n="mock.templates">Şablonlar</div>
+              </div>
+              <div class="preview-content">
+                <div class="preview-kpis">
+                  <div class="kpi-card">
+                    <span class="kpi-label" data-i18n="mock.kpiActive">Aktif başvuru</span>
+                    <strong class="kpi-value">14</strong>
+                  </div>
+                  <div class="kpi-card">
+                    <span class="kpi-label" data-i18n="mock.kpiToday">Bugün takip</span>
+                    <strong class="kpi-value accent">3</strong>
+                  </div>
+                  <div class="kpi-card">
+                    <span class="kpi-label" data-i18n="mock.kpiInterview">Mülakat</span>
+                    <strong class="kpi-value">4</strong>
+                  </div>
+                  <div class="kpi-card">
+                    <span class="kpi-label" data-i18n="mock.kpiOffer">Teklif</span>
+                    <strong class="kpi-value success">1</strong>
+                  </div>
+                </div>
+                <div class="preview-list">
+                  <div class="preview-row">
+                    <div>
+                      <strong>Nova Labs · Backend Engineer</strong>
+                      <span data-i18n="mock.step1">7. gün takip e-postası gönder</span>
+                    </div>
+                    <span class="pill warning" data-i18n="mock.dueToday">Bugün</span>
+                  </div>
+                  <div class="preview-row">
+                    <div>
+                      <strong>Atlas Cloud · Platform Developer</strong>
+                      <span data-i18n="mock.step2">LinkedIn bağlantı isteği ve kısa not</span>
+                    </div>
+                    <span class="pill primary" data-i18n="mock.upcoming">2 gün sonra</span>
+                  </div>
+                  <div class="preview-row">
+                    <div>
+                      <strong>Kuzey Tech · Genel Başvuru</strong>
+                      <span data-i18n="mock.step3">Mülakat sonrası teşekkür maili</span>
+                    </div>
+                    <span class="pill success" data-i18n="mock.interview">Mülakat</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="section">
+        <div class="container">
+          <div class="section-header">
+            <h2 data-i18n="features.heading">Sürecini düzenli tutan her şey bir arada</h2>
+            <p data-i18n="features.subheading">
+              Excel tablolarında kaybolmak yerine net takip adımları, hazır şablonlar ve akıllı
+              hatırlatıcılarla ilerle.
+            </p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="card">
+              <div class="card-icon">📋</div>
+              <h3 data-i18n="features.f1Title">Açık İlanlar &amp; Genel Başvurular</h3>
+              <p data-i18n="features.f1Body">
+                İlan başvurularını ve şirketlere yaptığın genel başvuruları ayrı sekmelerde, Tablo
+                veya Kanban panosu görünümüyle yönet.
+              </p>
+            </article>
+
+            <article class="card">
+              <div class="card-icon">🗓️</div>
+              <h3 data-i18n="features.f2Title">Bugün Paneli &amp; Aylık Takvim</h3>
+              <p data-i18n="features.f2Body">
+                Geciken, bugün yapılacak ve yaklaşan takip adımlarını tek ekranda gör; hafta
+                sonlarını atla, adımları ertele veya .ics olarak takvimine aktar.
+              </p>
+            </article>
+
+            <article class="card">
+              <div class="card-icon">✉️</div>
+              <h3 data-i18n="features.f3Title">Mail ve Mesaj Şablonları</h3>
+              <p data-i18n="features.f3Body">
+                Başvuru, takip, teşekkür ve LinkedIn mesajlarını dinamik değişkenlerle
+                (&#123;&#123;company&#125;&#125;, &#123;&#123;role&#125;&#125;) hazırla ve tek
+                tıkla kopyala.
+              </p>
+            </article>
+
+            <article class="card">
+              <div class="card-icon">🔔</div>
+              <h3 data-i18n="features.f4Title">Masaüstü &amp; E-posta Hatırlatıcıları</h3>
+              <p data-i18n="features.f4Body">
+                Yerel işletim sistemi bildirimleri veya kendi SMTP hesabın üzerinden günlük özet
+                e-postası al; sistem tepsisinde sessizce çalışır.
+              </p>
+            </article>
+
+            <article class="card">
+              <div class="card-icon">📊</div>
+              <h3 data-i18n="features.f5Title">Yerel İstatistikler &amp; Haftalık Hedef</h3>
+              <p data-i18n="features.f5Body">
+                Yanıt, mülakat ve teklif dönüşüm oranlarını, çalışma şekli dağılımını ve haftalık
+                başvuru hedefini canlı takip et.
+              </p>
+            </article>
+
+            <article class="card">
+              <div class="card-icon">🎨</div>
+              <h3 data-i18n="features.f6Title">Kişiselleştirme, CSV &amp; Yedekleme</h3>
+              <p data-i18n="features.f6Body">
+                Türkçe &amp; İngilizce arayüz, Açık/Koyu mod, 5 renk paleti, CSV içe/dışa aktarma
+                ve tek tıkla JSON yedekleme.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="download" class="section section-alt">
+        <div class="container">
+          <div class="section-header">
+            <h2 data-i18n="download.heading">Jobfollo'yu İndir</h2>
+            <p data-i18n="download.subheading">
+              Tüm kurulum dosyaları doğrudan GitHub Releases üzerinden ücretsiz sunulur.
+            </p>
+          </div>
+
+          <div class="download-grid">
+            <article class="card download-card" data-os="windows">
+              <div class="download-os">Windows</div>
+              <p class="download-desc" data-i18n="download.winDesc">Windows 10 / 11 (64-bit)</p>
+              <div class="download-links">
+                <a
+                  id="dl-win-exe"
+                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
+                  class="btn btn-primary btn-sm"
+                >
+                  .exe (Setup)
+                </a>
+                <a
+                  id="dl-win-msi"
+                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
+                  class="btn btn-secondary btn-sm"
+                >
+                  .msi
+                </a>
+              </div>
+            </article>
+
+            <article class="card download-card" data-os="macos">
+              <div class="download-os">macOS</div>
+              <p class="download-desc" data-i18n="download.macDesc">Apple Silicon &amp; Intel</p>
+              <div class="download-links">
+                <a
+                  id="dl-mac-arm"
+                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
+                  class="btn btn-primary btn-sm"
+                >
+                  Apple Silicon (.dmg)
+                </a>
+                <a
+                  id="dl-mac-x64"
+                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
+                  class="btn btn-secondary btn-sm"
+                >
+                  Intel (.dmg)
+                </a>
+              </div>
+            </article>
+
+            <article class="card download-card" data-os="linux">
+              <div class="download-os">Linux</div>
+              <p class="download-desc" data-i18n="download.linuxDesc">Ubuntu, Debian, Fedora vb.</p>
+              <div class="download-links">
+                <a
+                  id="dl-linux-appimage"
+                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
+                  class="btn btn-primary btn-sm"
+                >
+                  .AppImage
+                </a>
+                <a
+                  id="dl-linux-deb"
+                  href="https://github.com/onuraydi/Jobfollo/releases/latest"
+                  class="btn btn-secondary btn-sm"
+                >
+                  .deb
+                </a>
+              </div>
+            </article>
+          </div>
+
+          <div class="callout">
+            <strong data-i18n="download.noteTitle">İlk kurulum notu (imzasız açık kaynak derleme):</strong>
+            <p data-i18n="download.noteBody">
+              Windows SmartScreen uyarısında "Ek bilgi → Yine de çalıştır" seçeneğini kullanın.
+              macOS'ta ilk açılışta uygulamaya sağ tıklayıp "Aç" deyin veya terminalde
+              <code>xattr -cr /Applications/Jobfollo.app</code> çalıştırın.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="privacy" class="section">
+        <div class="container privacy-box">
+          <div>
+            <h2 data-i18n="privacy.heading">Gizlilik öncelikli mimari</h2>
+            <p data-i18n="privacy.body">
+              Jobfollo verilerini yalnızca kendi cihazındaki tek bir SQLite dosyasında saklar.
+              Telemetri, analitik veya üçüncü taraf sunucu yoktur. SMTP şifren yalnızca işletim
+              sisteminin güvenli anahtarlığında (OS Keychain) tutulur ve dışa aktarımlara asla
+              eklenmez.
+            </p>
+          </div>
+          <a
+            href="https://github.com/onuraydi/Jobfollo/blob/master/docs/ARCHITECTURE.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-secondary"
+            data-i18n="privacy.cta"
+          >
+            Mimariyi İncele
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <span>© 2026 Jobfollo · MIT License</span>
+        <div class="footer-links">
+          <a
+            href="https://github.com/onuraydi/Jobfollo"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
+          <a
+            href="https://github.com/onuraydi/Jobfollo/releases"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Releases
+          </a>
+          <a
+            href="https://github.com/onuraydi/Jobfollo/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Issues
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

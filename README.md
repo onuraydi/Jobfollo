@@ -4,11 +4,11 @@
 
 ## Download
 
-Download the latest installer for **Windows**, **macOS (Apple Silicon & Intel)**, or **Linux** from [GitHub Releases](https://github.com/onuraydi/Jobfollo/releases/latest):
-
-- **Windows:** `.exe` (NSIS setup) or `.msi`
-- **macOS:** `aarch64.dmg` (Apple Silicon M1–M4) or `x64.dmg` (Intel)
-- **Linux:** `.AppImage` or `.deb`
+- **Website:** https://onuraydi.github.io/Jobfollo/
+- **Direct installers:** [GitHub Releases](https://github.com/onuraydi/Jobfollo/releases/latest)
+  - **Windows:** `.exe` (NSIS setup) or `.msi`
+  - **macOS:** `aarch64.dmg` (Apple Silicon M1–M4) or `x64.dmg` (Intel)
+  - **Linux:** `.AppImage` or `.deb`
 
 ## Features
 
