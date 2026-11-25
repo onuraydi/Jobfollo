@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://onuraydi.github.io/Jobfollo/sitemap.xml
