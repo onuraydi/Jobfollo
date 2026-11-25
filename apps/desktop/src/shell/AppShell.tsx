@@ -12,7 +12,6 @@ import {
   Search,
   Send,
   Settings,
-  Sparkles,
   Sun,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -80,9 +79,13 @@ export function AppShell() {
 
       <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[var(--border)] bg-[var(--surface)]/95 px-3.5 py-5 backdrop-blur-md">
         <div className="mb-4 flex items-center gap-3 px-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)] text-[var(--primary-fg)] shadow-sm">
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-          </div>
+          <img
+            src="/logo.png"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 rounded-xl shadow-sm"
+          />
           <div className="min-w-0">
             <div className="truncate text-base font-bold leading-tight tracking-tight">
               {t("app.name")}

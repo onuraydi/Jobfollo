@@ -124,16 +124,12 @@ html:not(.dark) .header {
   letter-spacing: -0.025em;
 }
 
-.brand-logo {
+.brand-img {
   width: 32px;
   height: 32px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 18px -4px rgba(59, 130, 246, 0.6);
+  border-radius: 9px;
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
 }
 
 .nav {
